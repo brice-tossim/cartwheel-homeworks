@@ -28,7 +28,6 @@ import sqlite3
 from collections.abc import Callable, Iterable
 from difflib import SequenceMatcher
 from functools import wraps
-from typing import Any, ParamSpec
 
 from agent import db
 from agent.auth import AuthContext, can_cancel_order, permission_denied
@@ -43,10 +42,11 @@ FIND_ORDER_LIMIT = 5
 # different words that merely look alike ("vase" vs "base" scores 0.75).
 FUZZY_MATCH_THRESHOLD = 0.8
 
+# What every tool returns: {"ok": True, ...payload} or {"ok": False, "error", "reason"}.
+ToolResult = dict[str, object]
+
 _ALL_ROWS = -1  # SQLite treats a negative LIMIT as "no upper bound".
 _WORD_RE = re.compile(r"[a-z0-9]+")
-
-_P = ParamSpec("_P")
 
 
 # ---------------------------------------------------------------------------
@@ -57,7 +57,7 @@ _P = ParamSpec("_P")
 class _ToolFailure(Exception):
     """Raised by a private step to stop the tool with a structured failure."""
 
-    def __init__(self, result: dict[str, Any]) -> None:
+    def __init__(self, result: ToolResult) -> None:
         super().__init__(result["reason"])
         self.result = result
 
@@ -67,13 +67,44 @@ def _failure(error: str, reason: str) -> _ToolFailure:
     return _ToolFailure({"ok": False, "error": error, "reason": reason})
 
 
-def _structured_result(
-    tool: Callable[_P, dict[str, Any]],
-) -> Callable[_P, dict[str, Any]]:
-    """Return a raised `_ToolFailure` as the tool's structured result."""
+def _structured_result[**P](tool: Callable[P, ToolResult]) -> Callable[P, ToolResult]:
+    """Return a `_ToolFailure` raised inside `tool` as the tool's result dict.
+
+    The private steps raise `_ToolFailure` when they hit an expected error
+    (an unknown order, a permission denial, ...). Decorating a public tool
+    with `@_structured_result` is the same as wrapping its whole body in
+
+        ```
+        try:
+            ...the steps...
+        except _ToolFailure as failure:
+            return failure.result
+        ```
+
+    so the public body stays a plain list of steps. Example:
+
+        ```
+        @_structured_result
+        def get_policy(ctx, policy_id):
+            doc = _policy_doc(policy_id)  # raises _ToolFailure when unknown
+            return _policy_payload(doc)
+
+        get_policy(ctx, "cw-returns")  # {"ok": True, "policy_id": "cw-returns", ...}
+        get_policy(ctx, "cw-nope")     # {"ok": False, "error": "not_found", ...}
+        ```
+
+    Other exceptions propagate unchanged, as SPEC.md section 4 requires.
+
+    How it works: `@_structured_result` above `def get_policy` means
+    `get_policy = _structured_result(get_policy)`. The `run` function built
+    below takes the name `get_policy` and calls the original inside the
+    try/except. `@wraps(tool)` copies the original name and docstring onto
+    `run`, and `[**P]` tells type checkers that `run` accepts exactly the
+    original's arguments.
+    """
 
     @wraps(tool)
-    def run(*args: _P.args, **kwargs: _P.kwargs) -> dict[str, Any]:
+    def run(*args: P.args, **kwargs: P.kwargs) -> ToolResult:
         try:
             return tool(*args, **kwargs)
         except _ToolFailure as failure:
@@ -88,7 +119,7 @@ def _structured_result(
 
 
 @_structured_result
-def get_policy(ctx: AuthContext, policy_id: str) -> dict[str, Any]:
+def get_policy(ctx: AuthContext, policy_id: str) -> ToolResult:
     """Fetch one policy doc by its exact id. Risk tier: read.
 
     Every role may read every policy doc (the corpus is public help-center
@@ -122,7 +153,7 @@ def search_products(
     store: str | None = None,
     max_price_usd: float | None = None,
     limit: int = 5,
-) -> dict[str, Any]:
+) -> ToolResult:
     """Search the product catalog. Risk tier: read.
 
     Every role may search products. Matching is deterministic keyword
@@ -164,7 +195,7 @@ def search_products(
 
 
 @_structured_result
-def list_my_orders(ctx: AuthContext) -> dict[str, Any]:
+def list_my_orders(ctx: AuthContext) -> ToolResult:
     """List recent orders in the caller's own scope. Risk tier: read.
 
     Role behavior, straight from the access matrix in SPEC.md:
@@ -191,7 +222,7 @@ def list_my_orders(ctx: AuthContext) -> dict[str, Any]:
 
 
 @_structured_result
-def cancel_order(ctx: AuthContext, order_id: int, reason: str) -> dict[str, Any]:
+def cancel_order(ctx: AuthContext, order_id: int, reason: str) -> ToolResult:
     """Cancel an order. Risk tier: write.
 
     This is the homework's write tool, and it must enforce two independent
@@ -240,7 +271,7 @@ def cancel_order(ctx: AuthContext, order_id: int, reason: str) -> dict[str, Any]
 
 
 @_structured_result
-def find_order(ctx: AuthContext, query: str) -> dict[str, Any]:
+def find_order(ctx: AuthContext, query: str) -> ToolResult:
     """Search the caller's orders by product name. Risk tier: read.
 
     Takes a natural-language query (e.g., "earmuffs I bought last week")
@@ -290,7 +321,7 @@ def _policy_doc(policy_id: str) -> PolicyDoc:
     raise _failure("not_found", f"no policy doc with id {policy_id!r}")
 
 
-def _policy_payload(doc: PolicyDoc) -> dict[str, Any]:
+def _policy_payload(doc: PolicyDoc) -> ToolResult:
     return {
         "ok": True,
         "policy_id": doc.policy_id,
@@ -362,7 +393,7 @@ def _cheapest_first(products: list[db.Product], limit: int) -> list[db.Product]:
     return sorted(products, key=lambda product: (product.price_usd, product.id))[:limit]
 
 
-def _products_payload(products: list[db.Product]) -> dict[str, Any]:
+def _products_payload(products: list[db.Product]) -> ToolResult:
     listed = [
         {
             "product_id": product.id,
@@ -401,11 +432,11 @@ def _scoped_orders(
     return db.list_orders_for_user(conn, ctx.user_id, limit=limit)
 
 
-def _public_orders(orders: Iterable[db.Order]) -> list[dict[str, Any]]:
+def _public_orders(orders: Iterable[db.Order]) -> list[dict[str, object]]:
     return [order.to_public_dict() for order in orders]
 
 
-def _counted_orders_payload(orders: list[db.Order]) -> dict[str, Any]:
+def _counted_orders_payload(orders: list[db.Order]) -> ToolResult:
     listed = _public_orders(orders)
     return {"ok": True, "orders": listed, "count": len(listed)}
 
@@ -455,7 +486,7 @@ def _persist_cancellation(order_id: int) -> None:
         db.set_order_status(conn, order_id, "cancelled")
 
 
-def _cancellation_payload(order_id: int) -> dict[str, Any]:
+def _cancellation_payload(order_id: int) -> ToolResult:
     return {"ok": True, "order_id": order_id, "status": "cancelled"}
 
 
@@ -496,7 +527,10 @@ def _title_score(query_words: list[str], title_words: list[str]) -> float:
     query ("I bought last week") score nothing.
     """
     best_scores = (
-        max((_similarity(query_word, title_word) for title_word in title_words), default=0.0)
+        max(
+            (_similarity(query_word, title_word) for title_word in title_words),
+            default=0.0,
+        )
         for query_word in query_words
     )
     return sum(score for score in best_scores if score >= FUZZY_MATCH_THRESHOLD)
@@ -547,5 +581,5 @@ def _best_matches(orders: list[db.Order], scores: dict[int, float]) -> list[db.O
     return ranked[:FIND_ORDER_LIMIT]
 
 
-def _orders_payload(orders: list[db.Order]) -> dict[str, Any]:
+def _orders_payload(orders: list[db.Order]) -> ToolResult:
     return {"ok": True, "orders": _public_orders(orders)}
