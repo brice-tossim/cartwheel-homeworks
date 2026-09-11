@@ -17,3 +17,6 @@ __pycache__/
 *.pyc
 .venv/
 .pytest_cache/
+
+# Expanded copy of the session records, kept locally for the HW1 video.
+hw1-session.expanded.json
