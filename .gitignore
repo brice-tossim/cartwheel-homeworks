@@ -20,3 +20,4 @@ __pycache__/
 
 # Expanded copy of the session records, kept locally for the HW1 video.
 hw1-session.expanded.json
+scenarios/demo_pilot_gt.json
