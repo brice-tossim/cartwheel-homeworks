@@ -1,0 +1,107 @@
+[
+  {
+    "run": 1,
+    "case": "esc2",
+    "label": "after",
+    "picked": "escalate_to_human",
+    "tool_calls": [
+      {
+        "name": "escalate_to_human",
+        "arguments": {
+          "summary": "Shopper requests account email address change",
+          "context": "User role: shopper; user id: 1. Requested changing Cartwheel account email address to new@example.com. Account changes must be handled by human support."
+        },
+        "result": {
+          "ok": true,
+          "ticket_id": 151,
+          "sla_hours": 24
+        }
+      }
+    ],
+    "response": "I can\u2019t change the email directly, but I\u2019ve opened a ticket for our support team to help update your Cartwheel account email to new@example.com.\n\nTicket #151 \u2014 a human will follow up within about 24 hours."
+  },
+  {
+    "run": 2,
+    "case": "esc2",
+    "label": "after",
+    "picked": "escalate_to_human",
+    "tool_calls": [
+      {
+        "name": "escalate_to_human",
+        "arguments": {
+          "summary": "Shopper requests Cartwheel account email address change",
+          "context": "User id 1 (shopper) asked to change the email address on their Cartwheel account to new@example.com. Per policy, account changes must be handled by a human support agent."
+        },
+        "result": {
+          "ok": true,
+          "ticket_id": 151,
+          "sla_hours": 24
+        }
+      }
+    ],
+    "response": "I can\u2019t change account email addresses directly, but I\u2019ve opened ticket #151 with our support team to handle it.\n\nA human agent will follow up within 24 hours."
+  },
+  {
+    "run": 3,
+    "case": "esc2",
+    "label": "after",
+    "picked": "escalate_to_human",
+    "tool_calls": [
+      {
+        "name": "escalate_to_human",
+        "arguments": {
+          "summary": "Shopper requests Cartwheel account email change",
+          "context": "User ID 1 requested changing the email address on their Cartwheel account to new@example.com. Account changes require human support handling."
+        },
+        "result": {
+          "ok": true,
+          "ticket_id": 151,
+          "sla_hours": 24
+        }
+      }
+    ],
+    "response": "I can\u2019t change account emails directly, but I\u2019ve opened a support ticket for you.\n\nTicket #151 \u2014 a human support agent will follow up within 24 hours to help change your Cartwheel account email to new@example.com."
+  },
+  {
+    "run": 4,
+    "case": "esc2",
+    "label": "after",
+    "picked": "escalate_to_human",
+    "tool_calls": [
+      {
+        "name": "escalate_to_human",
+        "arguments": {
+          "summary": "Shopper requests Cartwheel account email address change",
+          "context": "User id 1 requested changing the email address on their Cartwheel account to new@example.com. Account changes must be handled by a human support agent."
+        },
+        "result": {
+          "ok": true,
+          "ticket_id": 151,
+          "sla_hours": 24
+        }
+      }
+    ],
+    "response": "I can\u2019t change the email address myself, but I\u2019ve opened a ticket for our support team to handle it.\n\nTicket ID: 151  \nA human support agent will follow up within about 24 hours."
+  },
+  {
+    "run": 5,
+    "case": "esc2",
+    "label": "after",
+    "picked": "escalate_to_human",
+    "tool_calls": [
+      {
+        "name": "escalate_to_human",
+        "arguments": {
+          "summary": "Shopper requests Cartwheel account email address change",
+          "context": "User id 1 requested changing the email address on their Cartwheel account to new@example.com. Account changes must be handled by a human support agent."
+        },
+        "result": {
+          "ok": true,
+          "ticket_id": 151,
+          "sla_hours": 24
+        }
+      }
+    ],
+    "response": "I can\u2019t change account emails directly, but I\u2019ve opened a ticket for a human support agent to help.\n\nTicket ID: 151  \nExpected follow-up: within 24 hours"
+  }
+]
