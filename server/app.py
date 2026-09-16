@@ -114,7 +114,7 @@ class MessageIn(BaseModel):
 
 
 @app.post("/sessions")
-def create_session(body: SessionCreate) -> dict[str, Any]:
+def create_session(body: SessionCreate) -> dict[str, str]:
     """Bind a verified database user to a new server-side session.
 
     Validate the requested role, load the user from the database, and reject
@@ -123,8 +123,56 @@ def create_session(body: SessionCreate) -> dict[str, Any]:
     session id and a signed token. The token payload must contain session_id,
     user_id, role, store_id, and issued_at.
     """
-    ### YOUR CODE HERE (HW2)
-    raise NotImplementedError("HW2: implement POST /sessions")
+    _require_known_role(body.role)
+    user = _load_user(body.user_id)
+    _require_claimed_role(user, body.role)
+    ctx = _auth_context(user)
+    session_id = _open_session(ctx)
+    return _signed_session(session_id, ctx)
+
+
+def _require_known_role(role: str) -> None:
+    if role not in ROLES:
+        raise HTTPException(status_code=400, detail=f"unknown role: {role!r}")
+
+
+def _load_user(user_id: int) -> db.User:
+    with db.connection() as conn:
+        user = db.get_user(conn, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail=f"unknown user: {user_id}")
+    return user
+
+
+def _require_claimed_role(user: db.User, claimed_role: str) -> None:
+    # Say only that the claim failed: naming the stored role would disclose it.
+    if user.role != claimed_role:
+        raise HTTPException(status_code=403, detail="role does not match this user")
+
+
+def _auth_context(user: db.User) -> AuthContext:
+    """Build the caller's identity from the database row, never from the request."""
+    return AuthContext(user_id=user.id, role=user.role, store_id=user.store_id)
+
+
+def _open_session(ctx: AuthContext) -> str:
+    """Save the identity with its own conversation history under a new id."""
+    session_id = uuid.uuid4().hex
+    _SESSIONS[session_id] = (ctx, SQLiteSession(session_id, SESSIONS_DB))
+    return session_id
+
+
+def _signed_session(session_id: str, ctx: AuthContext) -> dict[str, str]:
+    token = create_token(
+        {
+            "session_id": session_id,
+            "user_id": ctx.user_id,
+            "role": ctx.role,
+            "store_id": ctx.store_id,
+            "issued_at": int(time.time()),
+        }
+    )
+    return {"session_id": session_id, "token": token}
 
 
 def _authorize(session_id: str, authorization: str | None) -> AuthContext:
