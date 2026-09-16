@@ -11,11 +11,18 @@ from __future__ import annotations
 
 import os
 import shutil
+from collections.abc import Iterator
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 
 from seed.generate import generate_world
+
+if TYPE_CHECKING:
+    from agents import SQLiteSession
+
+    from agent.auth import AuthContext
 
 
 @pytest.fixture(scope="session")
@@ -37,6 +44,27 @@ def world_copy(
     shutil.copy(world["db"], db)
     monkeypatch.setenv("CARTWHEEL_DB", str(db))
     return db
+
+
+@pytest.fixture
+def server_sessions(
+    world: dict[str, Path], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> Iterator[dict[str, tuple[AuthContext, SQLiteSession]]]:
+    """Hand each Homework 2 session test an empty server-side session store.
+
+    ``create_session`` saves every session in the module-level ``_SESSIONS``
+    dict and opens its conversation history on ``SESSIONS_DB``. A fresh dict
+    and a temp history database keep tests independent and leave the
+    repository's ``.sessions.db`` untouched, as ``world_copy`` does for orders.
+    """
+    from server import app as server_app
+
+    sessions: dict[str, tuple[AuthContext, SQLiteSession]] = {}
+    monkeypatch.setattr(server_app, "_SESSIONS", sessions)
+    monkeypatch.setattr(server_app, "SESSIONS_DB", tmp_path / "sessions.db")
+    yield sessions
+    for _, history in sessions.values():
+        history.close()
 
 
 @pytest.fixture
