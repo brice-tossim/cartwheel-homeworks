@@ -35,6 +35,7 @@ from typing import Any, AsyncIterator
 from agents import Runner, SQLiteSession
 from fastapi import FastAPI, Header, HTTPException
 from opentelemetry import trace
+from opentelemetry.instrumentation.openai_agents.utils import should_send_prompts
 from pydantic import BaseModel
 
 from agent import db
@@ -193,7 +194,7 @@ async def post_message(
     session_id: str,
     body: MessageIn,
     authorization: str | None = Header(default=None),
-) -> dict[str, Any]:
+) -> dict[str, str]:
     """Run one authenticated conversation turn inside a root trace span.
 
     Authorize the token, recover the server-side session, and build the agent
@@ -206,8 +207,63 @@ async def post_message(
     gen_ai.output.messages on the root span as JSON arrays of OTel GenAI
     messages with role and parts fields.
     """
-    ### YOUR CODE HERE (HW2)
-    raise NotImplementedError("HW2: implement the traced message endpoint")
+    ctx = _authorize(session_id, authorization)
+    _, history = _SESSIONS[session_id]
+    version = prompt_version()
+    reply = await _run_in_root_span(session_id, body, ctx, history, version)
+    return {"session_id": session_id, "reply": reply, "prompt_version": version}
+
+
+async def _run_in_root_span(
+    session_id: str,
+    body: MessageIn,
+    ctx: AuthContext,
+    history: SQLiteSession,
+    version: str,
+) -> str:
+    """Run the turn inside the root span, so model and tool spans nest under it."""
+    with _tracer.start_as_current_span("cartwheel.session_message") as span:
+        _record_request(span, session_id, ctx, version, body.scenario_id)
+        _record_message(span, "gen_ai.input.messages", "user", body.message)
+        reply = await _run_agent(ctx, history, body)
+        _record_message(span, "gen_ai.output.messages", "assistant", reply)
+    return reply
+
+
+def _record_request(
+    span: trace.Span,
+    session_id: str,
+    ctx: AuthContext,
+    version: str,
+    scenario_id: str | None,
+) -> None:
+    # session.id is the standard OTel attribute Langfuse uses to group the
+    # turns of one conversation into a session.
+    span.set_attribute("session.id", session_id)
+    span.set_attribute("cartwheel.user_role", ctx.role)
+    span.set_attribute("cartwheel.user_id", str(ctx.user_id))
+    span.set_attribute("cartwheel.prompt_version", version)
+    if scenario_id:
+        span.set_attribute("cartwheel.scenario_id", scenario_id)
+
+
+def _record_message(span: trace.Span, attribute: str, role: str, text: str) -> None:
+    """Record one message in the OTel GenAI format when content capture is on.
+
+    should_send_prompts reads TRACELOOP_TRACE_CONTENT exactly as OpenLLMetry
+    does for the model spans, so the root span never records content they omit.
+    """
+    if should_send_prompts():
+        message = {"role": role, "parts": [{"type": "text", "content": text}]}
+        span.set_attribute(attribute, json.dumps([message]))
+
+
+async def _run_agent(ctx: AuthContext, history: SQLiteSession, body: MessageIn) -> str:
+    agent = build_agent(ctx, model=body.model)
+    result = await Runner.run(
+        agent, body.message, session=history, context=ctx, max_turns=MAX_TURNS
+    )
+    return result.final_output_as(str)
 
 
 @app.get("/health")
