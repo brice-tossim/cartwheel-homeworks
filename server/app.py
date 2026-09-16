@@ -29,8 +29,9 @@ import json
 import os
 import time
 import uuid
+from collections.abc import AsyncIterator, Mapping, Sequence
 from contextlib import asynccontextmanager
-from typing import Any, AsyncIterator
+from typing import Any, Literal
 
 from agents import Runner, SQLiteSession
 from fastapi import FastAPI, Header, HTTPException
@@ -112,6 +113,16 @@ class MessageIn(BaseModel):
     # Set by the scenario runner (Lecture 3) so a trace links back to its
     # ground truth. Manual sessions leave it null.
     scenario_id: str | None = None
+
+
+class TranscriptMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str
+
+
+class SessionTranscript(BaseModel):
+    session_id: str
+    messages: list[TranscriptMessage]
 
 
 @app.post("/sessions")
@@ -264,6 +275,63 @@ async def _run_agent(ctx: AuthContext, history: SQLiteSession, body: MessageIn) 
         agent, body.message, session=history, context=ctx, max_turns=MAX_TURNS
     )
     return result.final_output_as(str)
+
+
+@app.get("/sessions/{session_id}/messages")
+async def list_messages(
+    session_id: str,
+    authorization: str | None = Header(default=None),
+) -> SessionTranscript:
+    """List a session's conversation as a plain chat transcript.
+
+    An extension beyond Homework 2, behind the same bearer token as POST. Only
+    user and assistant text is listed; tool calls, tool results, and reasoning
+    stay in the stored history and in the traces. No span is recorded: nothing
+    runs, and a trace per read would crowd the per-turn traces.
+    """
+    _authorize(session_id, authorization)
+    _, history = _SESSIONS[session_id]
+    items = await history.get_items()
+    return SessionTranscript(session_id=session_id, messages=_transcript(items))
+
+
+def _transcript(items: Sequence[Mapping[str, object]]) -> list[TranscriptMessage]:
+    entries = (_transcript_entry(item) for item in items)
+    return [entry for entry in entries if entry is not None]
+
+
+def _transcript_entry(item: Mapping[str, object]) -> TranscriptMessage | None:
+    """A user or assistant message as plain text; None for every other item."""
+    role = _transcript_role(item.get("role"))
+    text = _text_of(item.get("content"))
+    if role is None or not text:
+        return None
+    return TranscriptMessage(role=role, content=text)
+
+
+def _transcript_role(role: object) -> Literal["user", "assistant"] | None:
+    match role:
+        case "user":
+            return "user"
+        case "assistant":
+            return "assistant"
+        case _:
+            return None
+
+
+def _text_of(content: object) -> str:
+    """A message's text: the string itself, or its output_text parts joined."""
+    if isinstance(content, str):
+        return content
+    if not isinstance(content, list):
+        return ""
+    texts: list[str] = []
+    for part in content:
+        if isinstance(part, Mapping) and part.get("type") == "output_text":
+            text = part.get("text")
+            if isinstance(text, str):
+                texts.append(text)
+    return "".join(texts)
 
 
 @app.get("/health")
