@@ -24,6 +24,10 @@ if TYPE_CHECKING:
 
     from agent.auth import AuthContext
 
+# LiteLLM loads .env on import unless LITELLM_MODE is set. "PRODUCTION"
+# is its documented off-switch; it keeps real keys out of the tests.
+os.environ.setdefault("LITELLM_MODE", "PRODUCTION")
+
 
 @pytest.fixture(scope="session")
 def world(tmp_path_factory: pytest.TempPathFactory) -> dict[str, Path]:
