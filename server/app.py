@@ -40,7 +40,7 @@ from opentelemetry.instrumentation.openai_agents.utils import should_send_prompt
 from pydantic import BaseModel
 
 from agent import db
-from agent.agent import build_agent, prompt_version
+from agent.agent import build_agent, prompt_version, render_system_prompt
 from agent.auth import ROLES, AuthContext
 from agent.config import REPO_ROOT, db_path
 from observability.instrument import load_env, setup_tracing
@@ -235,6 +235,7 @@ async def _run_in_root_span(
     """Run the turn inside the root span, so model and tool spans nest under it."""
     with _tracer.start_as_current_span("cartwheel.session_message") as span:
         _record_request(span, session_id, ctx, version, body.scenario_id)
+        _record_instructions(span, render_system_prompt(ctx))
         _record_message(span, "gen_ai.input.messages", "user", body.message)
         reply = await _run_agent(ctx, history, body)
         _record_message(span, "gen_ai.output.messages", "assistant", reply)
@@ -256,6 +257,20 @@ def _record_request(
     span.set_attribute("cartwheel.prompt_version", version)
     if scenario_id:
         span.set_attribute("cartwheel.scenario_id", scenario_id)
+
+
+def _record_instructions(span: trace.Span, instructions: str) -> None:
+    """Record the rendered system prompt as OTel GenAI system instructions.
+
+    An extension beyond Homework 2: Langfuse shows gen_ai.system_instructions
+    as a System message above the user message in the root span's preview.
+    Like the messages, it is recorded only when content capture is on.
+    """
+    if should_send_prompts():
+        span.set_attribute(
+            "gen_ai.system_instructions",
+            json.dumps([{"type": "text", "content": instructions}]),
+        )
 
 
 def _record_message(span: trace.Span, attribute: str, role: str, text: str) -> None:
