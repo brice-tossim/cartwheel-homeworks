@@ -5,8 +5,9 @@ span by eye in Langfuse (Part E). These tests pin the same contract offline: a
 rejected token never reaches the agent, the reply comes back with the session
 and prompt version, the agent runs inside the cartwheel.session_message root
 span, that span records the caller, session, prompt version, and any scenario
-id, the OTel GenAI messages follow the content-capture setting, the requested
-model is used, and a session keeps its history across messages. A scripted
+id, the OTel GenAI messages and system prompt follow the content-capture
+setting, the requested model is used, and a session keeps its history across
+messages. A scripted
 FakeModel stands in for the provider and an in-memory exporter for Langfuse.
 """
 
@@ -228,6 +229,31 @@ def test_messages_are_left_out_when_content_capture_is_off(
     attributes = harness.root_attributes()
     assert "gen_ai.input.messages" not in attributes
     assert "gen_ai.output.messages" not in attributes
+
+
+def test_the_system_prompt_the_model_received_is_recorded(harness: Harness) -> None:
+    """Langfuse shows gen_ai.system_instructions as the root span's System message."""
+    session_id, token = _open_session(1, "shopper")
+    harness.model.set_next_output([text_message(REPLY)])
+
+    _send(session_id, token)
+
+    (request,) = harness.model.requests
+    assert _json_attribute(harness.root_attributes(), "gen_ai.system_instructions") == [
+        {"type": "text", "content": request["system_instructions"]}
+    ]
+
+
+def test_the_system_prompt_is_left_out_when_content_capture_is_off(
+    harness: Harness, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("TRACELOOP_TRACE_CONTENT", "false")
+    session_id, token = _open_session(1, "shopper")
+    harness.model.set_next_output([text_message(REPLY)])
+
+    _send(session_id, token)
+
+    assert "gen_ai.system_instructions" not in harness.root_attributes()
 
 
 def test_the_requested_model_is_used(harness: Harness) -> None:
