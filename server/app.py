@@ -196,7 +196,9 @@ def _authorize(session_id: str, authorization: str | None) -> AuthContext:
     if payload.get("session_id") != session_id:
         raise HTTPException(status_code=403, detail="token is for another session")
     if session_id not in _SESSIONS:
-        raise HTTPException(status_code=404, detail="unknown session (server restarted?)")
+        raise HTTPException(
+            status_code=404, detail="unknown session (server restarted?)"
+        )
     return _SESSIONS[session_id][0]
 
 
