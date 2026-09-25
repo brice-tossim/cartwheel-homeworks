@@ -1,0 +1,20 @@
+[
+  {
+    "trace_id": "639d4b1c708f8a94a5cfe83a944baf07",
+    "permalink": "http://localhost:3000/project/cmu3aglrc0006ti07tfmrv4d2/traces/639d4b1c708f8a94a5cfe83a944baf07",
+    "prompt_version": "d108f6949e5e",
+    "user_role": "shopper",
+    "user_id": 1,
+    "tool_order": [],
+    "final_status": "completed"
+  },
+  {
+    "trace_id": "40e9ce2600a5273625e033cd45fcc163",
+    "permalink": "http://localhost:3000/project/cmu3aglrc0006ti07tfmrv4d2/traces/40e9ce2600a5273625e033cd45fcc163",
+    "prompt_version": "cc8946a7f36e",
+    "user_role": "shopper",
+    "user_id": 1,
+    "tool_order": ["escalate_to_human"],
+    "final_status": "completed"
+  }
+]
