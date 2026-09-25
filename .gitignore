@@ -18,4 +18,10 @@ __pycache__/
 *.pyc
 .venv/
 .pytest_cache/
+<<<<<<< HEAD
 scenarios/demo_pilot_gt.json
+=======
+
+# Expanded copy of the session records, kept locally for the HW1 video.
+hw1-session.expanded.json
+>>>>>>> 10ef9ef (chore: finish the Part B assessments and collapse the session file)
