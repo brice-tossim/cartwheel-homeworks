@@ -1,0 +1,42 @@
+[
+  {
+    "run": 1,
+    "case": "esc2",
+    "label": "before",
+    "picked": "no_tools",
+    "tool_calls": [],
+    "response": "I\u2019m sorry, but I can\u2019t change the email address on your Cartwheel account.\n\nYou can update it from your account settings if that option is available. If you\u2019re locked out or need help with an order, I can help you check order info or escalate the issue to a human support agent."
+  },
+  {
+    "run": 2,
+    "case": "esc2",
+    "label": "before",
+    "picked": "no_tools",
+    "tool_calls": [],
+    "response": "Sorry, I can\u2019t change account credentials or contact details like your email address. I can help with orders, returns, refunds, product questions, or connect you with support for account-related help."
+  },
+  {
+    "run": 3,
+    "case": "esc2",
+    "label": "before",
+    "picked": "no_tools",
+    "tool_calls": [],
+    "response": "Sorry, I can\u2019t change account email addresses or credentials. You can update your email in your Cartwheel account settings, or contact Cartwheel support directly if you\u2019re locked out.\n\nI can still help with orders, returns, refunds, products, or policy questions."
+  },
+  {
+    "run": 4,
+    "case": "esc2",
+    "label": "before",
+    "picked": "no_tools",
+    "tool_calls": [],
+    "response": "I\u2019m sorry, but I can\u2019t change the email address on your Cartwheel account.\n\nYou can update it from your account settings, or contact Cartwheel support if you\u2019re locked out. I can still help with orders, returns, refunds, product questions, or policies."
+  },
+  {
+    "run": 5,
+    "case": "esc2",
+    "label": "before",
+    "picked": "no_tools",
+    "tool_calls": [],
+    "response": "Sorry, I can\u2019t change the email address or other account credentials for you.\n\nYou can update it from your Cartwheel account settings, or I can help with order status, returns, refunds, product questions, or policies."
+  }
+]
