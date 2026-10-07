@@ -13,6 +13,9 @@ scenarios/results/
 replay/results/
 .harbor/
 
+# Derived scenario plan: regenerate with `python -m scenarios.generate_support`.
+scenarios/support_plan.jsonl
+
 # Python
 __pycache__/
 *.pyc
