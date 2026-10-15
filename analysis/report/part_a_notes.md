@@ -1,0 +1,50 @@
+# My understanding of the review process
+
+Items marked *(handout)* are required by the handout.
+
+- **Definitions**
+  - A trace is one customer message and everything the agent did to answer it: model calls, tool calls and the final answer.
+  - A session is Langfuse's name for a group of traces. In Cartwheel it is one conversation: a single turn is one trace, multiple turns are multiple traces (one per customer message).
+  - Recording one trace per customer message is Cartwheel's choice, not a Langfuse rule.
+  - A failure mode is a named type of failure with a yes/no definition. *(handout)*
+- **Data and storage** *(handout)*
+  - Traces are read live from Langfuse: each time my interface opens, it asks my running Langfuse for them.
+  - The local export is `traces/support_traces.json`, a saved copy of my HW3 traces exported from Langfuse by `scenarios/export_langfuse.py`. It is only a fallback, read when Langfuse cannot be reached.
+  - If I use the fallback, the trace ids stay unchanged so my decisions can be sent to Langfuse later, and I record why in `analysis/report/interface_comparison.md`.
+  - Every trace keeps its Langfuse trace id, so each decision is saved back to the right trace.
+  - The code of my personal interface lives under `analysis/review_app/`.
+- **At a glance, for each trace**
+  - Who is asking: role, user id and store id.
+  - The user message.
+  - The steps, one line each: the agent's reason, the tool and its inputs, whether it succeeded, and the key result. This covers tool calls, tool results and help-center search results. *(handout)*
+  - Only long tool answers are collapsed. Refund, cancel and hand-off to a human are never collapsed.
+  - The final answer, right after the steps.
+  - The system prompt behind an expand/collapse button, with its version as a small tag.
+  - The `SPEC.md` rules and policy numbers within reach, to check a behaviour before calling it a failure. *(handout asks to consult `SPEC.md` during review)*
+- **Session view**
+  - Traces are grouped by session and shown oldest to newest, each as its own block, so a follow-up is never read without the earlier turn. *(handout)*
+  - Each note sits next to the content it refers to. *(handout)*
+- **Notes, first reading**
+  - Selecting text lets me attach a free-text note to it. *(handout)*
+  - Each trace also has a general note, for problems with no text to select (something the agent never did).
+  - The note describes the first failure in my own words; no failure mode is picked at this stage. *(handout)*
+  - A one-click "no failure observed" separates a reviewed trace from an unread one. *(handout)*
+  - A note can be edited or removed, but its original wording stays in the saved history. *(handout)*
+  - Notes are saved to `analysis/state/annotations.json`. *(handout)*
+- **Failure modes view** *(handout)*
+  - Lists the current failure modes, each with the notes that support it.
+  - Each mode shows its name, yes/no definition, confirmed examples, close non-examples, the boundary with its nearest neighbour, the likely check (code or LLM judge), and its `SPEC.md` rule id or recorded `SPEC.md` revision.
+  - Saved to `analysis/state/patterns.json`.
+- **Labelling view** *(handout)*
+  - One present or absent decision for every reviewed trace and every final failure mode.
+  - Accepted decisions are saved to Langfuse as scores and to `analysis/state/labels/`.
+- **AI suggestions** *(handout)*
+  - Shown separately from my own notes and visually distinct.
+  - Each one needs my explicit accept or reject, and both outcomes are recorded in `analysis/state/suggestions.json`.
+- **Progress view** *(handout)*
+  - Shows reviewed and unreviewed traces, and traces with incomplete decisions.
+- **Session list**
+  - Filter by role, tool used, sessions with a refund, cancel or hand-off, reviewed or not, single turn or multiple turns, and keyword.
+- **Navigation**
+  - Previous and next between sessions, by button and keyboard, following my review sample in `analysis/state/sample_manifest.json`.
+  - A progress counter in traces ("x of N").
