@@ -143,7 +143,7 @@ def _order_status_trace() -> dict[str, object]:
     )
 
 
-def test_customer_message_is_read_from_the_rootobservation() -> None:
+def test_customer_message_is_read_from_the_root_observation() -> None:
     steps = normalize_trace(_order_status_trace())["trace"]
 
     assert steps[0] == USER_STEP
