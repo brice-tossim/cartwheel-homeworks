@@ -226,6 +226,16 @@ def test_conversations_route_serves_what_the_page_draws(base_url: str) -> None:
     ] == [("s1", ["t1"])]
 
 
+def test_conversations_carry_the_review_batches(base_url: str, tmp_path: Path) -> None:
+    (tmp_path / "batches").mkdir()
+    (tmp_path / "batches" / "batch_1_random.jsonl").write_text('{"trace_id": "t1"}\n')
+
+    _, loaded = _get(f"{base_url}/api/conversations")
+
+    assert isinstance(loaded, dict)
+    assert loaded["batches"] == [{"name": "batch_1_random", "trace_ids": ["t1"]}]
+
+
 def test_conversations_share_the_loaded_traces_until_a_refresh(
     base_url: str, loader: _CountingLoader
 ) -> None:
