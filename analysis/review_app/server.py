@@ -11,6 +11,7 @@ Routes:
     GET  /                                    the review page (files under ui/)
     GET  /ui/<file>                           the page's stylesheet and script
     GET  /api/conversations[?refresh=1]       what the page draws, with the Langfuse trace link
+                                              and the review batches
     GET  /api/sessions[?refresh=1]            the raw conversations and their source
     GET  /api/rules                           SPEC.md rules and facts.yaml numbers
     GET  /api/notes                           every saved note, removed ones included
@@ -36,7 +37,7 @@ from pathlib import Path
 from typing import NamedTuple
 from urllib.parse import unquote
 
-from analysis.review_app import notes, suggestions
+from analysis.review_app import batches, notes, suggestions
 from analysis.review_app.rules import RulesPanel
 from analysis.review_app.rules import load_rules as load_spec_rules
 from analysis.review_app.sessions import SessionsSource
@@ -122,13 +123,13 @@ class ReviewServer(ThreadingHTTPServer):
 class ReviewHandler(BaseHTTPRequestHandler):
     server: ReviewServer
 
-    def log_message(self, format: str, *args: object) -> None:  # noqa: A002
+    def log_message(self, format: str, *args: object) -> None:
         return
 
-    def do_GET(self) -> None:  # noqa: N802  (http.server naming)
+    def do_GET(self) -> None:
         self._respond("GET")
 
-    def do_POST(self) -> None:  # noqa: N802
+    def do_POST(self) -> None:
         self._respond("POST")
 
     # -- dispatch ---------------------------------------------------------
@@ -198,6 +199,7 @@ class ReviewHandler(BaseHTTPRequestHandler):
             "fallback_reason": loaded["fallback_reason"],
             "trace_link": _trace_link(),
             "conversations": conversation_views(loaded["sessions"]),
+            "batches": batches.load_batches(),
         }
 
     def _sessions(self, match: re.Match[str], query: str) -> Response:
@@ -222,7 +224,9 @@ class ReviewHandler(BaseHTTPRequestHandler):
         return 201, added
 
     def _reword_note(self, match: re.Match[str], query: str) -> Response:
-        return 200, notes.edit_note(match["note_id"], _required_text(self._body(), "note"))
+        return 200, notes.edit_note(
+            match["note_id"], _required_text(self._body(), "note")
+        )
 
     def _remove_note(self, match: re.Match[str], query: str) -> Response:
         return 200, notes.remove_note(match["note_id"])
@@ -247,7 +251,9 @@ def _ui_file(ui_dir: Path, name: str) -> Response:
     requested = (ui_dir / name).resolve()
     if ui_dir not in requested.parents or not requested.is_file():
         return 404, {"error": f"not found: {name}"}
-    return File(requested, _CONTENT_TYPES.get(requested.suffix, "application/octet-stream"))
+    return File(
+        requested, _CONTENT_TYPES.get(requested.suffix, "application/octet-stream")
+    )
 
 
 def _trace_link() -> str | None:

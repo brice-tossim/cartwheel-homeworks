@@ -16,10 +16,11 @@ const state = {
   fallbackReason: null,
   traceLink: null,
   conversations: [],
+  batches: [],
   notes: [],
   suggestions: [],
   rules: null,
-  filters: { search: "", role: "", action: "", tool: "", twoTurns: false, unread: false },
+  filters: { batch: "", search: "", role: "", action: "", tool: "", twoTurns: false, unread: false },
   selectedId: remembered("selected", null),
   listOpen: remembered("listOpen", true),
   rulesOpen: remembered("rulesOpen", true),
@@ -112,6 +113,10 @@ async function loadAll(refresh = false) {
   state.fallbackReason = loaded.fallback_reason;
   state.traceLink = loaded.trace_link;
   state.conversations = loaded.conversations;
+  state.batches = loaded.batches;
+  if (state.filters.batch && state.filters.batch !== NO_BATCH && !findBatch(state.filters.batch)) {
+    state.filters.batch = "";
+  }
   state.notes = notes;
   state.suggestions = suggestions;
   state.rules = rules;
@@ -174,11 +179,29 @@ function matchesAction(conversation, action) {
   return conversation.actions.includes(action);
 }
 
+// The batch picker's value for the traces in no batch; batch file names never start with "_".
+const NO_BATCH = "__none__";
+
+const findBatch = (name) => state.batches.find((b) => b.name === name) ?? null;
+
+function inBatch(conversation, batch) {
+  const ids = new Set(batch.trace_ids);
+  return conversation.turns.some((t) => ids.has(t.trace_id));
+}
+
+function matchesBatch(conversation, name) {
+  if (!name) return true;
+  if (name === NO_BATCH) return !state.batches.some((b) => inBatch(conversation, b));
+  const batch = findBatch(name);
+  return batch ? inBatch(conversation, batch) : true;
+}
+
 function visibleConversations() {
   const f = state.filters;
   const words = f.search.toLowerCase().split(/\s+/).filter(Boolean);
   return state.conversations.filter((c) => (
-    (!f.role || c.role === f.role)
+    matchesBatch(c, f.batch)
+    && (!f.role || c.role === f.role)
     && matchesAction(c, f.action)
     && (!f.tool || c.tools.includes(f.tool))
     && (!f.twoTurns || c.turns.length > 1)
@@ -189,15 +212,28 @@ function visibleConversations() {
 
 // -- rendering: frame -------------------------------------------------------------
 
+// When the filters drop the open conversation, open the first one they keep.
+function followFilters() {
+  const list = visibleConversations();
+  if (list.some((c) => c.session_id === state.selectedId)) return false;
+  state.selectedId = list[0]?.session_id ?? null;
+  state.promptOpen = false;
+  state.editingNoteId = null;
+  if (state.selectedId) remember("selected", state.selectedId);
+  return true;
+}
+
 function renderAll({ keepScroll = true } = {}) {
   const panes = [$("conversation"), $("side"), $("list-panel")];
   const scrolls = panes.map((pane) => pane.scrollTop);
+  const moved = followFilters();
   renderTopbar();
   renderList();
   renderConversation();
   renderSide();
   renderListVisibility();
   if (keepScroll) panes.forEach((pane, i) => { pane.scrollTop = scrolls[i]; });
+  if (moved) [$("conversation"), $("side")].forEach((pane) => { pane.scrollTop = 0; });
 }
 
 function renderTopbar() {
@@ -236,6 +272,9 @@ function renderFilterOptions() {
   const roles = [...new Set(all.map((c) => c.role).filter(Boolean))].sort(
     (a, b) => (ROLE_ORDER.indexOf(a) + 99 * (ROLE_ORDER.indexOf(a) < 0)) - (ROLE_ORDER.indexOf(b) + 99 * (ROLE_ORDER.indexOf(b) < 0)),
   );
+  $("batch").innerHTML = option("", `All traces · ${all.length}`, f.batch)
+    + state.batches.map((b) => option(b.name, `${b.name} · ${all.filter((c) => inBatch(c, b)).length}`, f.batch)).join("")
+    + option(NO_BATCH, `Not in a batch · ${all.filter((c) => matchesBatch(c, NO_BATCH)).length}`, f.batch);
   $("role").innerHTML = option("", `Everyone · ${all.length}`, f.role)
     + roles.map((role) => option(role, `${cap(role)} · ${all.filter((c) => c.role === role).length}`, f.role)).join("");
   $("action").innerHTML = option("", `No filter · ${all.length}`, f.action)
@@ -290,7 +329,7 @@ function renderConversation() {
   const pane = $("conversation");
   const conversation = selected();
   if (!conversation) {
-    pane.innerHTML = `<p class="empty">${state.conversations.length ? "Pick a conversation in the list." : "No conversation to show."}</p>`;
+    pane.innerHTML = `<p class="empty">${state.conversations.length ? "No conversation matches these filters." : "No conversation to show."}</p>`;
     return;
   }
   pane.innerHTML = `<div class="conversation-inner">
@@ -817,10 +856,9 @@ async function savePopoverNote() {
 function bindFilters() {
   $("search").addEventListener("input", (event) => {
     state.filters.search = event.target.value;
-    renderList();
-    renderListVisibility();
+    renderAll();
   });
-  [["role", "role"], ["action", "action"], ["tool", "tool"]].forEach(([id, key]) => {
+  [["batch", "batch"], ["role", "role"], ["action", "action"], ["tool", "tool"]].forEach(([id, key]) => {
     $(id).addEventListener("change", (event) => {
       state.filters[key] = event.target.value;
       renderAll();
