@@ -338,6 +338,7 @@ function renderConversation() {
     ${whoCard(conversation)}
     ${conversation.turns.map((turn, i) => turnCard(conversation, turn, i)).join("")}
   </div>`;
+  pane.querySelectorAll(".turn").forEach((turn) => markQuotes(turn, marksFor(turn.dataset.traceId)));
 }
 
 function callerLine(conversation) {
@@ -398,18 +399,17 @@ function timeOf(timestamp) {
 function marksFor(traceId) {
   const notes = liveNotes(traceId)
     .filter((n) => n.quote)
-    .map((n) => ({ quote: n.quote, attrs: `class="note-mark" data-note-id="${esc(n.id)}"` }));
+    .map((n) => ({ quote: n.quote, className: "note-mark", data: { noteId: n.id } }));
   const suggested = pendingSuggestions(traceId)
     .filter((s) => s.quote)
-    .map((s) => ({ quote: s.quote, attrs: `class="ai-mark" data-suggestion-id="${esc(s.id)}"` }));
-  return { list: [...notes, ...suggested], used: new Set() };
+    .map((s) => ({ quote: s.quote, className: "ai-mark", data: { suggestionId: s.id } }));
+  return [...notes, ...suggested];
 }
 
 function turnCard(conversation, turn, i) {
   const count = conversation.turns.length;
-  const marks = marksFor(turn.trace_id);
   const steps = turn.steps.length
-    ? `<ol class="steps">${turn.steps.map((step, n) => stepItem(turn, step, n, marks)).join("")}</ol>`
+    ? `<ol class="steps">${turn.steps.map((step, n) => stepItem(turn, step, n)).join("")}</ol>`
     : `<p class="no-tools">${ICON_INFO}No tool call in this turn.</p>`;
   return `<article class="card turn" id="turn-${esc(turn.trace_id)}" data-trace-id="${esc(turn.trace_id)}" aria-label="Turn ${i + 1} of ${count}">
     <div class="turn-head">
@@ -419,21 +419,21 @@ function turnCard(conversation, turn, i) {
     <div class="turn-body">
       <div class="customer" data-part="customer">
         <span class="label">Customer</span>
-        <p>${highlight(turn.customer ?? "", marks)}</p>
+        <p>${esc(turn.customer ?? "")}</p>
       </div>
       ${steps}
-      ${replyBlock(turn, marks)}
+      ${replyBlock(turn)}
     </div>
   </article>`;
 }
 
-function replyBlock(turn, marks) {
+function replyBlock(turn) {
   if (turn.reply == null) {
     return `<div class="reply missing"><span class="label">Reply to the customer</span><p class="muted" style="margin:0">No reply was recorded for this turn.</p></div>`;
   }
   return `<div class="reply" data-part="reply">
     <span class="label">Reply to the customer</span>
-    <div class="reply-text">${markdown(turn.reply, marks)}</div>
+    <div class="reply-text">${markdown(turn.reply)}</div>
   </div>`;
 }
 
@@ -452,12 +452,12 @@ function statusChip(step) {
   return `<span class="status unknown">no answer recorded</span>`;
 }
 
-function stepItem(turn, step, n, marks) {
+function stepItem(turn, step, n) {
   const key = `${turn.trace_id}:${n}`;
   const open = state.openAnswers.has(key);
   const kind = step.changes_data ? " write" : step.ok === false ? " failed" : "";
   const reason = step.reason
-    ? `<p class="reason"><span class="who-said">Agent · </span>${highlight(step.reason, marks)}</p>`
+    ? `<p class="reason"><span class="who-said">Agent · </span>${esc(step.reason)}</p>`
     : "";
   return `<li class="step" data-step="${n + 1}">
     <span class="step-number" aria-hidden="true">${n + 1}</span>
@@ -513,64 +513,63 @@ function prettyJson(value) {
   return `<pre class="json">${text.replace(/^(\s*)(&quot;.*?&quot;)(:)/gm, '$1<span class="key">$2</span>$3')}</pre>`;
 }
 
-// Find where each quote first appears in a text; quotes never overlap, and a
-// quote is placed once per turn.
-function findSpans(raw, marks) {
-  const spans = [];
-  marks.list.forEach((mark, i) => {
-    if (marks.used.has(i)) return;
-    const at = raw.indexOf(mark.quote);
-    if (at < 0) return;
-    const end = at + mark.quote.length;
-    if (spans.some((s) => at < s.end && end > s.start)) return;
-    spans.push({ start: at, end, mark });
-    marks.used.add(i);
+// Mark each saved quote where it first appears in a turn: in the customer
+// message, a step's reason (with its label) or the reply. Whitespace is
+// ignored, so a quote spanning lines, list items or bold words still matches.
+function markQuotes(turn, marks) {
+  const parts = [...turn.querySelectorAll(".customer p, .reason, .reply-text")];
+  marks.forEach((mark) => {
+    const found = parts.map((part) => findQuote(part, mark.quote)).find(Boolean);
+    if (found && !found.some((c) => c.node.parentElement.closest("mark"))) wrapChars(found, mark);
   });
-  return spans.sort((a, b) => a.start - b.start);
 }
 
-// Escape one piece of a text that starts at `offset`, marking the parts that
-// fall inside the spans. A span crossing pieces is marked in each piece.
-function wrapPiece(piece, offset, spans) {
-  let out = "";
-  let position = 0;
-  spans.forEach((span) => {
-    const start = Math.max(span.start - offset, position);
-    const end = Math.min(span.end - offset, piece.length);
-    if (end <= start) return;
-    out += esc(piece.slice(position, start));
-    out += `<mark ${span.mark.attrs}>${esc(piece.slice(start, end))}</mark>`;
-    position = end;
+// The characters of a quote inside a part, each with its text node and
+// offset, or null when the part does not contain the quote.
+function findQuote(part, quote) {
+  const chars = [];
+  const walker = document.createTreeWalker(part, NodeFilter.SHOW_TEXT);
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    [...node.data].forEach((char, offset) => {
+      if (!/\s/.test(char)) chars.push({ node, offset, char });
+    });
+  }
+  const needle = quote.replace(/\s+/g, "");
+  const at = needle ? chars.map((c) => c.char).join("").indexOf(needle) : -1;
+  return at < 0 ? null : chars.slice(at, at + needle.length);
+}
+
+// Wrap the found characters in one mark per text node they fall in.
+function wrapChars(chars, mark) {
+  const ranges = new Map();
+  chars.forEach(({ node, offset }) => {
+    const range = ranges.get(node) ?? { start: offset, end: offset };
+    ranges.set(node, { start: range.start, end: offset + 1 });
   });
-  return out + esc(piece.slice(position));
+  ranges.forEach(({ start, end }, node) => {
+    const middle = node.splitText(start);
+    middle.splitText(end - start);
+    const element = document.createElement("mark");
+    element.className = mark.className;
+    Object.assign(element.dataset, mark.data);
+    middle.replaceWith(element);
+    element.append(middle);
+  });
 }
 
-function highlight(text, marks) {
-  const raw = String(text ?? "");
-  return wrapPiece(raw, 0, findSpans(raw, marks));
-}
-
-// Bold text and highlights together: quotes are found in the text as read,
-// without the ** markers, so a quote spanning bold words is still marked.
-function inline(text, marks) {
-  const pieces = String(text).split("**");
-  const spans = findSpans(pieces.join(""), marks);
-  let offset = 0;
-  return pieces.map((piece, i) => {
-    const html = wrapPiece(piece, offset, spans);
-    offset += piece.length;
-    return i % 2 ? `<strong>${html}</strong>` : html;
-  }).join("");
+// Bold text: the parts between ** markers alternate plain and bold.
+function inline(text) {
+  return String(text).split("**").map((piece, i) => (i % 2 ? `<strong>${esc(piece)}</strong>` : esc(piece))).join("");
 }
 
 // A small Markdown reader for replies: paragraphs, bold, and nested lists.
-function markdown(raw, marks) {
+function markdown(raw) {
   const lines = String(raw).replace(/\r/g, "").split("\n");
   const stack = [];
   let html = "";
   let paragraph = [];
   const flush = () => {
-    if (paragraph.length) html += `<p>${inline(paragraph.join(" "), marks)}</p>`;
+    if (paragraph.length) html += `<p>${inline(paragraph.join(" "))}</p>`;
     paragraph = [];
   };
   const closeTo = (indent) => {
@@ -591,12 +590,12 @@ function markdown(raw, marks) {
         html += `<${type}${type === "ol" && item[3] !== "1" ? ` start="${item[3]}"` : ""}><li>`;
         stack.push({ type, indent });
       }
-      html += inline(item[4], marks);
+      html += inline(item[4]);
     } else if (!line.trim()) {
       flush();
       closeTo(-1);
     } else if (stack.length) {
-      html += ` ${inline(line.trim(), marks)}`;
+      html += ` ${inline(line.trim())}`;
     } else {
       paragraph.push(line.trim());
     }
