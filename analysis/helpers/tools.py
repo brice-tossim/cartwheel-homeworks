@@ -271,7 +271,9 @@ def select_traces(
             results raise. For offline use, pass a Module 1 export such as
             ``traces/support_traces.json``.
         k: batch size (the demo default is 24).
-        strategy: ``"diversity"`` (default), ``"random"``, or ``"outlier"``
+        strategy: ``"diversity"`` (default), ``"random"``, ``"cluster"``
+            (``k`` clusters on trace features, the trace closest to each
+            centre), or ``"outlier"``
             (interquartile-range flags on a numeric feature).
         exclude_ids: trace ids already read, skipped this batch.
 
