@@ -165,6 +165,8 @@ function searchText(conversation) {
   if (!conversation.searchText) {
     conversation.searchText = [
       conversation.scenario_id,
+      conversation.session_id,
+      ...conversation.turns.map((t) => t.trace_id),
       conversation.role,
       ...conversation.tools,
       ...conversation.turns.flatMap((t) => [t.customer, t.reply, ...t.steps.map((s) => s.reason)]),
