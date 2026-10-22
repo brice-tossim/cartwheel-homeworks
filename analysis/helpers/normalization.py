@@ -9,7 +9,16 @@ from __future__ import annotations
 
 import json
 from datetime import date, datetime
-from typing import Any
+from typing import Any, TypedDict
+
+type TraceRecord = dict[str, object]
+
+
+class SessionGroup(TypedDict):
+    """One conversation: the traces sharing a Langfuse session, oldest first."""
+
+    session_id: str
+    traces: list[TraceRecord]
 
 
 def _data(value: Any) -> Any:
@@ -87,12 +96,74 @@ def _observation_record(value: Any) -> dict[str, Any] | None:
     }
 
 
+_ATTRIBUTE_PREFIX = "attributes."
+
+# Trace-level fields that the Observations API v2 keeps on the root observation.
+_ROOT_ENVELOPE_KEYS = ("input", "output", "metadata", "sessionId")
+
+
+def _decoded(payload: object) -> object:
+    """Return a JSON object or array stored as text; leave anything else as is."""
+    if not isinstance(payload, str) or not payload.startswith(("[", "{")):
+        return payload
+    try:
+        return json.loads(payload)
+    except ValueError:
+        return payload
+
+
+def _with_decoded_payloads(observation: object) -> object:
+    """Decode an observation's input and output, which the v2 API returns as text."""
+    record = _data(observation)
+    if not isinstance(record, dict):
+        return observation
+    return {
+        **record,
+        "input": _decoded(record.get("input")),
+        "output": _decoded(record.get("output")),
+    }
+
+
+def _root_observation(observations: list[object]) -> dict[str, object] | None:
+    for observation in observations:
+        if isinstance(observation, dict) and observation.get("isRootObservation"):
+            return observation
+    return None
+
+
+def _as_observations_trace(raw: dict[str, object]) -> dict[str, object]:
+    """Read a trace served as its observations (Langfuse Observations API v2).
+
+    That shape keeps nothing at trace level: the conversation, the session and
+    the span attributes sit on the root observation, and payloads are JSON
+    text. A value already present at trace level is kept.
+    """
+    observations = [
+        _with_decoded_payloads(observation) for observation in raw.get("observations") or []
+    ]
+    trace = {**raw, "observations": observations}
+    root = _root_observation(observations)
+    for key in _ROOT_ENVELOPE_KEYS if root else ():
+        if trace.get(key) is None:
+            trace[key] = root.get(key)
+    return trace
+
+
+def _unprefixed_attributes(metadata: dict[str, object]) -> dict[str, object]:
+    """Return ``attributes.``-prefixed keys under their bare span attribute name."""
+    return {
+        key.removeprefix(_ATTRIBUTE_PREFIX): value
+        for key, value in metadata.items()
+        if key.startswith(_ATTRIBUTE_PREFIX)
+    }
+
+
 def _metadata(record: dict[str, Any]) -> dict[str, Any]:
     """Return trace metadata with nested OpenTelemetry attributes merged in.
 
-    Langfuse stores span attributes under ``metadata.attributes`` (a JSON
-    string in ClickHouse, a dict from the API). Top level keys win when both
-    are present.
+    Langfuse v3 stores span attributes under ``metadata.attributes`` (a JSON
+    string in ClickHouse, a dict from the API); v4 flattens them into
+    ``attributes.``-prefixed keys. Top level keys win when both are present.
     """
     metadata = _data(record.get("metadata"))
     if not isinstance(metadata, dict):
@@ -104,6 +175,7 @@ def _metadata(record: dict[str, Any]) -> dict[str, Any]:
         except ValueError:
             attributes = None
     merged = dict(attributes) if isinstance(attributes, dict) else {}
+    merged.update(_unprefixed_attributes(metadata))
     merged.update(metadata)
     return merged
 
@@ -213,6 +285,7 @@ def normalize_trace(value: Any) -> dict[str, Any]:
     raw = _data(value)
     if not isinstance(raw, dict):
         raise ValueError("a trace record must be an object")
+    raw = _as_observations_trace(raw)
     metadata = _metadata(raw)
     trace_id = raw.get("id") or raw.get("trace_id")
     if not trace_id:
@@ -253,7 +326,8 @@ def normalize_trace(value: Any) -> dict[str, Any]:
         or metadata.get("cartwheel.scenario_id")
         or metadata.get("scenario_id"),
         "session_id": metadata.get("cartwheel.session_id")
-        or metadata.get("session_id"),
+        or metadata.get("session_id")
+        or raw.get("sessionId"),
     }
     supplied_segments = raw.get("segments")
     segments = dict(supplied_segments) if isinstance(supplied_segments, dict) else {}
@@ -323,6 +397,42 @@ def _merge_multi_turn(traces: list[dict[str, Any]]) -> list[dict[str, Any]]:
         )
         merged.append(first)
     return merged
+
+
+def _session_key(trace: TraceRecord) -> str:
+    """Return the trace's session, or its own id when it belongs to none."""
+    meta = trace.get("meta")
+    session_id = meta.get("session_id") if isinstance(meta, dict) else None
+    return str(session_id or trace["id"])
+
+
+def _started(trace: TraceRecord) -> str:
+    return str(trace.get("timestamp") or "")
+
+
+def _traces_by_session(traces: list[TraceRecord]) -> dict[str, list[TraceRecord]]:
+    """Collect traces per session, oldest first within and across sessions."""
+    sessions: dict[str, list[TraceRecord]] = {}
+    for trace in sorted(traces, key=_started):
+        sessions.setdefault(_session_key(trace), []).append(trace)
+    return sessions
+
+
+def _as_session_groups(sessions: dict[str, list[TraceRecord]]) -> list[SessionGroup]:
+    return [
+        {"session_id": session_id, "traces": turns} for session_id, turns in sessions.items()
+    ]
+
+
+def group_by_session(traces: list[TraceRecord]) -> list[SessionGroup]:
+    """Group traces into conversations, leaving every trace intact.
+
+    Unlike ``_merge_multi_turn``, nothing is folded together: each trace keeps
+    its own identifier, so a judgment can still be saved against it. Repeated
+    runs of one scenario stay separate because they have separate sessions.
+    """
+    sessions = _traces_by_session(traces)
+    return _as_session_groups(sessions)
 
 
 def normalize_traces(values: list[Any]) -> list[dict[str, Any]]:

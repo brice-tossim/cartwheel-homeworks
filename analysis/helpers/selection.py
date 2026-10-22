@@ -28,6 +28,7 @@ import math
 import random
 import re
 from collections import Counter
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -141,6 +142,8 @@ def select(
         return _random_picks(pool, k, seed)
     if strategy == "outlier":
         return _outlier_picks(pool, k)
+    if strategy == "cluster":
+        return _cluster_picks(pool, k, seed)
     return _diversity_picks(pool, k, seed)
 
 
@@ -200,6 +203,43 @@ def _diversity_picks(
         chosen_ids.add(t["id"])
 
     return picks[:k]
+
+
+def _cluster_picks(
+    pool: Sequence[dict[str, object]], k: int, seed: int
+) -> list[dict[str, str]]:
+    """Group the pool into ``k`` clusters and return the trace closest to each centre."""
+    vectors = _standardize([_feature_vector(t) for t in pool])
+    clusters = _clusters(_kmeans(vectors, k=k, seed=seed))
+    return [
+        _representative(pool, vectors, members, number, len(clusters))
+        for number, members in enumerate(clusters, start=1)
+    ]
+
+
+def _clusters(assign: list[int]) -> list[list[int]]:
+    """Member positions of each non-empty cluster, in cluster order."""
+    by_cluster: dict[int, list[int]] = {}
+    for position, cluster in enumerate(assign):
+        by_cluster.setdefault(cluster, []).append(position)
+    return [by_cluster[cluster] for cluster in sorted(by_cluster)]
+
+
+def _representative(
+    pool: Sequence[dict[str, object]],
+    vectors: list[list[float]],
+    members: list[int],
+    number: int,
+    total: int,
+) -> dict[str, str]:
+    centre = [sum(vectors[m][d] for m in members) / len(members) for d in range(len(vectors[0]))]
+    closest = min(members, key=lambda m: (_distance(vectors[m], centre), str(pool[m]["id"])))
+    reason = f"representative of cluster {number} of {total} ({len(members)} traces)"
+    return {"trace_id": str(pool[closest]["id"]), "reason": reason}
+
+
+def _distance(a: list[float], b: list[float]) -> float:
+    return sum((x - y) ** 2 for x, y in zip(a, b))
 
 
 def _outlier_picks(pool: list[dict[str, Any]], k: int) -> list[dict[str, str]]:

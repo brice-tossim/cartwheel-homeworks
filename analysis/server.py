@@ -27,9 +27,9 @@ API (kept compatible with the error-discovery skill so the same UI works):
 
 Run it:
 
-    python analysis/server.py                       # serve on :8020
-    python analysis/server.py --port 8021
-    python analysis/server.py --replay state/demo_annotations.json
+    uv run python analysis/server.py                       # serve on :8020
+    uv run python analysis/server.py --port 8021
+    uv run python analysis/server.py --replay state/demo_annotations.json
 
 The ``--replay`` flag replays a canned annotations file on a timer, appending
 one annotation every few seconds, so the watcher, the grouping, and the
