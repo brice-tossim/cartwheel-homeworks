@@ -1,1 +1,182 @@
-{"modes": []}
+{
+  "modes": [
+    {
+      "name": "ignores_known_store",
+      "definition": "The customer named a store, or an earlier turn identified it, and the agent's first order lookup does not narrow to that store (for example it calls list_my_orders or searches every order instead).",
+      "status": "candidate",
+      "added_in": "batch_1",
+      "note_ids": [
+        "18ee98945349",
+        "803ddd423850",
+        "a816eee858fc",
+        "0fc8ee173a19",
+        "5500a36f92f9",
+        "d598f0977dc6",
+        "024dde2d0cc1",
+        "5200d871a781",
+        "b8ec803605ae"
+      ],
+      "example_trace_ids": [
+        "7d614db08a876f0c70541e0a5d567b6b",
+        "c0749c66ca2a0db2b0123f85a34dc9ad",
+        "a7e9dd4474c34bc14ed71fcdd4fbfd21",
+        "dd14ea25e0d1071e520016392f970dc1",
+        "c77bc73de2930040ef5ae5ad718ed92d",
+        "fb77a52d811e50e4f54c71c131a02f6a",
+        "e2e0f7095958a198f9835472f63f88c8",
+        "72e33e745ff92828f0337c57e7e1695f",
+        "2c9307a33819ac9bb904c3366004e0ae"
+      ],
+      "any_instance_count": 9
+    },
+    {
+      "name": "reveals_internal_policy",
+      "definition": "The reply tells the customer an internal policy id (such as cw-refunds), an internal threshold (such as the $100 auto-approval limit), or how a request is processed behind the scenes.",
+      "status": "candidate",
+      "added_in": "batch_1",
+      "note_ids": [
+        "194b3a395d12",
+        "a5a6e224a28b",
+        "dac0c21830f0",
+        "79aac18bbc29",
+        "4792035489c2",
+        "6ee5bd1b606b",
+        "a1e898e16009",
+        "5ba685ce9b35"
+      ],
+      "example_trace_ids": [
+        "7d614db08a876f0c70541e0a5d567b6b",
+        "cf89270130faf85e682bf47abbcc7287",
+        "5649ffb00905ae070eeb5a465676fee6",
+        "e2e0f7095958a198f9835472f63f88c8",
+        "259155c9124b0f5c6ca9501c17a68e8d",
+        "77fef59b98d57cf63fbe1822cc05030f",
+        "72e33e745ff92828f0337c57e7e1695f",
+        "188a1c3af05b25c563fc2f002b518e46"
+      ],
+      "any_instance_count": 8
+    },
+    {
+      "name": "reveals_data_problems",
+      "definition": "The reply tells the customer about errors or inconsistencies in the store data, such as duplicate listings or a negative price.",
+      "status": "candidate",
+      "added_in": "batch_1",
+      "note_ids": [
+        "732d6c0c5063",
+        "02a1a515cda7"
+      ],
+      "example_trace_ids": [
+        "6776b7df1dbd706e4fbc07ccae3e28ca",
+        "f3c5672b6283128027a95b38a3f62c2c"
+      ],
+      "any_instance_count": 2
+    },
+    {
+      "name": "no_reply",
+      "definition": "The turn ends without any reply to the customer.",
+      "status": "candidate",
+      "added_in": "batch_1",
+      "note_ids": [
+        "706b7457673f",
+        "d6d92cd826de",
+        "c078e7600b29",
+        "594b3cd8224d"
+      ],
+      "example_trace_ids": [
+        "3b14d86eb8280273e7946e5cffc0023c",
+        "c23630503c3dd267ed10b20e804092d3",
+        "fb77a52d811e50e4f54c71c131a02f6a",
+        "47fec190c6ddc93595852ddd125eab76"
+      ],
+      "any_instance_count": 4
+    },
+    {
+      "name": "escalates_ineligible_refund",
+      "definition": "The agent opens a human review for a refund on an order that the tool result marks as not refund eligible.",
+      "status": "candidate",
+      "added_in": "batch_1",
+      "note_ids": [
+        "79aac18bbc29",
+        "a1e898e16009"
+      ],
+      "example_trace_ids": [
+        "e2e0f7095958a198f9835472f63f88c8",
+        "72e33e745ff92828f0337c57e7e1695f"
+      ],
+      "any_instance_count": 2
+    },
+    {
+      "name": "contradicts_tool_data",
+      "definition": "The reply states something that a tool result in the conversation, or another part of the same reply, contradicts (for example it calls orders recent when their dates are months old).",
+      "status": "candidate",
+      "added_in": "batch_1",
+      "note_ids": [
+        "fc34cae6aca7",
+        "effe598dfc30"
+      ],
+      "example_trace_ids": [
+        "dd14ea25e0d1071e520016392f970dc1",
+        "2cfc15ccc925cccfe108dd2692e86342"
+      ],
+      "any_instance_count": 2
+    },
+    {
+      "name": "guesses_order",
+      "definition": "Several orders could match the customer's request, and the agent picks one to report on or act on without listing the options or asking which one.",
+      "status": "candidate",
+      "added_in": "batch_1",
+      "note_ids": [
+        "2681c140282b",
+        "09ba7527951f",
+        "01837a31ad13"
+      ],
+      "example_trace_ids": [
+        "c77bc73de2930040ef5ae5ad718ed92d",
+        "2c9307a33819ac9bb904c3366004e0ae",
+        "188a1c3af05b25c563fc2f002b518e46"
+      ],
+      "any_instance_count": 3
+    },
+    {
+      "name": "too_much_detail",
+      "definition": "The reply includes details the customer did not ask for and does not need, such as a full order record when only the status was asked, or orders outside the request.",
+      "status": "candidate",
+      "added_in": "batch_1",
+      "note_ids": [
+        "5484561661ca",
+        "01837a31ad13"
+      ],
+      "example_trace_ids": [
+        "22f90c6ffd3bcc00679a84d8eb1d95fc",
+        "188a1c3af05b25c563fc2f002b518e46"
+      ],
+      "any_instance_count": 2
+    },
+    {
+      "name": "shows_others_orders",
+      "definition": "The reply presents orders that do not belong to the caller as the caller's orders.",
+      "status": "candidate",
+      "added_in": "batch_1",
+      "note_ids": [
+        "21b7e9a8b99e"
+      ],
+      "example_trace_ids": [
+        "a4aeceedb4d83f929dea27e10631a0a0"
+      ],
+      "any_instance_count": 1
+    },
+    {
+      "name": "asks_for_lookup_info",
+      "definition": "The agent asks the customer for information, such as an order id or a product name, that it could have found with its tools from what it already knows.",
+      "status": "candidate",
+      "added_in": "batch_1",
+      "note_ids": [
+        "21cb32fac3a2"
+      ],
+      "example_trace_ids": [
+        "cff5b6342ce8b0493416142555edd3ec"
+      ],
+      "any_instance_count": 1
+    }
+  ]
+}
