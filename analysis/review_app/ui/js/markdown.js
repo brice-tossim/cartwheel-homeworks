@@ -1,10 +1,35 @@
-// A small Markdown reader for replies: paragraphs, bold, nested lists and tables.
+// A small Markdown reader for replies: paragraphs, headings, bold, italics,
+// code, nested lists and tables.
 
 import { esc } from "./helpers.js";
 
-// Bold text: the parts between ** markers alternate plain and bold.
+// Inline formatting: `code` first, since nothing is formatted inside it, then
+// bold and italics in the rest.
 function inline(text) {
-  return String(text).split("**").map((piece, i) => (i % 2 ? `<strong>${esc(piece)}</strong>` : esc(piece))).join("");
+  return String(text).split(/(`[^`]+`)/).map((part) => (
+    /^`[^`]+`$/.test(part) ? `<code>${esc(part.slice(1, -1))}</code>` : emphasis(part)
+  )).join("");
+}
+
+// Bold text: the parts between ** markers alternate plain and bold.
+function emphasis(text) {
+  return text.split("**").map((piece, i) => (i % 2 ? `<strong>${italics(piece)}</strong>` : italics(piece))).join("");
+}
+
+// *word*: italics, when the stars hug the text on both sides.
+function italics(text) {
+  return esc(text).replace(/\*(?=\S)([^*]+?)(?<=\S)\*/g, "<em>$1</em>");
+}
+
+const HEADING = /^(#{1,6})\s+(.*?)\s*#*\s*$/;
+
+// "# Title" to "###### Title". The page already uses h1 and h2, so reply
+// headings start at h3.
+function heading(line) {
+  const match = line.match(HEADING);
+  if (!match) return null;
+  const level = Math.min(match[1].length + 2, 6);
+  return `<h${level} class="reply-heading">${inline(match[2])}</h${level}>`;
 }
 
 const TABLE_ROW = /^\s*\|.*\|\s*$/;
@@ -37,7 +62,8 @@ function tableAt(lines, i) {
   };
 }
 
-// A small Markdown reader for replies: paragraphs, bold, nested lists and tables.
+// A small Markdown reader for replies: paragraphs, headings, bold, italics,
+// code, nested lists and tables.
 export function markdown(raw) {
   const lines = String(raw).replace(/\r/g, "").split("\n");
   const stack = [];
@@ -53,8 +79,13 @@ export function markdown(raw) {
   for (let i = 0; i < lines.length; i += 1) {
     const line = lines[i];
     const table = tableAt(lines, i);
+    const title = heading(line);
     const item = line.match(/^(\s*)([-*]|(\d+)\.)\s+(.*)$/);
-    if (table) {
+    if (title) {
+      flush();
+      closeTo(-1);
+      html += title;
+    } else if (table) {
       flush();
       closeTo(-1);
       html += table.html;
