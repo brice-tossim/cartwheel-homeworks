@@ -123,7 +123,6 @@ async function loadAll(refresh = false) {
   if (!findConversation(state.selectedId)) {
     state.selectedId = state.conversations[0]?.session_id ?? null;
   }
-  renderFilterOptions();
   renderAll({ keepScroll: false });
 }
 
@@ -198,19 +197,28 @@ function matchesBatch(conversation, name) {
   return batch ? inBatch(conversation, batch) : true;
 }
 
-function visibleConversations() {
+const searchWords = (f) => f.search.toLowerCase().split(/\s+/).filter(Boolean);
+
+// One test per filter, keyed by its name in state.filters.
+const FILTER_TESTS = {
+  batch: (c, f) => matchesBatch(c, f.batch),
+  role: (c, f) => !f.role || c.role === f.role,
+  action: (c, f) => matchesAction(c, f.action),
+  tool: (c, f) => !f.tool || c.tools.includes(f.tool),
+  twoTurns: (c, f) => !f.twoTurns || c.turns.length > 1,
+  unread: (c, f) => !f.unread || c.turns.some((t) => !isRead(t.trace_id)),
+  search: (c, f) => searchWords(f).every((word) => searchText(c).includes(word)),
+};
+
+// The conversations every filter keeps, leaving out the filter named in
+// `except`: a filter's counts then show what picking each of its options gives.
+function conversationsWithout(except) {
   const f = state.filters;
-  const words = f.search.toLowerCase().split(/\s+/).filter(Boolean);
-  return state.conversations.filter((c) => (
-    matchesBatch(c, f.batch)
-    && (!f.role || c.role === f.role)
-    && matchesAction(c, f.action)
-    && (!f.tool || c.tools.includes(f.tool))
-    && (!f.twoTurns || c.turns.length > 1)
-    && (!f.unread || c.turns.some((t) => !isRead(t.trace_id)))
-    && words.every((word) => searchText(c).includes(word))
-  ));
+  const tests = Object.entries(FILTER_TESTS).filter(([name]) => name !== except).map(([, test]) => test);
+  return state.conversations.filter((c) => tests.every((test) => test(c, f)));
 }
+
+const visibleConversations = () => conversationsWithout(null);
 
 // -- rendering: frame -------------------------------------------------------------
 
@@ -230,6 +238,7 @@ function renderAll({ keepScroll = true } = {}) {
   const scrolls = panes.map((pane) => pane.scrollTop);
   const moved = followFilters();
   renderTopbar();
+  renderFilterOptions();
   renderList();
   renderConversation();
   renderSide();
@@ -271,21 +280,25 @@ function option(value, label, current) {
 function renderFilterOptions() {
   const all = state.conversations;
   const f = state.filters;
+  const forBatch = conversationsWithout("batch");
+  const forRole = conversationsWithout("role");
+  const forAction = conversationsWithout("action");
+  const forTool = conversationsWithout("tool");
   const roles = [...new Set(all.map((c) => c.role).filter(Boolean))].sort(
     (a, b) => (ROLE_ORDER.indexOf(a) + 99 * (ROLE_ORDER.indexOf(a) < 0)) - (ROLE_ORDER.indexOf(b) + 99 * (ROLE_ORDER.indexOf(b) < 0)),
   );
-  $("batch").innerHTML = option("", `All traces · ${all.length}`, f.batch)
-    + state.batches.map((b) => option(b.name, `${b.name} · ${all.filter((c) => inBatch(c, b)).length}`, f.batch)).join("")
-    + option(NO_BATCH, `Not in a batch · ${all.filter((c) => matchesBatch(c, NO_BATCH)).length}`, f.batch);
-  $("role").innerHTML = option("", `Everyone · ${all.length}`, f.role)
-    + roles.map((role) => option(role, `${cap(role)} · ${all.filter((c) => c.role === role).length}`, f.role)).join("");
-  $("action").innerHTML = option("", `No filter · ${all.length}`, f.action)
-    + option("any", `Refund, cancel or hand-off · ${all.filter((c) => c.actions.length).length}`, f.action)
-    + ACTIONS.map(([value, label]) => option(value, `${label} · ${all.filter((c) => c.actions.includes(value)).length}`, f.action)).join("");
+  $("batch").innerHTML = option("", `All traces · ${forBatch.length}`, f.batch)
+    + state.batches.map((b) => option(b.name, `${b.name} · ${forBatch.filter((c) => inBatch(c, b)).length}`, f.batch)).join("")
+    + option(NO_BATCH, `Not in a batch · ${forBatch.filter((c) => matchesBatch(c, NO_BATCH)).length}`, f.batch);
+  $("role").innerHTML = option("", `Everyone · ${forRole.length}`, f.role)
+    + roles.map((role) => option(role, `${cap(role)} · ${forRole.filter((c) => c.role === role).length}`, f.role)).join("");
+  $("action").innerHTML = option("", `No filter · ${forAction.length}`, f.action)
+    + option("any", `Refund, cancel or hand-off · ${forAction.filter((c) => c.actions.length).length}`, f.action)
+    + ACTIONS.map(([value, label]) => option(value, `${label} · ${forAction.filter((c) => c.actions.includes(value)).length}`, f.action)).join("");
   const tools = [...new Set(all.flatMap((c) => c.tools))].sort();
   $("tool").innerHTML = option("", "Any tool", f.tool)
-    + tools.map((tool) => option(tool, `${tool} · ${all.filter((c) => c.tools.includes(tool)).length}`, f.tool)).join("");
-  $("two-turns").textContent = `Two turns · ${all.filter((c) => c.turns.length > 1).length}`;
+    + tools.map((tool) => option(tool, `${tool} · ${forTool.filter((c) => c.tools.includes(tool)).length}`, f.tool)).join("");
+  $("two-turns").textContent = `Two turns · ${conversationsWithout("twoTurns").filter((c) => c.turns.length > 1).length}`;
 }
 
 // -- rendering: conversation list ---------------------------------------------------
