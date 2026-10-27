@@ -13,15 +13,20 @@ export function marksFor(traceId) {
 }
 
 // Mark each saved quote where it first appears in a turn: in the customer
-// message, a step's reason (with its label) or the reply. Whitespace is
-// ignored, so a quote spanning lines, list items or bold words still matches.
+// message, a step's reason (with its label), the reply, or the line saying no
+// reply was recorded. Whitespace and Markdown symbols are ignored, so a quote
+// spanning lines, list items, bold words or table cells still matches, and so
+// does a quote saved while the page still showed those symbols as text.
 export function markQuotes(turn, marks) {
-  const parts = [...turn.querySelectorAll(".customer p, .reason, .reply-text")];
+  const parts = [...turn.querySelectorAll(".customer p, .reason, .reply-text, .reply.missing p")];
   marks.forEach((mark) => {
     const found = parts.map((part) => findQuote(part, mark.quote)).find(Boolean);
     if (found && !found.some((c) => c.node.parentElement.closest("mark"))) wrapChars(found, mark);
   });
 }
+
+// Spaces, and the Markdown symbols for headings, bold, code and tables.
+const IGNORED = /[\s#*`|:-]/;
 
 // The characters of a quote inside a part, each with its text node and
 // offset, or null when the part does not contain the quote.
@@ -30,10 +35,10 @@ function findQuote(part, quote) {
   const walker = document.createTreeWalker(part, NodeFilter.SHOW_TEXT);
   for (let node = walker.nextNode(); node; node = walker.nextNode()) {
     [...node.data].forEach((char, offset) => {
-      if (!/\s/.test(char)) chars.push({ node, offset, char });
+      if (!IGNORED.test(char)) chars.push({ node, offset, char });
     });
   }
-  const needle = quote.replace(/\s+/g, "");
+  const needle = quote.replace(new RegExp(IGNORED.source, "g"), "");
   const at = needle ? chars.map((c) => c.char).join("").indexOf(needle) : -1;
   return at < 0 ? null : chars.slice(at, at + needle.length);
 }
