@@ -163,6 +163,15 @@ textarea.input { padding: 10px 12px; min-height: 0; resize: vertical; }
 .reply-text p { margin: 0 0 8px 0; }
 .reply-text p:last-child { margin-bottom: 0; }
 .reply-text ul, .reply-text ol { margin: 0 0 8px 0; padding-left: 22px; }
+.reply-table { overflow-x: auto; margin: 0 0 8px 0; border: 1px solid var(--reply-line); border-radius: 8px; background: var(--surface); }
+.reply-table:last-child { margin-bottom: 0; }
+.reply-table table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.4; font-variant-numeric: tabular-nums; }
+.reply-table th, .reply-table td { padding: 7px 12px; text-align: left; vertical-align: top; }
+.reply-table th { font-weight: 600; white-space: nowrap; background: var(--accent-tint); }
+.reply-table tbody tr { border-top: 1px solid var(--reply-line); }
+.reply-table .align-right { text-align: right; }
+.reply-table .align-center { text-align: center; }
+.reply-table .nowrap { white-space: nowrap; }
 .reply.missing { background: var(--surface-soft); border-style: dashed; border-color: var(--control-line); }
 mark.note-mark { padding: 1px 2px; border-radius: 3px; background: var(--mark); color: var(--ink); box-shadow: inset 0 -2px 0 var(--mark-line); cursor: pointer; }
 mark.ai-mark { padding: 1px 2px; border-radius: 3px; background: var(--ai-tint); color: var(--ink); outline: 1px dashed var(--ai-line); }
