@@ -163,6 +163,9 @@ textarea.input { padding: 10px 12px; min-height: 0; resize: vertical; }
 .reply-text p { margin: 0 0 8px 0; }
 .reply-text p:last-child { margin-bottom: 0; }
 .reply-text ul, .reply-text ol { margin: 0 0 8px 0; padding-left: 22px; }
+.reply-text .reply-heading { margin: 14px 0 6px 0; font-size: 16px; line-height: 1.35; font-weight: 600; }
+.reply-text .reply-heading:first-child { margin-top: 0; }
+.reply-text code { padding: 1px 5px; border-radius: 4px; background: var(--accent-tint); font-family: var(--mono); font-size: 13px; }
 .reply-table { overflow-x: auto; margin: 0 0 8px 0; border: 1px solid var(--reply-line); border-radius: 8px; background: var(--surface); }
 .reply-table:last-child { margin-bottom: 0; }
 .reply-table table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.4; font-variant-numeric: tabular-nums; }
