@@ -273,7 +273,9 @@ def select_traces(
         k: batch size (the demo default is 24).
         strategy: ``"diversity"`` (default), ``"random"``, ``"cluster"``
             (``k`` clusters on trace features, the trace closest to each
-            centre), or ``"outlier"``
+            centre), ``"by_role"`` (``k`` whole conversations spread evenly
+            across caller roles, so a pick may bring several turns), or
+            ``"outlier"``
             (interquartile-range flags on a numeric feature).
         exclude_ids: trace ids already read, skipped this batch.
 

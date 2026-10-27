@@ -135,6 +135,8 @@ def select(
     seed: int = 7,
 ) -> list[dict[str, str]]:
     """Return ``k`` picks as ``{"trace_id", "reason"}`` dicts."""
+    if strategy == "by_role":
+        return _role_picks(traces, k, seed, exclude_ids)
     pool = [t for t in traces if t.get("id") not in exclude_ids]
     if not pool:
         return []
@@ -203,6 +205,60 @@ def _diversity_picks(
         chosen_ids.add(t["id"])
 
     return picks[:k]
+
+
+type Conversation = list[dict[str, object]]
+
+
+def _role_picks(
+    traces: Sequence[dict[str, object]], k: int, seed: int, exclude_ids: set[str]
+) -> list[dict[str, str]]:
+    """Spread ``k`` conversations evenly across the caller roles, picked at
+    random within each role. A picked conversation brings all its turns, and
+    a conversation with an excluded turn is never picked."""
+    by_role = _conversations_by_role(_open_conversations(traces, exclude_ids))
+    roles = sorted(by_role)
+    rng = random.Random(seed)
+    return [pick
+            for role, quota in zip(roles, _even_split(k, len(roles)))
+            for pick in _role_draw(role, by_role[role], quota, rng)]
+
+
+def _open_conversations(
+    traces: Sequence[dict[str, object]], exclude_ids: set[str]
+) -> list[Conversation]:
+    conversations: dict[str, Conversation] = {}
+    for trace in traces:
+        conversations.setdefault(_meta(trace, "session_id") or str(trace["id"]), []).append(trace)
+    return [turns for turns in conversations.values()
+            if not any(turn["id"] in exclude_ids for turn in turns)]
+
+
+def _conversations_by_role(conversations: list[Conversation]) -> dict[str, list[Conversation]]:
+    by_role: dict[str, list[Conversation]] = {}
+    for turns in conversations:
+        by_role.setdefault(_meta(turns[0], "role") or "unknown", []).append(turns)
+    return by_role
+
+
+def _meta(trace: dict[str, object], key: str) -> str | None:
+    meta = trace.get("meta")
+    value = meta.get(key) if isinstance(meta, dict) else None
+    return str(value) if value else None
+
+
+def _even_split(k: int, parts: int) -> list[int]:
+    """``k`` split into ``parts`` near-equal counts, the extra ones first."""
+    return [k // parts + (1 if i < k % parts else 0) for i in range(parts)] if parts else []
+
+
+def _role_draw(
+    role: str, conversations: list[Conversation], quota: int, rng: random.Random
+) -> list[dict[str, str]]:
+    chosen = rng.sample(conversations, min(quota, len(conversations)))
+    return [{"trace_id": str(turn["id"]), "reason": f"role {role}, conversation {number} of {len(chosen)}"}
+            for number, turns in enumerate(chosen, start=1)
+            for turn in turns]
 
 
 def _cluster_picks(
