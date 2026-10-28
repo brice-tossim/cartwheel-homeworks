@@ -13,3 +13,4 @@
 {"trace_id": "c77bc73de2930040ef5ae5ad718ed92d", "reason": "representative of cluster 13 of 15 (17 traces)", "strategy": "cluster", "source": "traces/support_traces.json", "selected_at": "2026-10-22T00:49:00.721153+00:00"}
 {"trace_id": "cff5b6342ce8b0493416142555edd3ec", "reason": "representative of cluster 14 of 15 (12 traces)", "strategy": "cluster", "source": "traces/support_traces.json", "selected_at": "2026-10-22T00:49:00.721153+00:00"}
 {"trace_id": "e2e0f7095958a198f9835472f63f88c8", "reason": "representative of cluster 15 of 15 (10 traces)", "strategy": "cluster", "source": "traces/support_traces.json", "selected_at": "2026-10-22T00:49:00.721153+00:00"}
+{"trace_id": "2c9307a33819ac9bb904c3366004e0ae", "reason": "second turn of d62bf0ca, reviewed with turn 1", "strategy": "follow-up turn", "source": "langfuse", "selected_at": "2026-10-22T00:49:00.721153+00:00"}

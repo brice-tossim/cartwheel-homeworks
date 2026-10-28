@@ -17,15 +17,4 @@
 
 ## Candidate failure modes
 
-| Mode | Fails when… | Traces |
-|---|---|---|
-| `ignores_known_store` | The customer named a store, or an earlier turn found it, and the agent's first order lookup doesn't narrow to that store. | 9 |
-| `reveals_internal_policy` | The reply tells the customer a policy id (`cw-refunds`), an internal threshold (the $100 limit), or how a request is processed behind the scenes. | 8 |
-| `reveals_data_problems` | The reply tells the customer about errors in the store data (duplicate listings, negative price). | 2 |
-| `no_reply` | The turn ends without any reply to the customer. | 4 |
-| `escalates_ineligible_refund` | The agent opens a human review for a refund on an order the tool marks not eligible. | 2 |
-| `contradicts_tool_data` | The reply says something a tool result, or another part of the same reply, contradicts. | 2 |
-| `guesses_order` | Several orders could match, and the agent picks one to report on or act on without listing them or asking. | 3 |
-| `too_much_detail` | The reply includes details the customer didn't ask for and doesn't need. | 2 |
-| `shows_others_orders` | The reply presents orders that aren't the caller's as theirs. | 1 |
-| `asks_for_lookup_info` | The agent asks the customer for something it could have found with its tools. | 1 |
+See [failure_modes.md](failure_modes.md), shared by every batch.
