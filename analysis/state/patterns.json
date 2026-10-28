@@ -2,7 +2,7 @@
   "modes": [
     {
       "name": "ignores_known_store",
-      "definition": "The customer named a store, or an earlier turn identified it, and the agent's first order lookup does not narrow to that store (for example it calls list_my_orders or searches every order instead).",
+      "definition": "The customer named a store, or an earlier turn found it, and the agent's first order lookup does not narrow to that store.",
       "status": "candidate",
       "added_in": "batch_1",
       "note_ids": [
@@ -14,7 +14,11 @@
         "d598f0977dc6",
         "024dde2d0cc1",
         "5200d871a781",
-        "b8ec803605ae"
+        "b8ec803605ae",
+        "8711e0b3ae04",
+        "a5d6b435b5e9",
+        "2ea1b591df69",
+        "711c00cbfea8"
       ],
       "example_trace_ids": [
         "7d614db08a876f0c70541e0a5d567b6b",
@@ -25,13 +29,17 @@
         "fb77a52d811e50e4f54c71c131a02f6a",
         "e2e0f7095958a198f9835472f63f88c8",
         "72e33e745ff92828f0337c57e7e1695f",
-        "2c9307a33819ac9bb904c3366004e0ae"
+        "2c9307a33819ac9bb904c3366004e0ae",
+        "1bd924606faee465e332ea3af1420565",
+        "275066f1e2548fbf11f2cc1d5e28ca96",
+        "55e41507adf80abac4e44fa5145eb204",
+        "22f0af59d66a9d1fe88a9fff38b7b92e"
       ],
-      "any_instance_count": 9
+      "any_instance_count": 13
     },
     {
       "name": "reveals_internal_policy",
-      "definition": "The reply tells the customer an internal policy id (such as cw-refunds), an internal threshold (such as the $100 auto-approval limit), or how a request is processed behind the scenes.",
+      "definition": "The reply tells the customer a policy id (such as cw-refunds), an internal threshold (such as the $100 auto-approval limit), or how a request is processed behind the scenes.",
       "status": "candidate",
       "added_in": "batch_1",
       "note_ids": [
@@ -42,7 +50,11 @@
         "4792035489c2",
         "6ee5bd1b606b",
         "a1e898e16009",
-        "5ba685ce9b35"
+        "5ba685ce9b35",
+        "66f1c6faed34",
+        "f2ba919e27b3",
+        "ddcfe4e1a960",
+        "ecc7a818b862"
       ],
       "example_trace_ids": [
         "7d614db08a876f0c70541e0a5d567b6b",
@@ -52,24 +64,30 @@
         "259155c9124b0f5c6ca9501c17a68e8d",
         "77fef59b98d57cf63fbe1822cc05030f",
         "72e33e745ff92828f0337c57e7e1695f",
-        "188a1c3af05b25c563fc2f002b518e46"
+        "188a1c3af05b25c563fc2f002b518e46",
+        "5ccf99b3b733a127efff3f0cb2da36af",
+        "20359fb5559f9a275eff3d94159569ff",
+        "a39aefca38b5fecfb1eb60f620bd4940",
+        "22f0af59d66a9d1fe88a9fff38b7b92e"
       ],
-      "any_instance_count": 8
+      "any_instance_count": 12
     },
     {
       "name": "reveals_data_problems",
-      "definition": "The reply tells the customer about errors or inconsistencies in the store data, such as duplicate listings or a negative price.",
+      "definition": "The reply tells the customer about errors in the store data, such as duplicate listings or a negative price.",
       "status": "candidate",
       "added_in": "batch_1",
       "note_ids": [
         "732d6c0c5063",
-        "02a1a515cda7"
+        "02a1a515cda7",
+        "d3ffef084459"
       ],
       "example_trace_ids": [
         "6776b7df1dbd706e4fbc07ccae3e28ca",
-        "f3c5672b6283128027a95b38a3f62c2c"
+        "f3c5672b6283128027a95b38a3f62c2c",
+        "104c7ebc34f95a0338308797245f9287"
       ],
-      "any_instance_count": 2
+      "any_instance_count": 3
     },
     {
       "name": "no_reply",
@@ -80,15 +98,21 @@
         "706b7457673f",
         "d6d92cd826de",
         "c078e7600b29",
-        "594b3cd8224d"
+        "594b3cd8224d",
+        "04d4c88139fb",
+        "772a9ddbabac",
+        "d616223ca8d4"
       ],
       "example_trace_ids": [
         "3b14d86eb8280273e7946e5cffc0023c",
         "c23630503c3dd267ed10b20e804092d3",
         "fb77a52d811e50e4f54c71c131a02f6a",
-        "47fec190c6ddc93595852ddd125eab76"
+        "47fec190c6ddc93595852ddd125eab76",
+        "275066f1e2548fbf11f2cc1d5e28ca96",
+        "94b6ab798f49f16a9b82aca1d3edc7f5",
+        "845aadd3db06740bb9edfbd7aab596f9"
       ],
-      "any_instance_count": 4
+      "any_instance_count": 7
     },
     {
       "name": "escalates_ineligible_refund",
@@ -97,17 +121,19 @@
       "added_in": "batch_1",
       "note_ids": [
         "79aac18bbc29",
-        "a1e898e16009"
+        "a1e898e16009",
+        "2ea1b591df69"
       ],
       "example_trace_ids": [
         "e2e0f7095958a198f9835472f63f88c8",
-        "72e33e745ff92828f0337c57e7e1695f"
+        "72e33e745ff92828f0337c57e7e1695f",
+        "55e41507adf80abac4e44fa5145eb204"
       ],
-      "any_instance_count": 2
+      "any_instance_count": 3
     },
     {
       "name": "contradicts_tool_data",
-      "definition": "The reply states something that a tool result in the conversation, or another part of the same reply, contradicts (for example it calls orders recent when their dates are months old).",
+      "definition": "The reply says something that a tool result, or another part of the same reply, contradicts.",
       "status": "candidate",
       "added_in": "batch_1",
       "note_ids": [
@@ -122,52 +148,58 @@
     },
     {
       "name": "guesses_order",
-      "definition": "Several orders could match the customer's request, and the agent picks one to report on or act on without listing the options or asking which one.",
+      "definition": "Several orders could match, and the agent picks one to report on or act on without asking which one the customer means.",
       "status": "candidate",
       "added_in": "batch_1",
       "note_ids": [
         "2681c140282b",
         "09ba7527951f",
-        "01837a31ad13"
+        "01837a31ad13",
+        "30d5aadd7f87",
+        "9b6e35de5b27",
+        "a17e7ef421a3"
       ],
       "example_trace_ids": [
         "c77bc73de2930040ef5ae5ad718ed92d",
         "2c9307a33819ac9bb904c3366004e0ae",
-        "188a1c3af05b25c563fc2f002b518e46"
+        "188a1c3af05b25c563fc2f002b518e46",
+        "dd6f07289997669f3f7f885ab739a140",
+        "f87559c034e450d921553bac804a8e77",
+        "2001821552a022a2ea584839d840b6b3"
       ],
-      "any_instance_count": 3
+      "any_instance_count": 6
     },
     {
       "name": "too_much_detail",
-      "definition": "The reply includes details the customer did not ask for and does not need, such as a full order record when only the status was asked, or orders outside the request.",
+      "definition": "The reply includes details the customer did not ask for and does not need.",
       "status": "candidate",
       "added_in": "batch_1",
       "note_ids": [
         "5484561661ca",
-        "01837a31ad13"
+        "01837a31ad13",
+        "ddcfe4e1a960",
+        "ae0dc537b680"
       ],
       "example_trace_ids": [
         "22f90c6ffd3bcc00679a84d8eb1d95fc",
-        "188a1c3af05b25c563fc2f002b518e46"
+        "188a1c3af05b25c563fc2f002b518e46",
+        "a39aefca38b5fecfb1eb60f620bd4940",
+        "22f0af59d66a9d1fe88a9fff38b7b92e"
       ],
-      "any_instance_count": 2
+      "any_instance_count": 4
     },
     {
       "name": "shows_others_orders",
-      "definition": "The reply presents orders that do not belong to the caller as the caller's orders.",
+      "definition": "For a shopper or merchant caller, the reply presents orders that are not the caller's as theirs.",
       "status": "candidate",
       "added_in": "batch_1",
-      "note_ids": [
-        "21b7e9a8b99e"
-      ],
-      "example_trace_ids": [
-        "a4aeceedb4d83f929dea27e10631a0a0"
-      ],
-      "any_instance_count": 1
+      "note_ids": [],
+      "example_trace_ids": [],
+      "any_instance_count": 0
     },
     {
       "name": "asks_for_lookup_info",
-      "definition": "The agent asks the customer for information, such as an order id or a product name, that it could have found with its tools from what it already knows.",
+      "definition": "The agent asks the customer for information it could have found with its tools from what it already knows.",
       "status": "candidate",
       "added_in": "batch_1",
       "note_ids": [
@@ -175,6 +207,62 @@
       ],
       "example_trace_ids": [
         "cff5b6342ce8b0493416142555edd3ec"
+      ],
+      "any_instance_count": 1
+    },
+    {
+      "name": "unclear_next_step",
+      "definition": "The agent asks the customer for information but leaves them unsure what to give: it names it vaguely, or gives no hint where to find it.",
+      "status": "candidate",
+      "added_in": "batch_2",
+      "note_ids": [
+        "38da911594cb",
+        "d77a8e5d1f36"
+      ],
+      "example_trace_ids": [
+        "fc6c8df96d518e630e658232910df993",
+        "8ebded8f6a6ec7b0a256fc48350a5ad6"
+      ],
+      "any_instance_count": 2
+    },
+    {
+      "name": "date_errors",
+      "definition": "The reply uses a current date other than the platform's current date (world_asof), or counts dates or days from the wrong current date.",
+      "status": "candidate",
+      "added_in": "batch_2",
+      "note_ids": [
+        "a6504947a80f"
+      ],
+      "example_trace_ids": [
+        "d7e3af35ee13f7a55009dd269717d1e2"
+      ],
+      "any_instance_count": 1
+    },
+    {
+      "name": "searches_store_as_product",
+      "definition": "The agent passes a store name to find_order, which matches product names, and reports the results as that store's orders.",
+      "status": "candidate",
+      "added_in": "batch_2",
+      "note_ids": [
+        "205bc425ee64",
+        "3a11ed3beec1"
+      ],
+      "example_trace_ids": [
+        "a4aeceedb4d83f929dea27e10631a0a0",
+        "2001821552a022a2ea584839d840b6b3"
+      ],
+      "any_instance_count": 2
+    },
+    {
+      "name": "ignores_caller_role",
+      "definition": "The agent handles the request as if the caller were a shopper, when the caller's role calls for something else (for example, asking a support caller which customer they mean).",
+      "status": "candidate",
+      "added_in": "batch_2",
+      "note_ids": [
+        "606b53d96b48"
+      ],
+      "example_trace_ids": [
+        "a4aeceedb4d83f929dea27e10631a0a0"
       ],
       "any_instance_count": 1
     }
