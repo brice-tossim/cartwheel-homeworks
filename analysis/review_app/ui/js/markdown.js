@@ -4,8 +4,8 @@
 import { esc } from "./helpers.js";
 
 // Inline formatting: `code` first, since nothing is formatted inside it, then
-// bold and italics in the rest.
-function inline(text) {
+// bold and italics in the rest. Short texts such as notes use it on its own.
+export function inline(text) {
   return String(text).split(/(`[^`]+`)/).map((part) => (
     /^`[^`]+`$/.test(part) ? `<code>${esc(part.slice(1, -1))}</code>` : emphasis(part)
   )).join("");
