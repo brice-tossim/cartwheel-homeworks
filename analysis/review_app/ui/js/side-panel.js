@@ -2,6 +2,7 @@
 
 import { $, esc, plural } from "./helpers.js";
 import { failureNotes, liveNotes, selected } from "./lookups.js";
+import { inline } from "./markdown.js";
 import { state } from "./state.js";
 
 export function renderSide() {
@@ -16,10 +17,10 @@ function noteWhere(note) {
   return note.step ? `On step ${note.step}` : "On the selected text";
 }
 
-function noteCard(note) {
+export function noteCard(note) {
   if (state.editingNoteId === note.id) {
     return `<div class="note" data-note-card="${esc(note.id)}">
-      ${note.quote ? `<blockquote>“${esc(note.quote)}”</blockquote>` : ""}
+      ${note.quote ? `<blockquote>“${inline(note.quote)}”</blockquote>` : ""}
       <label class="label" for="edit-${esc(note.id)}">Reword this note</label>
       <textarea class="input" id="edit-${esc(note.id)}" rows="3">${esc(note.note)}</textarea>
       <div class="row">
@@ -31,8 +32,8 @@ function noteCard(note) {
   const history = Array.isArray(note.history) ? note.history.length : 0;
   return `<figure class="note" data-note-card="${esc(note.id)}" data-action="go-to-note" data-note="${esc(note.id)}">
     <span class="note-where">${esc(note.quote ? noteWhere(note) : "On the whole turn")}</span>
-    ${note.quote ? `<blockquote>“${esc(note.quote)}”</blockquote>` : ""}
-    <p class="note-text">${esc(note.note)}</p>
+    ${note.quote ? `<blockquote>“${inline(note.quote)}”</blockquote>` : ""}
+    <p class="note-text">${inline(note.note)}</p>
     <div class="note-foot">
       <span>${history ? `Edited · ${plural(history, "earlier wording")} kept` : ""}</span>
       <span class="row">
@@ -64,14 +65,14 @@ function notesCard(conversation, turn, i) {
   </section>`;
 }
 
-function suggestionsCard(conversation) {
+export function suggestionsCard(conversation) {
   const traceIds = conversation.turns.map((t) => t.trace_id);
   const turnNumber = (traceId) => traceIds.indexOf(traceId) + 1;
   const pending = state.suggestions.filter((s) => traceIds.includes(s.trace_id) && s.status === "pending");
   const cards = pending.map((s) => `<figure class="suggestion">
     <span class="where">AI suggestion${traceIds.length > 1 ? ` · turn ${turnNumber(s.trace_id)}` : ""}</span>
-    ${s.quote ? `<blockquote>“${esc(s.quote)}”</blockquote>` : ""}
-    <p class="note-text">${esc(s.note || s.mode || "")}</p>
+    ${s.quote ? `<blockquote>“${inline(s.quote)}”</blockquote>` : ""}
+    <p class="note-text">${inline(s.note || s.mode || "")}</p>
     <div class="row">
       <button type="button" class="button small ai" data-action="accept" data-suggestion="${esc(s.id)}">Accept as my note</button>
       <button type="button" class="button small" data-action="reject" data-suggestion="${esc(s.id)}">Reject</button>
