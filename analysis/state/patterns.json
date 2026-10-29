@@ -35,7 +35,8 @@
         "55e41507adf80abac4e44fa5145eb204",
         "22f0af59d66a9d1fe88a9fff38b7b92e"
       ],
-      "any_instance_count": 13
+      "any_instance_count": 13,
+      "close_negative_trace_ids": []
     },
     {
       "name": "reveals_internal_policy",
@@ -54,7 +55,14 @@
         "66f1c6faed34",
         "f2ba919e27b3",
         "ddcfe4e1a960",
-        "ecc7a818b862"
+        "ecc7a818b862",
+        "2eb09337c1dd",
+        "d369c604a3c0",
+        "c79b6bab8b1a",
+        "88e09538511b",
+        "645803e575ee",
+        "98a4deb07d80",
+        "7f4f679169f0"
       ],
       "example_trace_ids": [
         "7d614db08a876f0c70541e0a5d567b6b",
@@ -68,9 +76,17 @@
         "5ccf99b3b733a127efff3f0cb2da36af",
         "20359fb5559f9a275eff3d94159569ff",
         "a39aefca38b5fecfb1eb60f620bd4940",
-        "22f0af59d66a9d1fe88a9fff38b7b92e"
+        "22f0af59d66a9d1fe88a9fff38b7b92e",
+        "4e3fcb5185c6a9815e450fb2f79d2678",
+        "c82cca95759e4ad8ccb3513fb232d5ce",
+        "34b98d221349f9289b47e92f76ac9692",
+        "755619040e57dad62ab8a98c0d6b27a2",
+        "9435f98d3524e80927c554c08b634e91",
+        "3f60fd9737640e4246f43068369c90f3",
+        "b2ca24996e4a0684ebd1b60982058bbf"
       ],
-      "any_instance_count": 12
+      "any_instance_count": 19,
+      "close_negative_trace_ids": []
     },
     {
       "name": "reveals_data_problems",
@@ -87,7 +103,8 @@
         "f3c5672b6283128027a95b38a3f62c2c",
         "104c7ebc34f95a0338308797245f9287"
       ],
-      "any_instance_count": 3
+      "any_instance_count": 3,
+      "close_negative_trace_ids": []
     },
     {
       "name": "no_reply",
@@ -112,7 +129,8 @@
         "94b6ab798f49f16a9b82aca1d3edc7f5",
         "845aadd3db06740bb9edfbd7aab596f9"
       ],
-      "any_instance_count": 7
+      "any_instance_count": 7,
+      "close_negative_trace_ids": []
     },
     {
       "name": "escalates_ineligible_refund",
@@ -129,7 +147,8 @@
         "72e33e745ff92828f0337c57e7e1695f",
         "55e41507adf80abac4e44fa5145eb204"
       ],
-      "any_instance_count": 3
+      "any_instance_count": 3,
+      "close_negative_trace_ids": []
     },
     {
       "name": "contradicts_tool_data",
@@ -144,7 +163,10 @@
         "dd14ea25e0d1071e520016392f970dc1",
         "2cfc15ccc925cccfe108dd2692e86342"
       ],
-      "any_instance_count": 2
+      "any_instance_count": 2,
+      "close_negative_trace_ids": [
+        "522bdafb8521932bf4c80d984d22b63c"
+      ]
     },
     {
       "name": "guesses_order",
@@ -167,7 +189,8 @@
         "f87559c034e450d921553bac804a8e77",
         "2001821552a022a2ea584839d840b6b3"
       ],
-      "any_instance_count": 6
+      "any_instance_count": 6,
+      "close_negative_trace_ids": []
     },
     {
       "name": "too_much_detail",
@@ -186,7 +209,8 @@
         "a39aefca38b5fecfb1eb60f620bd4940",
         "22f0af59d66a9d1fe88a9fff38b7b92e"
       ],
-      "any_instance_count": 4
+      "any_instance_count": 4,
+      "close_negative_trace_ids": []
     },
     {
       "name": "shows_others_orders",
@@ -195,7 +219,10 @@
       "added_in": "batch_1",
       "note_ids": [],
       "example_trace_ids": [],
-      "any_instance_count": 0
+      "any_instance_count": 0,
+      "close_negative_trace_ids": [
+        "33434e3827c00900e7b972a0a379fe6f"
+      ]
     },
     {
       "name": "asks_for_lookup_info",
@@ -203,12 +230,21 @@
       "status": "candidate",
       "added_in": "batch_1",
       "note_ids": [
-        "21cb32fac3a2"
+        "21cb32fac3a2",
+        "54b859354350",
+        "6f7bfadf7637",
+        "ac2d44c00990"
       ],
       "example_trace_ids": [
-        "cff5b6342ce8b0493416142555edd3ec"
+        "cff5b6342ce8b0493416142555edd3ec",
+        "4ee30d6ea6ec55840754c1a0bb769cf8",
+        "a679c2438327f35dae8dfc6dedcfca53",
+        "63a1a15357fe626e568ef25db3b65042"
       ],
-      "any_instance_count": 1
+      "any_instance_count": 4,
+      "close_negative_trace_ids": [
+        "755619040e57dad62ab8a98c0d6b27a2"
+      ]
     },
     {
       "name": "unclear_next_step",
@@ -223,7 +259,8 @@
         "fc6c8df96d518e630e658232910df993",
         "8ebded8f6a6ec7b0a256fc48350a5ad6"
       ],
-      "any_instance_count": 2
+      "any_instance_count": 2,
+      "close_negative_trace_ids": []
     },
     {
       "name": "date_errors",
@@ -231,27 +268,60 @@
       "status": "candidate",
       "added_in": "batch_2",
       "note_ids": [
-        "a6504947a80f"
+        "a6504947a80f",
+        "f7763f214d85",
+        "2ae035229b44",
+        "c2170b771c70",
+        "ff51ade6c836"
       ],
       "example_trace_ids": [
-        "d7e3af35ee13f7a55009dd269717d1e2"
+        "d7e3af35ee13f7a55009dd269717d1e2",
+        "4e3fcb5185c6a9815e450fb2f79d2678",
+        "3f60fd9737640e4246f43068369c90f3",
+        "b2ca24996e4a0684ebd1b60982058bbf",
+        "59c03333b95060f4886023252ea48afb"
       ],
-      "any_instance_count": 1
+      "any_instance_count": 5,
+      "close_negative_trace_ids": [
+        "c82cca95759e4ad8ccb3513fb232d5ce",
+        "9435f98d3524e80927c554c08b634e91"
+      ]
     },
     {
       "name": "searches_store_as_product",
-      "definition": "The agent passes a store name to find_order, which matches product names, and reports the results as that store's orders.",
+      "definition": "The agent passes a store name to find_order, which matches product names, and answers from those results: either presenting the matches as that store's orders, or saying the customer has no order there.",
       "status": "candidate",
       "added_in": "batch_2",
       "note_ids": [
         "205bc425ee64",
-        "3a11ed3beec1"
+        "3a11ed3beec1",
+        "cc0e8c6b4667",
+        "fb90ba3a6593",
+        "f532c14fccd1",
+        "32ab54b6cf57",
+        "12988ffa781e",
+        "3089d52daa24",
+        "a824ef6ec385",
+        "63d381770924",
+        "956bfca685b9"
       ],
       "example_trace_ids": [
         "a4aeceedb4d83f929dea27e10631a0a0",
-        "2001821552a022a2ea584839d840b6b3"
+        "2001821552a022a2ea584839d840b6b3",
+        "d3155538344bf8b6f59d99d41ee78ff1",
+        "f5039a0e38808e9d4764016064fd0eb5",
+        "45b8b8cd790ee12658fe9479c79b0370",
+        "34b98d221349f9289b47e92f76ac9692",
+        "85a51352c94119f4aced6f73f30f7b19",
+        "31c0c9af11c2fe3bd486a857862309bf",
+        "a679c2438327f35dae8dfc6dedcfca53",
+        "63a1a15357fe626e568ef25db3b65042"
       ],
-      "any_instance_count": 2
+      "any_instance_count": 10,
+      "close_negative_trace_ids": [
+        "8bb9fcb99ee9accb3e01661b4dc0d431",
+        "e5237643a226a5d8bf6254462662b824"
+      ]
     },
     {
       "name": "ignores_caller_role",
@@ -259,12 +329,23 @@
       "status": "candidate",
       "added_in": "batch_2",
       "note_ids": [
-        "606b53d96b48"
+        "606b53d96b48",
+        "ef132c64a06c",
+        "595d59818e9c",
+        "b9079b1e2ef6"
       ],
       "example_trace_ids": [
-        "a4aeceedb4d83f929dea27e10631a0a0"
+        "a4aeceedb4d83f929dea27e10631a0a0",
+        "28b7a9e232e6d77fa776292271eae6c5",
+        "0af642ab91984e8dd0904d69f341cbbb",
+        "1c1c2a8a3bbde8297873aac276ebc3f5"
       ],
-      "any_instance_count": 1
+      "any_instance_count": 4,
+      "close_negative_trace_ids": [
+        "33434e3827c00900e7b972a0a379fe6f",
+        "13c82aa3b1ecd2709048d39b5c64d277",
+        "015083042084a4d07a67fb46688362f5"
+      ]
     }
   ]
 }
