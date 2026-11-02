@@ -328,7 +328,7 @@
       "note": "To be more helpful, the agent can list recent order placed by this customer from the store",
       "ts": "2026-10-22T16:25:31.294331+00:00",
       "history": [],
-      "removed_ts": null
+      "removed_ts": "2026-11-01T23:59:24.072417+00:00"
     },
     {
       "id": "732d6c0c5063",
@@ -647,7 +647,7 @@
       "note": "no failure observed",
       "ts": "2026-10-27T01:09:37.336315+00:00",
       "history": [],
-      "removed_ts": null
+      "removed_ts": "2026-11-02T00:06:20.614357+00:00"
     },
     {
       "id": "3b8e3a3dc493",
@@ -1213,7 +1213,7 @@
       "note": "`ignores_caller_role` is present here. The caller is a support agent who writes like a shopper, and the agent answers as to a shopper (\"your confirmation email\", \"the product you ordered\"), so it never asks which customer or order they are handling.",
       "ts": "2026-10-29T02:56:48.205430+00:00",
       "history": [],
-      "removed_ts": null
+      "removed_ts": "2026-11-01T23:50:59.696933+00:00"
     },
     {
       "id": "b9079b1e2ef6",
@@ -1344,6 +1344,303 @@
       "step": null,
       "note": "`searches_store_as_product` is present here. The agent considered \"Wooden Whale Workshop\" as a product name instead of a store name",
       "ts": "2026-10-29T03:18:43.851679+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "01bff9460efd",
+      "trace_id": "dd14ea25e0d1071e520016392f970dc1",
+      "kind": "note",
+      "quote": "You have two recent orders with **Copperline Tools**:",
+      "step": null,
+      "note": "`mishandles_ambiguous_request` is a close negative here. Two Copperline Tools orders match, and the agent reports both instead of picking one.",
+      "ts": "2026-10-31T22:51:55.932008+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "a62dba4ecd62",
+      "trace_id": "a39f90ded7e8eb8194ea15dd4ef83e19",
+      "kind": "note",
+      "quote": "I found two orders from **Wooden Whale Workshop** on your account:",
+      "step": null,
+      "note": "`misses_store_orders` is a close negative here. The agent's product-name search returned nothing, but it found the store in the catalog and reported both of the customer's Wooden Whale Workshop orders.",
+      "ts": "2026-10-31T23:12:32.249374+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "e3f157869e26",
+      "trace_id": "7d614db08a876f0c70541e0a5d567b6b",
+      "kind": "note",
+      "quote": "I found the order: **Pocket Arcade order #859** for **$189.50**, delivered on **2026-06-07**.",
+      "step": null,
+      "note": "`mishandles_ambiguous_request` may be present here. The customer wants to send back their Pocket Arcade order, and two exist (#859 and #5092). The agent picks #859 and opens a refund review without asking which one. I doubt it only a little: #859 is the more recent, but the agent acted on a guess.",
+      "ts": "2026-10-31T23:19:52.068612+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "8da096e1e5f5",
+      "trace_id": "fb77a52d811e50e4f54c71c131a02f6a",
+      "kind": "note",
+      "quote": "The catalog results point to store ID 3 as the likely Petal & Stem store, so I’ll open your matching recent order from that store to confirm the store name and refund eligibility.",
+      "step": null,
+      "note": "`mishandles_ambiguous_request` may be present here. The scan flagged two Petal & Stem orders and no question. I doubt it: the turn ends before the agent answers at all, which is already noted as `no_reply`.",
+      "ts": "2026-10-31T23:30:33.947218+00:00",
+      "history": [],
+      "removed_ts": "2026-10-31T23:31:48.376910+00:00"
+    },
+    {
+      "id": "30d80705df2d",
+      "trace_id": "fb77a52d811e50e4f54c71c131a02f6a",
+      "kind": "note",
+      "quote": "The catalog results point to store ID 3 as the likely Petal & Stem store, so I’ll open your matching recent order from that store to confirm the store name and refund eligibility.",
+      "step": null,
+      "note": "`mishandles_ambiguous_request` may be present here. The scan flagged two Petal & Stem orders and no question. I doubt it: the turn ends before the agent answers at all, which is already noted as `no_reply`.",
+      "ts": "2026-10-31T23:33:43.795386+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "38e2de57a2d7",
+      "trace_id": "552df0278430258b28ec8f247242479c",
+      "kind": "note",
+      "quote": "Policy: **cw-returns**, **cw-refunds**",
+      "step": null,
+      "note": "`reveals_internal_details` is present here. The customer asked for a short answer with \"no fine print\", and the reply ends with the policy ids cw-returns and cw-refunds. This trace is marked \"no failure observed\".",
+      "ts": "2026-10-31T23:34:02.822883+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "8ad0ebc552d1",
+      "trace_id": "d7e3af35ee13f7a55009dd269717d1e2",
+      "kind": "note",
+      "quote": "(**cw-returns**)",
+      "step": null,
+      "note": "`reveals_internal_details` is present here. Besides the date error already noted, the reply names the policy id cw-returns.",
+      "ts": "2026-10-31T23:36:30.438400+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "43213ae71fc9",
+      "trace_id": "1ea9dd6c1aa53fd77c2cfe993ab061fb",
+      "kind": "note",
+      "quote": "If you give me the **order ID**, I can pull up that exact one.",
+      "step": null,
+      "note": "`mishandles_ambiguous_request` is a close negative here. The merchant asks about an order with no order id. The reply shows the latest order (#6997), the most likely match (#335) and the other orders in transit, then asks for the order id, so it doesn't pick one for the merchant.",
+      "ts": "2026-10-31T23:48:32.894469+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "318d08247a7f",
+      "trace_id": "deb44f97dad1859d707b71ce28c8a447",
+      "kind": "note",
+      "quote": "If you meant a specific order, send me the order ID and I’ll pull the exact readout for that one.",
+      "step": null,
+      "note": "`mishandles_ambiguous_request` is a close negative here. The merchant asks whether \"it\" has shipped, with no order id. The reply shows the most recent order (#6358), lists the other matching orders, and asks for the order id if they meant a specific one.",
+      "ts": "2026-10-31T23:49:25.154894+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "e2515e017088",
+      "trace_id": "3994621e9b91a1ade7b6946f81854f44",
+      "kind": "note",
+      "quote": "If you meant a different order, send me the **order ID** and I’ll check that exact one.",
+      "step": null,
+      "note": "`mishandles_ambiguous_request` is a close negative here. The merchant asks about an order with no order id. The reply gives the latest order (#6997), says that's the one it picked, and asks for the order id if they meant another.",
+      "ts": "2026-11-01T23:41:01.748293+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "f9e3c64dbe93",
+      "trace_id": "b08a1505c303777ea971df3082948bc3",
+      "kind": "note",
+      "quote": "- **Order #4125** — **Shipped**",
+      "step": null,
+      "note": "`mishandles_ambiguous_request` may be present here. The support caller asks about a Golden Hour Coffee order with no customer or order id. The reply lists every matching order, most recent first. I doubt it: nothing is hidden, though it never asks which one is meant.",
+      "ts": "2026-11-01T23:42:00.352748+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "3f691bc08196",
+      "trace_id": "fa6ec99735cdf1f1c22bfe2b3b4e6a75",
+      "kind": "note",
+      "quote": "Any other order reference from your confirmation email",
+      "step": null,
+      "note": "`ignores_caller_role` is present here. The caller is a support agent who writes like a shopper, and the agent answers as to a shopper (\"your confirmation email\"), so it never asks which customer they are handling. This trace is marked \"no failure observed\".",
+      "ts": "2026-11-01T23:42:16.790690+00:00",
+      "history": [],
+      "removed_ts": "2026-11-01T23:44:06.101839+00:00"
+    },
+    {
+      "id": "8300768e3778",
+      "trace_id": "fa6ec99735cdf1f1c22bfe2b3b4e6a75",
+      "kind": "note",
+      "quote": "I couldn’t find an order by searching for “Fern & Fog Skincare.”",
+      "step": null,
+      "note": "`misses_store_orders` is present here. The agent searched \"Fern & Fog Skincare\" as a product name, got nothing, and answered from that instead of finding the store's orders. This trace is marked \"no failure observed\".",
+      "ts": "2026-11-01T23:44:57.367331+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "2af91fb9ca31",
+      "trace_id": "0af642ab91984e8dd0904d69f341cbbb",
+      "kind": "note",
+      "quote": "I couldn’t find an order by searching “Cascade Audio,”",
+      "step": null,
+      "note": "`misses_store_orders` is present here. The agent search for a product named \"Cascade Audio\" instead of a store name",
+      "ts": "2026-11-01T23:53:48.884991+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "4b5e5670177a",
+      "trace_id": "cff5b6342ce8b0493416142555edd3ec",
+      "kind": "no_failure",
+      "quote": null,
+      "step": null,
+      "note": "no failure observed",
+      "ts": "2026-11-01T23:59:25.658657+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "3df70deda2d1",
+      "trace_id": "a4aeceedb4d83f929dea27e10631a0a0",
+      "kind": "note",
+      "quote": "If you can share the order number from your confirmation email, I can confirm the exact one for you.",
+      "step": null,
+      "note": "`mishandles_ambiguous_request` is a close negative here. Several Golden Hour Coffee orders match. The reply shows the most recent (#4125), lists the others, and asks for the order number to confirm the exact one.",
+      "ts": "2026-11-02T00:00:20.889363+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "ffb2369b2d85",
+      "trace_id": "a998e4aa6bc769ce04bdd6fbc8537858",
+      "kind": "note",
+      "quote": "This order shows delivery on **2026-06-23**, which appears to be outside that window now",
+      "step": null,
+      "note": "`date_errors` is present here. The order was delivered on 2026-06-23, 8 days ago, but the agent says it is outside the 60-day dispute window, so the customer is told their dispute may be too late. This trace is marked \"no failure observed\".",
+      "ts": "2026-11-02T00:00:41.973969+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "1c34c5b725f4",
+      "trace_id": "a998e4aa6bc769ce04bdd6fbc8537858",
+      "kind": "note",
+      "quote": "That’s required under Cartwheel’s dispute policy (**cw-disputes**)",
+      "step": null,
+      "note": "`reveals_internal_details` is present here. The reply names the policy id cw-disputes twice. This trace is marked \"no failure observed\".",
+      "ts": "2026-11-02T00:00:51.045284+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "339fcac1fef0",
+      "trace_id": "55e41507adf80abac4e44fa5145eb204",
+      "kind": "note",
+      "quote": "Since this order shows delivered on April 8 and today is October 7",
+      "step": null,
+      "note": "`date_errors` is present here. The agent says today is October 7, but today is 2026-07-01. The conclusion happens to hold (April 8 is 84 days back, past the 60-day dispute window), but the agent counted from the wrong date.",
+      "ts": "2026-11-02T00:05:02.688611+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "c13bd480c7ee",
+      "trace_id": "55e41507adf80abac4e44fa5145eb204",
+      "kind": "note",
+      "quote": "disputes are always handled by a human support agent, not automatically (**cw-disputes**)",
+      "step": null,
+      "note": "`reveals_internal_details` is present here. The reply names the policy id cw-disputes and explains how disputes are handled behind the scenes.",
+      "ts": "2026-11-02T00:05:08.340251+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "669cd463449d",
+      "trace_id": "a1c72c4aebbc231771b262ba6b23b396",
+      "kind": "note",
+      "quote": "Your most recent **Heavy-Duty Vase from Blue Heron Ceramics** is **order #4455**.",
+      "step": null,
+      "note": "`mishandles_ambiguous_request` may be present here. Three Heavy-Duty Vase orders from Blue Heron Ceramics exist (#4455, #4127, #3980). The reply answers with the most recent only and doesn't mention the others. I doubt it: all three are delivered, so the answer is the same either way.",
+      "ts": "2026-11-02T00:06:26.684875+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "3e4fd2acc08f",
+      "trace_id": "a7e9dd4474c34bc14ed71fcdd4fbfd21",
+      "kind": "note",
+      "quote": "If you meant a different order, send me the order number and I’ll check",
+      "step": null,
+      "note": "`mishandles_ambiguous_request` is a close negative here. Three Blue Heron Ceramics orders could match. The agent answers with the most recent one, but it says so, mentions the older ones, and offers to check another.",
+      "ts": "2026-11-02T00:07:17.640529+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "4b8f5f7e984b",
+      "trace_id": "22f90c6ffd3bcc00679a84d8eb1d95fc",
+      "kind": "note",
+      "quote": "**Order #1863**",
+      "step": null,
+      "note": "`mishandles_ambiguous_request` may be present here. Two Golden Hour Coffee orders exist (#1863 from June 2026 and #2139 from September 2025). The reply answers with #1863 without mentioning the other. I doubt it: the customer said \"order\", and the recent one is the likely meaning, but in turn 2 they ask for \"the other one\".",
+      "ts": "2026-11-02T00:08:16.274812+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "e63d2278a3c7",
+      "trace_id": "5649ffb00905ae070eeb5a465676fee6",
+      "kind": "note",
+      "quote": "I found it — your Atlas Stationery order number is **1897**.",
+      "step": null,
+      "note": "`misses_store_orders` is a close negative here. The agent's product-name search for \"atlas stationery\" returned nothing, but it didn't answer from that: it found the store in the catalog and matched the order, so the customer got the right one.",
+      "ts": "2026-11-02T00:09:04.022639+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "19c619f257be",
+      "trace_id": "22f0af59d66a9d1fe88a9fff38b7b92e",
+      "kind": "note",
+      "quote": "If **order #1931** is the one you mean, just tell me the refund reason and whether you’re requesting the full **$88.50** or a different amount.",
+      "step": null,
+      "note": "`mishandles_ambiguous_request` is a close negative here. Three Fern & Fog Skincare orders match a refund request. The reply lists all three with their refund eligibility and asks the customer to confirm which one before acting.",
+      "ts": "2026-11-02T00:09:47.057624+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "aa0d807527a8",
+      "trace_id": "188a1c3af05b25c563fc2f002b518e46",
+      "kind": "note",
+      "quote": null,
+      "step": null,
+      "note": "`escalates_ineligible_refund` may be present here. The scan flagged it because the agent opened a ticket in a trace where order #7861 is not refund eligible. I doubt it: the ticket is for the eligible order #1932, whose $313 refund was queued for human approval.",
+      "ts": "2026-11-02T00:10:48.957617+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "a245a227d4eb",
+      "trace_id": "1dfc8b530b48f908837ca7b840151ac3",
+      "kind": "note",
+      "quote": "If you meant a different Paper Lantern Press order, send me the order ID and I’ll check that one.",
+      "step": null,
+      "note": "`mishandles_ambiguous_request` is a close negative here. The merchant asks about an order with no order id. The reply gives the most recent order (#1935), says that's the one it picked, and asks for the order id if they meant another.",
+      "ts": "2026-11-02T00:11:29.274070+00:00",
       "history": [],
       "removed_ts": null
     }

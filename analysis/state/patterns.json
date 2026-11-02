@@ -30,11 +30,12 @@
         "a824ef6ec385",
         "63d381770924",
         "956bfca685b9",
-        "21cb32fac3a2",
         "54b859354350",
         "6f7bfadf7637",
         "ac2d44c00990",
-        "effe598dfc30"
+        "effe598dfc30",
+        "8300768e3778",
+        "2af91fb9ca31"
       ],
       "example_trace_ids": [
         "7d614db08a876f0c70541e0a5d567b6b",
@@ -60,15 +61,18 @@
         "31c0c9af11c2fe3bd486a857862309bf",
         "a679c2438327f35dae8dfc6dedcfca53",
         "63a1a15357fe626e568ef25db3b65042",
-        "cff5b6342ce8b0493416142555edd3ec",
         "4ee30d6ea6ec55840754c1a0bb769cf8",
-        "2cfc15ccc925cccfe108dd2692e86342"
+        "2cfc15ccc925cccfe108dd2692e86342",
+        "fa6ec99735cdf1f1c22bfe2b3b4e6a75",
+        "0af642ab91984e8dd0904d69f341cbbb"
       ],
-      "any_instance_count": 26,
+      "any_instance_count": 27,
       "close_negative_trace_ids": [
         "8bb9fcb99ee9accb3e01661b4dc0d431",
         "e5237643a226a5d8bf6254462662b824",
-        "755619040e57dad62ab8a98c0d6b27a2"
+        "755619040e57dad62ab8a98c0d6b27a2",
+        "a39f90ded7e8eb8194ea15dd4ef83e19",
+        "5649ffb00905ae070eeb5a465676fee6"
       ],
       "merged_from": [
         {
@@ -119,7 +123,11 @@
         "7f4f679169f0",
         "732d6c0c5063",
         "02a1a515cda7",
-        "d3ffef084459"
+        "d3ffef084459",
+        "38e2de57a2d7",
+        "8ad0ebc552d1",
+        "1c34c5b725f4",
+        "c13bd480c7ee"
       ],
       "example_trace_ids": [
         "7d614db08a876f0c70541e0a5d567b6b",
@@ -143,9 +151,13 @@
         "b2ca24996e4a0684ebd1b60982058bbf",
         "6776b7df1dbd706e4fbc07ccae3e28ca",
         "f3c5672b6283128027a95b38a3f62c2c",
-        "104c7ebc34f95a0338308797245f9287"
+        "104c7ebc34f95a0338308797245f9287",
+        "552df0278430258b28ec8f247242479c",
+        "d7e3af35ee13f7a55009dd269717d1e2",
+        "a998e4aa6bc769ce04bdd6fbc8537858",
+        "55e41507adf80abac4e44fa5145eb204"
       ],
-      "any_instance_count": 22,
+      "any_instance_count": 26,
       "close_negative_trace_ids": [],
       "merged_from": [
         {
@@ -171,7 +183,12 @@
         "9b6e35de5b27",
         "a17e7ef421a3",
         "38da911594cb",
-        "d77a8e5d1f36"
+        "d77a8e5d1f36",
+        "e3f157869e26",
+        "30d80705df2d",
+        "f9e3c64dbe93",
+        "669cd463449d",
+        "4b8f5f7e984b"
       ],
       "example_trace_ids": [
         "c77bc73de2930040ef5ae5ad718ed92d",
@@ -181,10 +198,24 @@
         "f87559c034e450d921553bac804a8e77",
         "2001821552a022a2ea584839d840b6b3",
         "fc6c8df96d518e630e658232910df993",
-        "8ebded8f6a6ec7b0a256fc48350a5ad6"
+        "8ebded8f6a6ec7b0a256fc48350a5ad6",
+        "7d614db08a876f0c70541e0a5d567b6b",
+        "fb77a52d811e50e4f54c71c131a02f6a",
+        "b08a1505c303777ea971df3082948bc3",
+        "a1c72c4aebbc231771b262ba6b23b396",
+        "22f90c6ffd3bcc00679a84d8eb1d95fc"
       ],
-      "any_instance_count": 8,
-      "close_negative_trace_ids": [],
+      "any_instance_count": 13,
+      "close_negative_trace_ids": [
+        "dd14ea25e0d1071e520016392f970dc1",
+        "1ea9dd6c1aa53fd77c2cfe993ab061fb",
+        "deb44f97dad1859d707b71ce28c8a447",
+        "3994621e9b91a1ade7b6946f81854f44",
+        "a4aeceedb4d83f929dea27e10631a0a0",
+        "a7e9dd4474c34bc14ed71fcdd4fbfd21",
+        "22f0af59d66a9d1fe88a9fff38b7b92e",
+        "1dfc8b530b48f908837ca7b840151ac3"
+      ],
       "merged_from": [
         {
           "name": "guesses_order",
@@ -224,7 +255,7 @@
     },
     {
       "name": "date_errors",
-      "definition": "The reply uses a current date other than the platform's current date (world_asof), or counts dates or days from the wrong current date.",
+      "definition": "The reply uses a current date other than the platform date (world_asof), counts days from the wrong date, or misstates how old an order is compared with the platform date. \"Most recent\" or \"latest\" means the newest of the matching orders and is not a date error; \"recent\" on its own means placed within the last 30 days.",
       "status": "candidate",
       "added_in": "batch_2",
       "note_ids": [
@@ -233,7 +264,9 @@
         "2ae035229b44",
         "c2170b771c70",
         "ff51ade6c836",
-        "fc34cae6aca7"
+        "fc34cae6aca7",
+        "ffb2369b2d85",
+        "339fcac1fef0"
       ],
       "example_trace_ids": [
         "d7e3af35ee13f7a55009dd269717d1e2",
@@ -241,9 +274,11 @@
         "3f60fd9737640e4246f43068369c90f3",
         "b2ca24996e4a0684ebd1b60982058bbf",
         "59c03333b95060f4886023252ea48afb",
-        "dd14ea25e0d1071e520016392f970dc1"
+        "dd14ea25e0d1071e520016392f970dc1",
+        "a998e4aa6bc769ce04bdd6fbc8537858",
+        "55e41507adf80abac4e44fa5145eb204"
       ],
-      "any_instance_count": 6,
+      "any_instance_count": 8,
       "close_negative_trace_ids": [
         "c82cca95759e4ad8ccb3513fb232d5ce",
         "9435f98d3524e80927c554c08b634e91"
@@ -254,26 +289,30 @@
           "trace_id": "dd14ea25e0d1071e520016392f970dc1",
           "note_id": "fc34cae6aca7"
         }
+      ],
+      "definition_history": [
+        {
+          "definition": "The reply uses a current date other than the platform's current date (world_asof), or counts dates or days from the wrong current date.",
+          "replaced_because": "\"recent\" needed a rule: \"most recent\" ranks the matching orders, while \"recent\" alone is a claim about age."
+        }
       ]
     },
     {
       "name": "ignores_caller_role",
-      "definition": "The agent handles the request as if the caller were a shopper, when the caller's role calls for something else (for example, asking a support caller which customer they mean).",
+      "definition": "The agent treats a support or merchant caller as a shopper in a way that changes what it does or shows: for example, it presents other customers' orders as the caller's, or never asks a support caller which customer or order they mean. Shopper-style wording alone (\"your confirmation email\"), around a request that still fits the caller's role, is not a failure.",
       "status": "candidate",
       "added_in": "batch_1",
       "note_ids": [
         "606b53d96b48",
         "ef132c64a06c",
-        "595d59818e9c",
         "b9079b1e2ef6"
       ],
       "example_trace_ids": [
         "a4aeceedb4d83f929dea27e10631a0a0",
         "28b7a9e232e6d77fa776292271eae6c5",
-        "0af642ab91984e8dd0904d69f341cbbb",
         "1c1c2a8a3bbde8297873aac276ebc3f5"
       ],
-      "any_instance_count": 4,
+      "any_instance_count": 3,
       "close_negative_trace_ids": [
         "33434e3827c00900e7b972a0a379fe6f",
         "13c82aa3b1ecd2709048d39b5c64d277",
@@ -287,6 +326,12 @@
         {
           "name": "shows_others_orders",
           "definition": "For a shopper or merchant caller, the reply presents orders that are not the caller's as theirs."
+        }
+      ],
+      "definition_history": [
+        {
+          "definition": "The agent handles the request as if the caller were a shopper, when the caller's role calls for something else (for example, asking a support caller which customer they mean).",
+          "replaced_because": "Asking a support caller for an order id \"from your confirmation email\" read like a shopper but still fit the role; the failure is judged by what the role mistake changes, not by wording."
         }
       ]
     },
@@ -318,14 +363,16 @@
       "note_ids": [
         "79aac18bbc29",
         "a1e898e16009",
-        "2ea1b591df69"
+        "2ea1b591df69",
+        "aa0d807527a8"
       ],
       "example_trace_ids": [
         "e2e0f7095958a198f9835472f63f88c8",
         "72e33e745ff92828f0337c57e7e1695f",
-        "55e41507adf80abac4e44fa5145eb204"
+        "55e41507adf80abac4e44fa5145eb204",
+        "188a1c3af05b25c563fc2f002b518e46"
       ],
-      "any_instance_count": 3,
+      "any_instance_count": 4,
       "close_negative_trace_ids": []
     }
   ]
