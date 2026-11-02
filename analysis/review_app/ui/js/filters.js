@@ -1,6 +1,6 @@
 // What each filter keeps, and the conversations they leave visible.
 
-import { isRead } from "./lookups.js";
+import { hasPendingSuggestions, isRead } from "./lookups.js";
 import { state } from "./state.js";
 
 export const ROLE_ORDER = ["shopper", "merchant", "support"];
@@ -57,6 +57,7 @@ const FILTER_TESTS = {
   tool: (c, f) => !f.tool || c.tools.includes(f.tool),
   twoTurns: (c, f) => !f.twoTurns || c.turns.length > 1,
   unread: (c, f) => !f.unread || c.turns.some((t) => !isRead(t.trace_id)),
+  suggested: (c, f) => !f.suggested || hasPendingSuggestions(c),
   search: (c, f) => searchWords(f).every((word) => searchText(c).includes(word)),
 };
 

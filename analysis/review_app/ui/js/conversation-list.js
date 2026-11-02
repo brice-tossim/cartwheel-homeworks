@@ -11,6 +11,7 @@ export function renderList() {
   $("trace-count").textContent = plural(list.reduce((sum, c) => sum + c.turns.length, 0), "trace");
   $("two-turns").setAttribute("aria-pressed", String(state.filters.twoTurns));
   $("unread").setAttribute("aria-pressed", String(state.filters.unread));
+  $("suggested").setAttribute("aria-pressed", String(state.filters.suggested));
   $("list").innerHTML = list.length
     ? list.map(listRow).join("")
     : `<p class="empty">No conversation matches these filters.</p>`;

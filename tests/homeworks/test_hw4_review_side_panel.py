@@ -91,3 +91,10 @@ def test_editing_a_note_keeps_its_markdown_symbols_in_the_text_box() -> None:
     card = _note_card("q", "`date_errors` is **here**.", editing=True)
 
     assert "`date_errors` is **here**.</textarea>" in card
+
+
+def test_clicking_a_suggestion_card_leads_to_its_quote() -> None:
+    card = _suggestion_card("a quote", "a note")
+
+    assert 'data-action="go-to-suggestion"' in card
+    assert 'data-suggestion-card="s1"' in card

@@ -4,9 +4,7 @@ import { renderConversation } from "./conversation.js";
 import { renderAll } from "./frame.js";
 import { $, flash } from "./helpers.js";
 import { go, select, toggleList } from "./navigation.js";
-import {
-  act, currentTurnId, decideSuggestion, focusNoteBox, markNoFailure, removeNote, rewordNote, saveTurnNote, showSavedNote,
-} from "./note-actions.js";
+import { act, currentTurnId, decideSuggestion, focusNoteBox, markNoFailure, removeNote, rewordNote, saveTurnNote, showSavedNote, showSuggestion } from "./note-actions.js";
 import { hidePopover, openPopoverForSelection, savePopoverNote } from "./selection-popover.js";
 import { loadAll } from "./server.js";
 import { renderSide } from "./side-panel.js";
@@ -31,6 +29,10 @@ export function bindFilters() {
     state.filters.unread = !state.filters.unread;
     renderAll();
   });
+  $("suggested").addEventListener("click", () => {
+    state.filters.suggested = !state.filters.suggested;
+    renderAll();
+  });
 }
 
 export function bindClicks() {
@@ -45,6 +47,11 @@ export function bindClicks() {
   $("popover-cancel").addEventListener("click", hidePopover);
 
   $("conversation").addEventListener("click", (event) => {
+    const suggested = event.target.closest("mark[data-suggestion-id]");
+    if (suggested) {
+      showSuggestion(suggested.dataset.suggestionId);
+      return;
+    }
     const mark = event.target.closest("mark[data-note-id]");
     if (mark) {
       showSavedNote(mark.dataset.noteId);
@@ -79,6 +86,9 @@ export function bindClicks() {
     const noteId = button.dataset.note;
     if (action === "go-to-note" && !event.target.closest("button")) {
       flash(document.querySelector(`mark[data-note-id="${CSS.escape(noteId)}"]`));
+    }
+    if (action === "go-to-suggestion" && !event.target.closest("button")) {
+      flash(document.querySelector(`mark[data-suggestion-id="${CSS.escape(button.dataset.suggestion)}"]`));
     }
     if (action === "save-note") saveTurnNote(button.dataset.trace);
     if (action === "no-failure") markNoFailure(button.dataset.trace);

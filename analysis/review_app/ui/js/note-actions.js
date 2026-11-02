@@ -20,6 +20,10 @@ export function showSavedNote(noteId) {
   flash(document.querySelector(`[data-note-card="${CSS.escape(noteId)}"]`));
 }
 
+export function showSuggestion(suggestionId) {
+  flash(document.querySelector(`[data-suggestion-card="${CSS.escape(suggestionId)}"]`));
+}
+
 export async function saveTurnNote(traceId) {
   const text = (state.drafts[traceId] ?? "").trim();
   if (!text) {

@@ -21,8 +21,25 @@ export function markQuotes(turn, marks) {
   const parts = [...turn.querySelectorAll(".customer p, .reason, .reply-text, .reply.missing p")];
   marks.forEach((mark) => {
     const found = parts.map((part) => findQuote(part, mark.quote)).find(Boolean);
-    if (found && !found.some((c) => c.node.parentElement.closest("mark"))) wrapChars(found, mark);
+    if (found && canMark(mark.className, coveringClasses(found))) wrapChars(found, mark);
   });
+}
+
+// A quote is marked unless a quote of the same kind already covers part of
+// it: an AI suggestion still shows inside a note's highlight.
+export function canMark(className, covering) {
+  return !covering.includes(className);
+}
+
+// The classes of the marks already wrapping any of these characters.
+function coveringClasses(chars) {
+  return [...new Set(chars.flatMap(({ node }) => {
+    const classes = [];
+    for (let mark = node.parentElement.closest("mark"); mark; mark = mark.parentElement.closest("mark")) {
+      classes.push(mark.className);
+    }
+    return classes;
+  }))];
 }
 
 // Spaces, and the Markdown symbols for headings, bold, code and tables.

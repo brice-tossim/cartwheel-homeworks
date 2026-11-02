@@ -12,6 +12,9 @@ export const isRead = (traceId) => liveNotes(traceId).length > 0;
 export const pendingSuggestions = (traceId) => state.suggestions.filter(
   (s) => s.trace_id === traceId && s.status === "pending",
 );
+export const hasPendingSuggestions = (conversation) => conversation.turns.some(
+  (t) => pendingSuggestions(t.trace_id).length > 0,
+);
 
 export function allTurns() {
   return state.conversations.flatMap((c) => c.turns);

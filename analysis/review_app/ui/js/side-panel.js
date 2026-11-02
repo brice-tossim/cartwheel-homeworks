@@ -69,7 +69,7 @@ export function suggestionsCard(conversation) {
   const traceIds = conversation.turns.map((t) => t.trace_id);
   const turnNumber = (traceId) => traceIds.indexOf(traceId) + 1;
   const pending = state.suggestions.filter((s) => traceIds.includes(s.trace_id) && s.status === "pending");
-  const cards = pending.map((s) => `<figure class="suggestion">
+  const cards = pending.map((s) => `<figure class="suggestion" data-suggestion-card="${esc(s.id)}" data-action="go-to-suggestion" data-suggestion="${esc(s.id)}">
     <span class="where">AI suggestion${traceIds.length > 1 ? ` · turn ${turnNumber(s.trace_id)}` : ""}</span>
     ${s.quote ? `<blockquote>“${inline(s.quote)}”</blockquote>` : ""}
     <p class="note-text">${inline(s.note || s.mode || "")}</p>

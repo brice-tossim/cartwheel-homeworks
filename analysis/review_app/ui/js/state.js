@@ -27,7 +27,7 @@ export const state = {
   notes: [],
   suggestions: [],
   rules: null,
-  filters: { batch: "", search: "", role: "", action: "", tool: "", twoTurns: false, unread: false },
+  filters: { batch: "", search: "", role: "", action: "", tool: "", twoTurns: false, unread: false, suggested: false },
   selectedId: remembered("selected", null),
   listOpen: remembered("listOpen", true),
   rulesOpen: remembered("rulesOpen", true),

@@ -4,7 +4,7 @@ import { renderConversation } from "./conversation.js";
 import { renderList } from "./conversation-list.js";
 import { ACTIONS, NO_BATCH, ROLE_ORDER, conversationsWithout, inBatch, matchesBatch, visibleConversations } from "./filters.js";
 import { $, cap, esc } from "./helpers.js";
-import { allTurns, isRead } from "./lookups.js";
+import { allTurns, hasPendingSuggestions, isRead } from "./lookups.js";
 import { renderSide } from "./side-panel.js";
 import { remember, state } from "./state.js";
 
@@ -85,4 +85,5 @@ function renderFilterOptions() {
   $("tool").innerHTML = option("", "Any tool", f.tool)
     + tools.map((tool) => option(tool, `${tool} · ${forTool.filter((c) => c.tools.includes(tool)).length}`, f.tool)).join("");
   $("two-turns").textContent = `Two turns · ${conversationsWithout("twoTurns").filter((c) => c.turns.length > 1).length}`;
+  $("suggested").textContent = `AI suggestions to check · ${conversationsWithout("suggested").filter(hasPendingSuggestions).length}`;
 }
