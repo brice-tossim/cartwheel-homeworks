@@ -9,7 +9,6 @@
         "18ee98945349",
         "803ddd423850",
         "a816eee858fc",
-        "0fc8ee173a19",
         "5500a36f92f9",
         "d598f0977dc6",
         "024dde2d0cc1",
@@ -35,13 +34,16 @@
         "ac2d44c00990",
         "effe598dfc30",
         "8300768e3778",
-        "2af91fb9ca31"
+        "2af91fb9ca31",
+        "6b000f5523b4",
+        "40b9b9c85748",
+        "1c2c936dbbdf",
+        "776f104aea71"
       ],
       "example_trace_ids": [
         "7d614db08a876f0c70541e0a5d567b6b",
         "c0749c66ca2a0db2b0123f85a34dc9ad",
         "a7e9dd4474c34bc14ed71fcdd4fbfd21",
-        "dd14ea25e0d1071e520016392f970dc1",
         "c77bc73de2930040ef5ae5ad718ed92d",
         "fb77a52d811e50e4f54c71c131a02f6a",
         "e2e0f7095958a198f9835472f63f88c8",
@@ -64,15 +66,25 @@
         "4ee30d6ea6ec55840754c1a0bb769cf8",
         "2cfc15ccc925cccfe108dd2692e86342",
         "fa6ec99735cdf1f1c22bfe2b3b4e6a75",
-        "0af642ab91984e8dd0904d69f341cbbb"
+        "0af642ab91984e8dd0904d69f341cbbb",
+        "d0f8a392a62de98e11fb937e02369572",
+        "fb1ec00a0b97582d42d02d0112e48a6b",
+        "e9dba5c23d2a88d647ec02af1a3c6ffa"
       ],
-      "any_instance_count": 27,
+      "any_instance_count": 29,
       "close_negative_trace_ids": [
         "8bb9fcb99ee9accb3e01661b4dc0d431",
         "e5237643a226a5d8bf6254462662b824",
         "755619040e57dad62ab8a98c0d6b27a2",
         "a39f90ded7e8eb8194ea15dd4ef83e19",
-        "5649ffb00905ae070eeb5a465676fee6"
+        "5649ffb00905ae070eeb5a465676fee6",
+        "39224ed805057c88899a69dfc364e267",
+        "36ccfba90db94bcb435c377c2d5efd3d",
+        "2efac6b6ced15c574e7f7244f7b476b2",
+        "6238f72c640e9c0dd6e6c2092c69b3a4",
+        "57b3323291e7ffd3416aef3452c8d965",
+        "60c6a13aba2821d3d67b0d6c3f59c39a",
+        "dd14ea25e0d1071e520016392f970dc1"
       ],
       "merged_from": [
         {
@@ -127,7 +139,14 @@
         "38e2de57a2d7",
         "8ad0ebc552d1",
         "1c34c5b725f4",
-        "c13bd480c7ee"
+        "c13bd480c7ee",
+        "c783ee441430",
+        "b17fd345a890",
+        "f33555813440",
+        "21b7a18b156b",
+        "341921dbeb36",
+        "2cbc34fb0fc5",
+        "34b4fbf5fc11"
       ],
       "example_trace_ids": [
         "7d614db08a876f0c70541e0a5d567b6b",
@@ -155,9 +174,16 @@
         "552df0278430258b28ec8f247242479c",
         "d7e3af35ee13f7a55009dd269717d1e2",
         "a998e4aa6bc769ce04bdd6fbc8537858",
-        "55e41507adf80abac4e44fa5145eb204"
+        "55e41507adf80abac4e44fa5145eb204",
+        "d0f8a392a62de98e11fb937e02369572",
+        "3b6ef3b84d83625c3638882d6f6dbd64",
+        "36ccfba90db94bcb435c377c2d5efd3d",
+        "2efac6b6ced15c574e7f7244f7b476b2",
+        "e9dba5c23d2a88d647ec02af1a3c6ffa",
+        "57b3323291e7ffd3416aef3452c8d965",
+        "d25cde4c00b5bf276db48d8c1b3b0f19"
       ],
-      "any_instance_count": 26,
+      "any_instance_count": 33,
       "close_negative_trace_ids": [],
       "merged_from": [
         {
@@ -188,7 +214,9 @@
         "30d80705df2d",
         "f9e3c64dbe93",
         "669cd463449d",
-        "4b8f5f7e984b"
+        "4b8f5f7e984b",
+        "0e23ca6c6120",
+        "a955e4ecf928"
       ],
       "example_trace_ids": [
         "c77bc73de2930040ef5ae5ad718ed92d",
@@ -203,9 +231,11 @@
         "fb77a52d811e50e4f54c71c131a02f6a",
         "b08a1505c303777ea971df3082948bc3",
         "a1c72c4aebbc231771b262ba6b23b396",
-        "22f90c6ffd3bcc00679a84d8eb1d95fc"
+        "22f90c6ffd3bcc00679a84d8eb1d95fc",
+        "36ccfba90db94bcb435c377c2d5efd3d",
+        "60c6a13aba2821d3d67b0d6c3f59c39a"
       ],
-      "any_instance_count": 13,
+      "any_instance_count": 15,
       "close_negative_trace_ids": [
         "dd14ea25e0d1071e520016392f970dc1",
         "1ea9dd6c1aa53fd77c2cfe993ab061fb",
@@ -214,7 +244,9 @@
         "a4aeceedb4d83f929dea27e10631a0a0",
         "a7e9dd4474c34bc14ed71fcdd4fbfd21",
         "22f0af59d66a9d1fe88a9fff38b7b92e",
-        "1dfc8b530b48f908837ca7b840151ac3"
+        "1dfc8b530b48f908837ca7b840151ac3",
+        "4b8e93a26822dc8f70ff4e4324c4669c",
+        "b9043ac1a664285404cd89cd9425ea7c"
       ],
       "merged_from": [
         {
@@ -266,7 +298,8 @@
         "ff51ade6c836",
         "fc34cae6aca7",
         "ffb2369b2d85",
-        "339fcac1fef0"
+        "339fcac1fef0",
+        "06244eb309e8"
       ],
       "example_trace_ids": [
         "d7e3af35ee13f7a55009dd269717d1e2",
@@ -276,12 +309,14 @@
         "59c03333b95060f4886023252ea48afb",
         "dd14ea25e0d1071e520016392f970dc1",
         "a998e4aa6bc769ce04bdd6fbc8537858",
-        "55e41507adf80abac4e44fa5145eb204"
+        "55e41507adf80abac4e44fa5145eb204",
+        "3b6ef3b84d83625c3638882d6f6dbd64"
       ],
-      "any_instance_count": 8,
+      "any_instance_count": 9,
       "close_negative_trace_ids": [
         "c82cca95759e4ad8ccb3513fb232d5ce",
-        "9435f98d3524e80927c554c08b634e91"
+        "9435f98d3524e80927c554c08b634e91",
+        "57b3323291e7ffd3416aef3452c8d965"
       ],
       "folded_in": [
         {
@@ -344,36 +379,60 @@
         "5484561661ca",
         "01837a31ad13",
         "ddcfe4e1a960",
-        "ae0dc537b680"
+        "ae0dc537b680",
+        "c9194f661c72"
       ],
       "example_trace_ids": [
         "22f90c6ffd3bcc00679a84d8eb1d95fc",
         "188a1c3af05b25c563fc2f002b518e46",
         "a39aefca38b5fecfb1eb60f620bd4940",
-        "22f0af59d66a9d1fe88a9fff38b7b92e"
+        "22f0af59d66a9d1fe88a9fff38b7b92e",
+        "3b6ef3b84d83625c3638882d6f6dbd64"
       ],
-      "any_instance_count": 4,
+      "any_instance_count": 5,
       "close_negative_trace_ids": []
     },
     {
-      "name": "escalates_ineligible_refund",
-      "definition": "The agent opens a human review for a refund on an order that the tool result marks as not refund eligible.",
+      "name": "escalates_without_need",
+      "definition": "The agent opens, or offers to open, a human review that isn't needed: for a refund the tool marks as not refund eligible, for something the agent can answer itself, before it knows what the customer means, or a second time for a request already queued for human review.",
       "status": "candidate",
       "added_in": "batch_1",
       "note_ids": [
         "79aac18bbc29",
         "a1e898e16009",
         "2ea1b591df69",
-        "aa0d807527a8"
+        "aa0d807527a8",
+        "d76407c7d922",
+        "87d335cc11e4",
+        "18dc298d4f3a",
+        "3243102abfec",
+        "7d6e7a3a64f5"
       ],
       "example_trace_ids": [
         "e2e0f7095958a198f9835472f63f88c8",
         "72e33e745ff92828f0337c57e7e1695f",
         "55e41507adf80abac4e44fa5145eb204",
-        "188a1c3af05b25c563fc2f002b518e46"
+        "188a1c3af05b25c563fc2f002b518e46",
+        "fb1ec00a0b97582d42d02d0112e48a6b",
+        "3b6ef3b84d83625c3638882d6f6dbd64",
+        "2efac6b6ced15c574e7f7244f7b476b2",
+        "e9dba5c23d2a88d647ec02af1a3c6ffa",
+        "60c6a13aba2821d3d67b0d6c3f59c39a"
       ],
-      "any_instance_count": 4,
-      "close_negative_trace_ids": []
+      "any_instance_count": 9,
+      "close_negative_trace_ids": [],
+      "merged_from": [
+        {
+          "name": "escalates_ineligible_refund",
+          "definition": "The agent opens, or offers to open, a human review for a refund on an order that the tool result marks as not refund eligible.",
+          "definition_history": [
+            {
+              "definition": "The agent opens a human review for a refund on an order that the tool result marks as not refund eligible.",
+              "replaced_because": "On 2efac6b6 the agent offered a human review for an ineligible refund without opening one; offering leads to the same problem."
+            }
+          ]
+        }
+      ]
     }
   ]
 }

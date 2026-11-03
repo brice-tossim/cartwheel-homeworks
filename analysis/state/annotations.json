@@ -1643,6 +1643,374 @@
       "ts": "2026-11-02T00:11:29.274070+00:00",
       "history": [],
       "removed_ts": null
+    },
+    {
+      "id": "5ef9fadbc37e",
+      "trace_id": "6238f72c640e9c0dd6e6c2092c69b3a4",
+      "kind": "note",
+      "quote": "I’ll look up your recent Cartwheel orders so I can find the Fern & Fog Skincare order and check its current status.",
+      "step": 1,
+      "note": "The store is known here. The agent could look up using the store name as a filter",
+      "ts": "2026-11-02T00:28:55.638102+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "e2636d918b36",
+      "trace_id": "60c6a13aba2821d3d67b0d6c3f59c39a",
+      "kind": "note",
+      "quote": "I’ll look up your recent Cartwheel orders so I can find the Wooden Whale Workshop purchase and check whether it’s eligible for a refund.",
+      "step": 1,
+      "note": "The store is known. The agent could filter by",
+      "ts": "2026-11-02T00:30:39.856408+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "a955e4ecf928",
+      "trace_id": "60c6a13aba2821d3d67b0d6c3f59c39a",
+      "kind": "note",
+      "quote": "I found your Wooden Whale Workshop order and submitted the refund request. Order: #483 Refund requested: $439.00 Refund request ID: #575 Status: Queued for human approval Support ticket: #153 Because the refund amount needs human review, a support agent will follow up within 24 hours.",
+      "step": null,
+      "note": "There are some orders placed by the customer with this store. The agent should confirm which one the customer is talking about before processing",
+      "ts": "2026-11-02T00:33:36.826864+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "9f6343e398dd",
+      "trace_id": "2efac6b6ced15c574e7f7244f7b476b2",
+      "kind": "note",
+      "quote": "I’ll look up your recent orders and Cartwheel’s return/refund policy so I can identify the Wooden Whale Workshop purchase and check what options may apply.",
+      "step": 1,
+      "note": "The store is known. The agent could filter by",
+      "ts": "2026-11-02T00:34:56.455105+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "21b7a18b156b",
+      "trace_id": "2efac6b6ced15c574e7f7244f7b476b2",
+      "kind": "note",
+      "quote": "Refunds of $100 or less execute automatically after the order passes eligibility; refunds over $100 go to a human support agent for review before any money moves (cw-refunds).",
+      "step": null,
+      "note": "Leaked policy ID as well as refund internal info process",
+      "ts": "2026-11-02T00:35:58.845419+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "18dc298d4f3a",
+      "trace_id": "2efac6b6ced15c574e7f7244f7b476b2",
+      "kind": "note",
+      "quote": "If you mean Order #6761, it isn’t automatically refund-eligible, but I can open a ticket for a human agent to review it.",
+      "step": null,
+      "note": "The agent shouldn't say something like that because the order is not eligible for a refund",
+      "ts": "2026-11-02T00:36:56.036174+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "a83d31ab4f5e",
+      "trace_id": "36ccfba90db94bcb435c377c2d5efd3d",
+      "kind": "note",
+      "quote": "I didn’t find a matching order by that search, so I’ll check your recent orders to see if there’s a Copperline Tools purchase listed.",
+      "step": 2,
+      "note": "The store is known. The agent could filter by",
+      "ts": "2026-11-02T00:37:42.551960+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "0e23ca6c6120",
+      "trace_id": "36ccfba90db94bcb435c377c2d5efd3d",
+      "kind": "note",
+      "quote": "I submitted the refund request for your Copperline Tools order. Order: #724 Refund amount: $260.50 Refund ID: #580 Status: queued for approval Because the refund is above Cartwheel’s $100 auto-approval threshold, a human support agent will review it before it’s finalized. They’ll follow up once it’s approved or if they need anything else.",
+      "step": null,
+      "note": "There are some orders placed by this customer with this store. The agent should confirm which one before processing",
+      "ts": "2026-11-02T00:38:46.857496+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "4fd7ac69266a",
+      "trace_id": "39224ed805057c88899a69dfc364e267",
+      "kind": "note",
+      "quote": "I’ll look up your recent orders to identify the Trailhead Supply order and confirm its refund eligibility before processing anything.",
+      "step": 1,
+      "note": "The store is known. The agent should filter by",
+      "ts": "2026-11-02T00:39:51.790604+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "a88a4da8af6f",
+      "trace_id": "2473d2f61a5d745068e41208a4ac9f2a",
+      "kind": "no_failure",
+      "quote": null,
+      "step": null,
+      "note": "no failure observed",
+      "ts": "2026-11-02T00:42:00.383237+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "34b4fbf5fc11",
+      "trace_id": "d25cde4c00b5bf276db48d8c1b3b0f19",
+      "kind": "note",
+      "quote": "and that refunds of $100 or less can process automatically only after the order passes the eligibility check; larger refunds require human review (cw-refunds). It does not create a general price-drop or price-match guarantee after purchase (cw-refunds).",
+      "step": null,
+      "note": "Leaked refund limit as well as policy ID",
+      "ts": "2026-11-02T00:43:33.965337+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "6b000f5523b4",
+      "trace_id": "d0f8a392a62de98e11fb937e02369572",
+      "kind": "note",
+      "quote": "I found one matching order, but it shows delivered rather than pending, so I’ll check your recent orders to see if there’s another unshipped Golden Hour Coffee order.",
+      "step": 2,
+      "note": "The store is known. The agent could filter by",
+      "ts": "2026-11-02T00:44:35.615521+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "40b9b9c85748",
+      "trace_id": "d0f8a392a62de98e11fb937e02369572",
+      "kind": "note",
+      "quote": "I couldn’t safely cancel/refund yet because I don’t see a pending, not-shipped Golden Hour Coffee order on your account. What I found: The order matching Golden Hour Coffee appears to be order #2444, but it is already delivered — shipped 2025-06-29 and delivered 2025-07-05 — so I did not cancel it. Cartwheel policy says orders can be canceled before shipment, but once shipped they can’t be canceled (cw-cancellations). Your current not-shipped/pending orders are: #6997 — placed, not shipped, total $203.25 #2572 — placed, not shipped, total $257.00 I have not canceled or refunded anything yet. Please send the exact order ID you want canceled — for example #6997 or #2572 — and I’ll check that order and proceed if it’s eligible.",
+      "step": null,
+      "note": "There are 02 orders from this shop and I think the result is wrong because the agent search for a product name instead of the store name",
+      "ts": "2026-11-02T00:46:17.374218+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "5f176a930367",
+      "trace_id": "57b3323291e7ffd3416aef3452c8d965",
+      "kind": "note",
+      "quote": "I’ll check your recent Cartwheel orders for any Trailhead Supply purchase and look up our guidance for unrecognized charges so I can point you to the right next step.",
+      "step": 1,
+      "note": "The store is known. The agent could filter by",
+      "ts": "2026-11-02T00:47:34.070884+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "2cbc34fb0fc5",
+      "trace_id": "57b3323291e7ffd3416aef3452c8d965",
+      "kind": "note",
+      "quote": "Cartwheel disputes are handled by a human support agent, not automatically, under cw-disputes. Cartwheel’s dispute policy says buyers can dispute a charge for up to 60 days after delivery; the order I found is older than that, but if your card charge is recent or doesn’t match that order, the human agent can investigate what it’s tied to (cw-disputes). Please don’t send your full card number here. Cartwheel support assistants never ask for full card numbers or change payment details in chat (cw-account-security).",
+      "step": null,
+      "note": "Leaked policy ID",
+      "ts": "2026-11-02T00:48:18.392952+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "f35dcf133d5b",
+      "trace_id": "a8a73bfd12f82e12ca2dc025c4602522",
+      "kind": "no_failure",
+      "quote": null,
+      "step": null,
+      "note": "no failure observed",
+      "ts": "2026-11-02T00:50:01.503487+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "341921dbeb36",
+      "trace_id": "e9dba5c23d2a88d647ec02af1a3c6ffa",
+      "kind": "note",
+      "quote": "If the order is eligible, I can help start the refund. Cartwheel-approved refunds go back to the original payment method and usually arrive in 5–10 business days. Refunds of $100 or less run automatically after the eligibility check; refunds over $100 are sent to a human support agent for review before money moves. Policy: cw-refunds",
+      "step": null,
+      "note": "Leaked internal info",
+      "ts": "2026-11-02T00:51:10.182713+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "776f104aea71",
+      "trace_id": "e9dba5c23d2a88d647ec02af1a3c6ffa",
+      "kind": "note",
+      "quote": "Hi! I found two of your Meridian Cycles orders and checked their refund eligibility:",
+      "step": null,
+      "note": "There are 03 orders from this customer with this store instead of 02. It's a wrong answer here because maybe the customer is talking about the missing third one",
+      "ts": "2026-11-02T00:52:22.912850+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "1c2c936dbbdf",
+      "trace_id": "fb1ec00a0b97582d42d02d0112e48a6b",
+      "kind": "note",
+      "quote": "Thanks — I checked your store’s recent orders and searched for “Northwind Books,” but I couldn’t find an exact matching order under that name.",
+      "step": null,
+      "note": "The agent search for a product named \"Northwind Books\".",
+      "ts": "2026-11-02T18:59:04.782324+00:00",
+      "history": [
+        {
+          "note": "The agent search for a product named \"Northwind Books\". It didn't pay attention about the role of the current user",
+          "ts": "2026-11-02T00:54:15.551192+00:00"
+        }
+      ],
+      "removed_ts": null
+    },
+    {
+      "id": "7f5613a45647",
+      "trace_id": "b9043ac1a664285404cd89cd9425ea7c",
+      "kind": "no_failure",
+      "quote": null,
+      "step": null,
+      "note": "no failure observed",
+      "ts": "2026-11-02T00:54:46.214553+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "b17fd345a890",
+      "trace_id": "3b6ef3b84d83625c3638882d6f6dbd64",
+      "kind": "note",
+      "quote": null,
+      "step": null,
+      "note": "Leaked internal policy ID",
+      "ts": "2026-11-02T00:55:48.950729+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "2b0ab68d1828",
+      "trace_id": "4b8e93a26822dc8f70ff4e4324c4669c",
+      "kind": "no_failure",
+      "quote": null,
+      "step": null,
+      "note": "no failure observed",
+      "ts": "2026-11-02T00:56:48.101265+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "7d6e7a3a64f5",
+      "trace_id": "60c6a13aba2821d3d67b0d6c3f59c39a",
+      "kind": "note",
+      "quote": "**Support ticket:** #153",
+      "step": null,
+      "note": "`escalates_without_need` (new mode) may be present here. The refund was already queued for human approval by the refund tool, and the agent opens a second ticket (#153) for the same review.",
+      "ts": "2026-11-02T19:00:51.596834+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "f33555813440",
+      "trace_id": "36ccfba90db94bcb435c377c2d5efd3d",
+      "kind": "note",
+      "quote": "Because the refund is above Cartwheel’s $100 auto-approval threshold",
+      "step": null,
+      "note": "`reveals_internal_details` is present here. The reply tells the customer about the internal $100 auto-approval threshold.",
+      "ts": "2026-11-02T19:01:07.824973+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "c783ee441430",
+      "trace_id": "d0f8a392a62de98e11fb937e02369572",
+      "kind": "note",
+      "quote": "once shipped they can’t be canceled (**cw-cancellations**)",
+      "step": null,
+      "note": "`reveals_internal_details` is present here. The reply names the policy id cw-cancellations.",
+      "ts": "2026-11-02T19:03:23.135480+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "20ee9b283618",
+      "trace_id": "57b3323291e7ffd3416aef3452c8d965",
+      "kind": "note",
+      "quote": "the order I found is older than that",
+      "step": null,
+      "note": "`date_errors` is a close negative here. The agent says the order is past the 60-day dispute window, and that's right: it was delivered on 2025-12-24, about six months before today (2026-07-01).",
+      "ts": "2026-11-02T19:03:44.398036+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "d76407c7d922",
+      "trace_id": "fb1ec00a0b97582d42d02d0112e48a6b",
+      "kind": "note",
+      "quote": "I’ve opened a ticket with our support team so a human can investigate",
+      "step": null,
+      "note": "`escalates_without_need` (new mode) may be present here. The merchant's question is vague (\"our order\"), and the agent opens a human ticket (#182) before asking which order they mean.",
+      "ts": "2026-11-02T19:04:06.564788+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "a0d1d08b9325",
+      "trace_id": "b9043ac1a664285404cd89cd9425ea7c",
+      "kind": "note",
+      "quote": "If you give me the specific order ID, I can do a focused lookup",
+      "step": null,
+      "note": "`mishandles_ambiguous_request` is a close negative here. The merchant names no order. The agent lists the recent orders and asks for the specific order id instead of picking one.",
+      "ts": "2026-11-02T19:04:20.056876+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "06244eb309e8",
+      "trace_id": "3b6ef3b84d83625c3638882d6f6dbd64",
+      "kind": "note",
+      "quote": "if the order you mean is one of those delivered June orders, the standard Cartwheel return window has passed",
+      "step": null,
+      "note": "`date_errors` is present here. The table itself shows the return windows ending between 2026-07-13 and 2026-07-28, but today is 2026-07-01, so none has passed. The agent tells the merchant the window is over when every one is still open.",
+      "ts": "2026-11-02T19:04:51.563955+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "87d335cc11e4",
+      "trace_id": "3b6ef3b84d83625c3638882d6f6dbd64",
+      "kind": "note",
+      "quote": "I opened a human review ticket so this doesn’t keep sitting unresolved.",
+      "step": null,
+      "note": "`escalates_without_need` (new mode) may be present here. The agent opens a human ticket (#187) for the shipped orders with no delivery date, though they shipped 1 to 3 days ago, well inside the 7-day transit window. If this is a failure, it's a new one: none of the 8 modes covers an escalation that wasn't needed.",
+      "ts": "2026-11-02T19:05:56.165748+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "c9194f661c72",
+      "trace_id": "3b6ef3b84d83625c3638882d6f6dbd64",
+      "kind": "note",
+      "quote": "For the **delivered** orders I can see for your store, the standard 30-day window would have ended on these dates:",
+      "step": null,
+      "note": "`too_much_detail` may be present here. The merchant asked where they stand on one order's return window, and the reply lists a 16-row table of every delivered order plus a second table of undelivered ones.",
+      "ts": "2026-11-02T19:06:30.232823+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "3243102abfec",
+      "trace_id": "e9dba5c23d2a88d647ec02af1a3c6ffa",
+      "kind": "note",
+      "quote": "I can **escalate it to a human support agent for review**",
+      "step": null,
+      "note": "`escalates_ineligible_refund` is present here. Both Meridian Cycles orders are marked not refund eligible, and the agent offers to escalate them to a human for review, which the widened definition now covers.",
+      "ts": "2026-11-02T19:07:20.897664+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "d766a287cc10",
+      "trace_id": "4b8e93a26822dc8f70ff4e4324c4669c",
+      "kind": "note",
+      "quote": "If #5473 is *not* the order you meant, send me the order number or product name and I’ll pull the exact one.",
+      "step": null,
+      "note": "`mishandles_ambiguous_request` is a close negative here. The merchant names no order. The agent points to the one stuck order (#5473), lists the other open ones, and asks for the order number if it guessed wrong.",
+      "ts": "2026-11-02T19:07:36.874410+00:00",
+      "history": [],
+      "removed_ts": null
     }
   ]
 }
