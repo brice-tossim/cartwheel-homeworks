@@ -3,12 +3,16 @@
 -- traces exist, tools fired, and nothing is silently broken.
 --
 -- These queries target the ClickHouse tables inside self-hosted Langfuse
--- (v3), where `traces` holds one row per trace and `observations` one row
--- per span/generation/event. Verified against Langfuse 3.205.1 (ClickHouse
--- 24.8): OpenTelemetry span attributes are stored as one JSON string under
--- metadata['attributes'], so the cartwheel.* fields are read with
--- JSONExtractString. Tool spans have type 'TOOL'. If your Langfuse version
--- differs, check with `SHOW TABLES` and `DESCRIBE traces` first.
+-- (v4), where `events_core` holds one row per span/generation/event with
+-- the core columns and `events_full` additionally keeps every OpenTelemetry
+-- span attribute. Verified against Langfuse 4.36.1 (ClickHouse 25.12):
+-- OTel span attributes are stored as parallel arrays under
+-- metadata_names/metadata_values with an `attributes.` prefix, so the
+-- cartwheel.* fields are read with arrayElement(metadata_values,
+-- indexOf(metadata_names, 'attributes.cartwheel.<field>')). Tool spans have
+-- type 'TOOL'. If your Langfuse version differs, check with `SHOW TABLES`
+-- and `DESCRIBE events_core` first. (Langfuse v3 instead exposes legacy
+-- `traces` and `observations` tables; see git history for the v3 report.)
 --
 -- Save the complete report from the Cartwheel root (noninteractive so the
 -- committed file is reproducible):
@@ -18,19 +22,26 @@
 --
 -- 1. Traces per scenario (are scenario ids flowing end to end?)
 SELECT
-    JSONExtractString(metadata['attributes'], 'cartwheel.scenario_id') AS scenario_id,
+    arrayElement(
+        metadata_values,
+        indexOf(metadata_names, 'attributes.cartwheel.scenario_id')
+    ) AS scenario_id,
     count() AS traces
-FROM traces
-WHERE scenario_id != ''
+FROM events_full
+WHERE has(metadata_names, 'attributes.cartwheel.scenario_id')
 GROUP BY scenario_id
 ORDER BY traces DESC
 LIMIT 50;
 
 -- 2. Traces per user role (are all three roles represented?)
 SELECT
-    JSONExtractString(metadata['attributes'], 'cartwheel.user_role') AS role,
+    arrayElement(
+        metadata_values,
+        indexOf(metadata_names, 'attributes.cartwheel.user_role')
+    ) AS role,
     count() AS traces
-FROM traces
+FROM events_full
+WHERE has(metadata_names, 'attributes.cartwheel.user_role')
 GROUP BY role
 ORDER BY traces DESC;
 
@@ -38,7 +49,7 @@ ORDER BY traces DESC;
 SELECT
     name,
     count() AS errors
-FROM observations
+FROM events_core
 WHERE level = 'ERROR'
 GROUP BY name
 ORDER BY errors DESC
@@ -46,15 +57,15 @@ LIMIT 20;
 
 -- 4. Escalation count (how often did the agent punt to a human?)
 SELECT count() AS escalations
-FROM observations
+FROM events_core
 WHERE name LIKE '%escalate_to_human%';
 
 -- 5. Token and cost totals (the Artifact I arithmetic, observed)
 SELECT
     sum(usage_details['input']) AS input_tokens,
     sum(usage_details['output']) AS output_tokens,
-    sum(total_cost) AS total_cost
-FROM observations
+    sum(calculated_total_cost) AS total_cost
+FROM events_core
 WHERE type = 'GENERATION';
 
 -- 6. Longest traces by span count (candidates for a raw read)
@@ -62,7 +73,7 @@ SELECT
     trace_id,
     count() AS spans,
     dateDiff('millisecond', min(start_time), max(end_time)) AS duration_ms
-FROM observations
+FROM events_core
 GROUP BY trace_id
 ORDER BY spans DESC
 LIMIT 10;
@@ -71,7 +82,7 @@ LIMIT 10;
 SELECT
     name,
     count() AS calls
-FROM observations
+FROM events_core
 WHERE type = 'TOOL'
 GROUP BY name
 ORDER BY calls DESC
@@ -80,5 +91,9 @@ LIMIT 20;
 -- 8. Permission-denied count (gold for Module 4; requires the Homework 2
 --    attribute to be implemented)
 SELECT count() AS permission_denials
-FROM observations
-WHERE JSONExtractString(metadata['attributes'], 'cartwheel.permission_denied') = 'true';
+FROM events_full
+WHERE has(metadata_names, 'attributes.cartwheel.permission_denied')
+  AND arrayElement(
+        metadata_values,
+        indexOf(metadata_names, 'attributes.cartwheel.permission_denied')
+      ) = 'true';

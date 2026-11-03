@@ -1,0 +1,94 @@
+    ┌─scenario_id───────────┬─traces─┐
+ 1. │ probe-024-adversarial │      5 │
+ 2. │ probe-024-toolerror   │      5 │
+ 3. │ support-0129          │      3 │
+ 4. │ support-0143          │      2 │
+ 5. │ support-0133          │      2 │
+ 6. │ support-0238          │      2 │
+ 7. │ support-0141          │      2 │
+ 8. │ support-0237          │      2 │
+ 9. │ support-0211          │      2 │
+10. │ support-0240          │      2 │
+11. │ support-0142          │      2 │
+12. │ support-0136          │      2 │
+13. │ support-0139          │      2 │
+14. │ pilot-004             │      2 │
+15. │ support-0130          │      2 │
+16. │ support-0050          │      2 │
+17. │ support-0144          │      2 │
+18. │ support-0135          │      2 │
+19. │ probe-024-followup    │      2 │
+20. │ support-0132          │      2 │
+21. │ support-0241          │      2 │
+22. │ support-0239          │      2 │
+23. │ support-0145          │      2 │
+24. │ support-0236          │      2 │
+25. │ support-0131          │      2 │
+26. │ support-0138          │      2 │
+27. │ support-0140          │      2 │
+28. │ support-0250          │      1 │
+29. │ support-0147          │      1 │
+30. │ support-0225          │      1 │
+31. │ support-0231          │      1 │
+32. │ support-0223          │      1 │
+33. │ support-0038          │      1 │
+34. │ support-0067          │      1 │
+35. │ support-0086          │      1 │
+36. │ support-0126          │      1 │
+37. │ support-0197          │      1 │
+38. │ support-0176          │      1 │
+39. │ support-0118          │      1 │
+40. │ support-0094          │      1 │
+41. │ support-0056          │      1 │
+42. │ support-0134          │      1 │
+43. │ support-0209          │      1 │
+44. │ support-0155          │      1 │
+45. │ support-0014          │      1 │
+46. │ pilot-008             │      1 │
+47. │ support-0117          │      1 │
+48. │ support-0242          │      1 │
+49. │ support-0075          │      1 │
+50. │ support-0037          │      1 │
+    └─scenario_id───────────┴─traces─┘
+   ┌─role─────┬─traces─┐
+1. │ shopper  │   1197 │
+2. │ merchant │    167 │
+3. │ support  │     79 │
+   └──────────┴────────┘
+   ┌─name──────────────────────┬─errors─┐
+1. │ cartwheel.session_message │     17 │
+2. │ openai.response           │     15 │
+3. │ cartwheel-support.agent   │      2 │
+   └───────────────────────────┴────────┘
+   ┌─escalations─┐
+1. │          62 │
+   └─────────────┘
+   ┌─input_tokens─┬─output_tokens─┬─total_cost─┐
+1. │      1579608 │        274086 │  16.794668 │
+   └──────────────┴───────────────┴────────────┘
+    ┌─trace_id─────────────────────────┬─spans─┬─duration_ms─┐
+ 1. │ 4f939cfc09fae74afee691123b56f0b3 │    34 │       56995 │
+ 2. │ fb77a52d811e50e4f54c71c131a02f6a │    28 │       44219 │
+ 3. │ 3131732861471a3cf27a071c623ec660 │    27 │       39351 │
+ 4. │ f3c5672b6283128027a95b38a3f62c2c │    26 │       29791 │
+ 5. │ 2f6a08834d54ac4ca033711e82e4e365 │    24 │       33358 │
+ 6. │ c66c4f1e07887f9e573bbda97f847995 │    23 │       37162 │
+ 7. │ be676d5e73837acd03afa70e19593b70 │    23 │       47429 │
+ 8. │ c50b42e13040d1ee249e3a250d0ec22e │    23 │       36236 │
+ 9. │ e2e0f7095958a198f9835472f63f88c8 │    22 │       40722 │
+10. │ 9435f98d3524e80927c554c08b634e91 │    22 │       46931 │
+    └──────────────────────────────────┴───────┴─────────────┘
+   ┌─name───────────────┬─calls─┐
+1. │ search_products    │   234 │
+2. │ search_help_center │   180 │
+3. │ get_policy         │   179 │
+4. │ get_order          │   167 │
+5. │ list_my_orders     │   149 │
+6. │ find_order         │   123 │
+7. │ escalate_to_human  │    62 │
+8. │ issue_refund       │    18 │
+9. │ cancel_order       │     3 │
+   └────────────────────┴───────┘
+   ┌─permission_denials─┐
+1. │                  5 │
+   └────────────────────┘

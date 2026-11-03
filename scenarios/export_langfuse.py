@@ -4,6 +4,12 @@ Usage (after loading ``.env`` and completing the runs):
 
     uv run python -m scenarios.export_langfuse \
       scenarios/support_scenarios.jsonl traces/support_traces.json
+
+Reads the Langfuse Observations API v2 (``client.api.observations_v_2``),
+which serves Langfuse v4 deployments. A trace is the set of observations
+sharing a ``traceId``; the root observation carries the conversation input
+and output, and every Cartwheel span carries ``cartwheel.scenario_id`` in
+its OTel attributes (exposed as ``metadata['attributes.cartwheel.scenario_id']``).
 """
 
 from __future__ import annotations
@@ -17,20 +23,10 @@ from typing import Any
 from observability.instrument import load_env
 from scenarios.validate import load_jsonl, validate_scenarios
 
-
-def _jsonable(value: Any) -> Any:
-    """Convert an SDK response model into plain JSON data.
-
-    The Langfuse SDK returns pydantic v1 models, whose ``dict()`` keeps
-    datetime objects, so those models go through their own JSON encoder.
-    """
-    if hasattr(value, "model_dump"):
-        return value.model_dump(mode="json", by_alias=True)
-    if hasattr(value, "json") and hasattr(value, "dict"):
-        return json.loads(value.json(by_alias=True))
-    if hasattr(value, "dict"):
-        return value.dict(by_alias=True)
-    return value
+# Field groups covering identity, timing, conversation content, model, and
+# usage for every observation, per the Observations API v2 schema.
+_FIELDS = "basic,time,io,metadata,model,usage,trace_context"
+_PAGE_SIZE = 100
 
 
 def _json_default(value: Any) -> str:
@@ -40,15 +36,17 @@ def _json_default(value: Any) -> str:
 
 
 def _attribute_scenario_id(metadata: Any) -> str | None:
-    """Read the scenario id from trace or observation metadata.
+    """Read the scenario id from observation metadata.
 
-    Langfuse stores OpenTelemetry span attributes under ``metadata.attributes``
-    (a JSON string in ClickHouse, a dict from the API), so the id is checked
-    there as well as at the top level.
+    Langfuse v4 flattens OpenTelemetry span attributes into metadata keys
+    with an ``attributes.`` prefix; v3 nested them under a JSON string.
+    Both shapes are accepted.
     """
     if not isinstance(metadata, dict):
         return None
-    value = metadata.get("cartwheel.scenario_id")
+    value = metadata.get("attributes.cartwheel.scenario_id")
+    if not value:
+        value = metadata.get("cartwheel.scenario_id")
     if not value:
         attributes = metadata.get("attributes")
         if isinstance(attributes, str):
@@ -61,46 +59,65 @@ def _attribute_scenario_id(metadata: Any) -> str | None:
     return str(value) if value else None
 
 
-def _scenario_id(record: Any) -> str | None:
-    """Find the scenario attribute on a trace or one of its observations."""
-    if isinstance(record, dict):
-        found = _attribute_scenario_id(record.get("metadata"))
-        if found:
-            return found
-        for value in record.values():
-            found = _scenario_id(value)
-            if found:
-                return found
-    elif isinstance(record, list):
-        for value in record:
-            found = _scenario_id(value)
-            if found:
-                return found
-    return None
+def _iter_observations(client: Any, **params: Any) -> Any:
+    """Yield observations page by page via the v2 cursor."""
+    cursor: str | None = None
+    while True:
+        response = client.api.observations_v_2.get_many(
+            limit=_PAGE_SIZE, cursor=cursor, fields=_FIELDS, **params
+        )
+        batch = list(response.data or [])
+        yield from batch
+        cursor = response.meta.cursor if response.meta else None
+        if not cursor or len(batch) < _PAGE_SIZE:
+            return
 
 
 def export_scenario_traces(
-    scenario_ids: set[str], client: Any, *, page_size: int = 100
+    scenario_ids: set[str], client: Any
 ) -> list[dict[str, Any]]:
-    """Fetch full trace records whose metadata carries a selected scenario id."""
+    """Collect full trace records whose observations carry a selected scenario id.
+
+    Walks every observation once, groups them by ``traceId``, and keeps the
+    groups whose scenario id is in the selection. The root observation
+    (``isRootObservation`` true) provides the conversation; children provide
+    model and tool activity.
+    """
+    by_trace: dict[str, dict[str, Any]] = {}
+    for observation in _iter_observations(client):
+        if not isinstance(observation, dict):
+            continue
+        trace_id = observation.get("traceId")
+        if not trace_id:
+            continue
+        metadata = observation.get("metadata")
+        scenario_id = _attribute_scenario_id(metadata)
+        group = by_trace.setdefault(
+            trace_id,
+            {"traceId": trace_id, "scenario_id": scenario_id, "observations": []},
+        )
+        if scenario_id and not group["scenario_id"]:
+            group["scenario_id"] = scenario_id
+        group["observations"].append(observation)
+
     matches: list[dict[str, Any]] = []
-    page = 1
-    while True:
-        response = client.api.trace.list(page=page, limit=page_size)
-        batch = list(response.data or [])
-        for trace_summary in batch:
-            scenario_id = _attribute_scenario_id(getattr(trace_summary, "metadata", None))
-            full = client.api.trace.get(getattr(trace_summary, "id"))
-            record = _jsonable(full)
-            scenario_id = scenario_id or _scenario_id(record)
-            if scenario_id not in scenario_ids:
-                continue
-            if isinstance(record, dict):
-                record.setdefault("cartwheel_scenario_id", scenario_id)
-            matches.append(record)
-        if len(batch) < page_size:
-            break
-        page += 1
+    for trace_id, group in by_trace.items():
+        scenario_id = group["scenario_id"]
+        if scenario_id not in scenario_ids:
+            continue
+        roots = [o for o in group["observations"] if o.get("isRootObservation")]
+        record = {
+            "id": trace_id,
+            "traceId": trace_id,
+            "timestamp": next(
+                (o.get("startTime") for o in roots if o.get("startTime")),
+                None,
+            ),
+            "name": next((o.get("traceName") for o in roots if o.get("traceName")), None),
+            "observations": group["observations"],
+        }
+        record["cartwheel_scenario_id"] = scenario_id
+        matches.append(record)
     return matches
 
 
