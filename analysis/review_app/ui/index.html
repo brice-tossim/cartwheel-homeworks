@@ -13,8 +13,8 @@
   <header class="topbar">
     <span class="brand">Cartwheel trace review</span>
     <nav class="tabs" aria-label="Views">
-      <button type="button" class="tab is-active" aria-pressed="true">Read</button>
-      <button type="button" class="tab" aria-disabled="true" title="Not built yet">Failure modes</button>
+      <button type="button" class="tab" data-view="read" aria-pressed="true">Read</button>
+      <button type="button" class="tab" data-view="modes" aria-pressed="false">Failure modes</button>
       <button type="button" class="tab" aria-disabled="true" title="Not built yet">Label</button>
       <button type="button" class="tab" aria-disabled="true" title="Not built yet">Progress</button>
     </nav>
@@ -32,7 +32,23 @@
 
   <div id="fallback" class="fallback" role="status" hidden></div>
 
-  <div class="body">
+  <main id="modes-view" class="modes-view" tabindex="0" hidden>
+    <div class="modes-page">
+      <div class="modes-head">
+        <div>
+          <h1 class="modes-title">Failure modes</h1>
+          <span id="modes-count" class="muted">Loading…</span>
+        </div>
+        <div class="field modes-search">
+          <label for="modes-search" class="label">Find a mode</label>
+          <input id="modes-search" type="search" class="input" placeholder="Type part of a name, e.g. date" autocomplete="off">
+        </div>
+      </div>
+      <div id="modes"></div>
+    </div>
+  </main>
+
+  <div id="read-view" class="body">
     <nav id="list-panel" class="list-panel" aria-label="Conversations" tabindex="0">
       <div class="panel-head">
         <h2>Conversations</h2>

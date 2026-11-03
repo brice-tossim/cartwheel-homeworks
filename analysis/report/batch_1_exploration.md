@@ -17,4 +17,4 @@
 
 ## Candidate failure modes
 
-See [failure_modes.md](failure_modes.md), shared by every batch.
+See the Failure modes tab of the review page, read from [patterns.json](../state/patterns.json) and shared by every batch.

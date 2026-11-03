@@ -236,6 +236,28 @@ def test_conversations_carry_the_review_batches(base_url: str, tmp_path: Path) -
     assert loaded["batches"] == [{"name": "batch_1_random", "trace_ids": ["t1"]}]
 
 
+def test_modes_route_serves_the_failure_modes(base_url: str, tmp_path: Path) -> None:
+    (tmp_path / "batches").mkdir()
+    (tmp_path / "batches" / "batch_1_random.jsonl").write_text('{"trace_id": "t1"}\n')
+    mode = {
+        "name": "no_reply",
+        "definition": "The turn ends without any reply.",
+        "status": "candidate",
+        "example_trace_ids": ["t1"],
+        "note_ids": ["n1"],
+    }
+    (tmp_path / "patterns.json").write_text(json.dumps({"modes": [mode]}))
+
+    assert _get(f"{base_url}/api/modes") == (200, [{
+        "name": "no_reply",
+        "definition": "The turn ends without any reply.",
+        "status": "candidate",
+        "batch_counts": [{"batch": 1, "count": 1}],
+        "total": 1,
+        "note_ids": ["n1"],
+    }])
+
+
 def test_conversations_share_the_loaded_traces_until_a_refresh(
     base_url: str, loader: _CountingLoader
 ) -> None:

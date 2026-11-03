@@ -3,12 +3,13 @@
 import { renderConversation } from "./conversation.js";
 import { renderAll } from "./frame.js";
 import { $, flash } from "./helpers.js";
-import { go, select, toggleList } from "./navigation.js";
+import { go, openNoteInRead, select, toggleList } from "./navigation.js";
 import { act, currentTurnId, decideSuggestion, focusNoteBox, markNoFailure, removeNote, rewordNote, saveTurnNote, showSavedNote, showSuggestion } from "./note-actions.js";
 import { hidePopover, openPopoverForSelection, savePopoverNote } from "./selection-popover.js";
 import { loadAll } from "./server.js";
 import { renderSide } from "./side-panel.js";
 import { remember, state } from "./state.js";
+import { renderModes, showView } from "./views.js";
 
 export function bindFilters() {
   $("search").addEventListener("input", (event) => {
@@ -36,6 +37,26 @@ export function bindFilters() {
 }
 
 export function bindClicks() {
+  document.querySelector(".tabs").addEventListener("click", (event) => {
+    const tab = event.target.closest(".tab[data-view]");
+    if (tab) showView(tab.dataset.view);
+  });
+  $("modes-search").addEventListener("input", (event) => {
+    state.modesSearch = event.target.value;
+    renderModes();
+  });
+  $("modes").addEventListener("click", (event) => {
+    const toggle = event.target.closest('[data-action="toggle-notes"]');
+    if (toggle) {
+      const { mode } = toggle.dataset;
+      if (state.openModes.has(mode)) state.openModes.delete(mode);
+      else state.openModes.add(mode);
+      renderModes();
+      return;
+    }
+    const button = event.target.closest('[data-action="open-note"]');
+    if (button) openNoteInRead(button.dataset.trace, button.dataset.note);
+  });
   $("list").addEventListener("click", (event) => {
     const row = event.target.closest("[data-id]");
     if (row) select(row.dataset.id);

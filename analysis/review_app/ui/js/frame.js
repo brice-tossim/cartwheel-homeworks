@@ -7,6 +7,7 @@ import { $, cap, esc } from "./helpers.js";
 import { allTurns, hasPendingSuggestions, isRead } from "./lookups.js";
 import { renderSide } from "./side-panel.js";
 import { remember, state } from "./state.js";
+import { renderViews } from "./views.js";
 
 // When the filters drop the open conversation, open the first one they keep.
 function followFilters() {
@@ -29,6 +30,7 @@ export function renderAll({ keepScroll = true } = {}) {
   renderConversation();
   renderSide();
   renderListVisibility();
+  renderViews();
   if (keepScroll) panes.forEach((pane, i) => { pane.scrollTop = scrolls[i]; });
   if (moved) [$("conversation"), $("side")].forEach((pane) => { pane.scrollTop = 0; });
 }

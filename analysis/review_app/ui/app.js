@@ -1,4 +1,4 @@
-// Trace review page: the Read view.
+// Trace review page: the Read and Failure modes tabs.
 //
 // Everything the page shows comes from the review server's JSON routes; the
 // page keeps no copy of its own except a few per-viewer conveniences in

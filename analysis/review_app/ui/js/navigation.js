@@ -4,6 +4,7 @@ import { visibleConversations } from "./filters.js";
 import { renderAll, renderListVisibility } from "./frame.js";
 import { $ } from "./helpers.js";
 import { findConversation } from "./lookups.js";
+import { showSavedNote } from "./note-actions.js";
 import { remember, state } from "./state.js";
 
 export function select(id) {
@@ -29,4 +30,14 @@ export function toggleList() {
   state.listOpen = !state.listOpen;
   remember("listOpen", state.listOpen);
   renderListVisibility();
+}
+
+// From a note in the Failure modes tab: open its conversation in Read and show the note.
+export function openNoteInRead(traceId, noteId) {
+  const conversation = state.conversations.find((c) => c.turns.some((t) => t.trace_id === traceId));
+  if (!conversation) return;
+  state.view = "read";
+  remember("view", "read");
+  select(conversation.session_id);
+  showSavedNote(noteId);
 }

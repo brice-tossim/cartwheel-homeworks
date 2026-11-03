@@ -14,6 +14,7 @@ Routes:
                                               and the review batches
     GET  /api/sessions[?refresh=1]            the raw conversations and their source
     GET  /api/rules                           SPEC.md rules and facts.yaml numbers
+    GET  /api/modes                           the failure modes from patterns.json, with counts per batch
     GET  /api/notes                           every saved note, removed ones included
     POST /api/notes                           add a note {trace_id, note, quote?, step?}
     POST /api/notes/<id>                      reword a note {note}
@@ -37,7 +38,7 @@ from pathlib import Path
 from typing import NamedTuple
 from urllib.parse import unquote
 
-from analysis.review_app import batches, notes, suggestions
+from analysis.review_app import batches, modes, notes, suggestions
 from analysis.review_app.rules import RulesPanel
 from analysis.review_app.rules import load_rules as load_spec_rules
 from analysis.review_app.sessions import SessionsSource
@@ -75,6 +76,7 @@ _ROUTES: dict[str, list[Route]] = {
         (re.compile(r"/api/conversations"), "_conversations"),
         (re.compile(r"/api/sessions"), "_sessions"),
         (re.compile(r"/api/rules"), "_rules"),
+        (re.compile(r"/api/modes"), "_modes"),
         (re.compile(r"/api/notes"), "_notes"),
         (re.compile(r"/api/suggestions"), "_suggestions"),
     ],
@@ -207,6 +209,9 @@ class ReviewHandler(BaseHTTPRequestHandler):
 
     def _rules(self, match: re.Match[str], query: str) -> Response:
         return 200, self.server.load_rules()
+
+    def _modes(self, match: re.Match[str], query: str) -> Response:
+        return 200, modes.list_modes()
 
     # -- notes ------------------------------------------------------------
 

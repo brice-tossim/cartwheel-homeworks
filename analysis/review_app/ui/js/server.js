@@ -23,11 +23,12 @@ export async function postJSON(url, body = {}) {
 }
 
 export async function loadAll(refresh = false) {
-  const [loaded, notes, suggestions, rules] = await Promise.all([
+  const [loaded, notes, suggestions, rules, modes] = await Promise.all([
     getJSON(`/api/conversations${refresh ? "?refresh=1" : ""}`),
     getJSON("/api/notes"),
     getJSON("/api/suggestions"),
     getJSON("/api/rules"),
+    getJSON("/api/modes"),
   ]);
   state.source = loaded.source;
   state.fallbackReason = loaded.fallback_reason;
@@ -40,6 +41,7 @@ export async function loadAll(refresh = false) {
   state.notes = notes;
   state.suggestions = suggestions;
   state.rules = rules;
+  state.modes = modes;
   if (!findConversation(state.selectedId)) {
     state.selectedId = state.conversations[0]?.session_id ?? null;
   }
