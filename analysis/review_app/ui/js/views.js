@@ -1,10 +1,12 @@
 // Switching between the page's tabs, and drawing the Failure modes tab.
+// Read and Label share the conversation layout; only the side panel differs.
 
 import { $, plural } from "./helpers.js";
 import { modesView } from "./modes-view.js";
+import { renderAll } from "./frame.js";
 import { remember, state } from "./state.js";
 
-const VIEWS = ["read", "modes"];
+const VIEWS = ["read", "label", "modes"];
 
 export function renderViews() {
   const view = VIEWS.includes(state.view) ? state.view : "read";
@@ -13,7 +15,7 @@ export function renderViews() {
     tab.classList.toggle("is-active", active);
     tab.setAttribute("aria-pressed", String(active));
   });
-  $("read-view").hidden = view !== "read";
+  $("read-view").hidden = view === "modes";
   $("modes-view").hidden = view !== "modes";
   renderModes();
 }
@@ -26,5 +28,5 @@ export function renderModes() {
 export function showView(view) {
   state.view = view;
   remember("view", view);
-  renderViews();
+  renderAll();
 }

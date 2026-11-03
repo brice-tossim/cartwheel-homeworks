@@ -23,12 +23,13 @@ export async function postJSON(url, body = {}) {
 }
 
 export async function loadAll(refresh = false) {
-  const [loaded, notes, suggestions, rules, modes] = await Promise.all([
+  const [loaded, notes, suggestions, rules, modes, labels] = await Promise.all([
     getJSON(`/api/conversations${refresh ? "?refresh=1" : ""}`),
     getJSON("/api/notes"),
     getJSON("/api/suggestions"),
     getJSON("/api/rules"),
     getJSON("/api/modes"),
+    getJSON("/api/labels"),
   ]);
   state.source = loaded.source;
   state.fallbackReason = loaded.fallback_reason;
@@ -42,6 +43,7 @@ export async function loadAll(refresh = false) {
   state.suggestions = suggestions;
   state.rules = rules;
   state.modes = modes;
+  state.labels = labels;
   if (!findConversation(state.selectedId)) {
     state.selectedId = state.conversations[0]?.session_id ?? null;
   }
@@ -50,6 +52,10 @@ export async function loadAll(refresh = false) {
 
 export async function refreshNotes() {
   state.notes = await getJSON("/api/notes");
+}
+
+export async function refreshLabels() {
+  state.labels = await getJSON("/api/labels");
 }
 
 export async function refreshSuggestions() {

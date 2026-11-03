@@ -9,7 +9,7 @@ total, and the ids of the notes that support it. Batches sharing a number
 from __future__ import annotations
 
 import re
-from typing import TypedDict
+from typing import NotRequired, TypedDict
 
 from analysis.helpers._state import read_json, state_path
 from analysis.review_app.batches import Batch, load_batches
@@ -20,6 +20,7 @@ class Pattern(TypedDict):
     definition: str
     status: str
     example_trace_ids: list[str]
+    close_negative_trace_ids: NotRequired[list[str]]
     note_ids: list[str]
 
 
@@ -35,6 +36,8 @@ class ModeView(TypedDict):
     batch_counts: list[BatchCount]
     total: int
     note_ids: list[str]
+    example_trace_ids: list[str]
+    close_negative_trace_ids: list[str]
 
 
 def list_modes() -> list[ModeView]:
@@ -71,6 +74,8 @@ def _view(pattern: Pattern, batch_of: dict[str, int]) -> ModeView:
         "batch_counts": [{"batch": n, "count": batches.count(n)} for n in sorted(set(batch_of.values()))],
         "total": len(traces),
         "note_ids": pattern["note_ids"],
+        "example_trace_ids": traces,
+        "close_negative_trace_ids": pattern.get("close_negative_trace_ids", []),
     }
 
 

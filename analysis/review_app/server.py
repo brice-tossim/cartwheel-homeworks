@@ -15,11 +15,14 @@ Routes:
     GET  /api/sessions[?refresh=1]            the raw conversations and their source
     GET  /api/rules                           SPEC.md rules and facts.yaml numbers
     GET  /api/modes                           the failure modes from patterns.json, with counts per batch
+    GET  /api/labels                          the saved present (1) / absent (0) label per trace and mode
     GET  /api/notes                           every saved note, removed ones included
     POST /api/notes                           add a note {trace_id, note, quote?, step?}
     POST /api/notes/<id>                      reword a note {note}
     POST /api/notes/<id>/remove               remove a note; it stays in the file
     POST /api/traces/<id>/no-failure          record "no failure observed" for a trace
+    POST /api/traces/<id>/labels              save a turn's decisions {decisions: {mode: 0 or 1}}
+                                              to Langfuse as scores, then to analysis/state/labels/
     GET  /api/suggestions                     AI suggestions with their status
     POST /api/suggestions/<id>/accept         turn a suggestion into a note
     POST /api/suggestions/<id>/reject         record a rejected suggestion
@@ -38,7 +41,8 @@ from pathlib import Path
 from typing import NamedTuple
 from urllib.parse import unquote
 
-from analysis.review_app import batches, modes, notes, suggestions
+from analysis.helpers import langfuse_io
+from analysis.review_app import batches, labels, modes, notes, suggestions
 from analysis.review_app.rules import RulesPanel
 from analysis.review_app.rules import load_rules as load_spec_rules
 from analysis.review_app.sessions import SessionsSource
@@ -77,6 +81,7 @@ _ROUTES: dict[str, list[Route]] = {
         (re.compile(r"/api/sessions"), "_sessions"),
         (re.compile(r"/api/rules"), "_rules"),
         (re.compile(r"/api/modes"), "_modes"),
+        (re.compile(r"/api/labels"), "_labels"),
         (re.compile(r"/api/notes"), "_notes"),
         (re.compile(r"/api/suggestions"), "_suggestions"),
     ],
@@ -85,6 +90,7 @@ _ROUTES: dict[str, list[Route]] = {
         (re.compile(_NOTE), "_reword_note"),
         (re.compile(_NOTE + r"/remove"), "_remove_note"),
         (re.compile(r"/api/traces/(?P<trace_id>[^/]+)/no-failure"), "_no_failure"),
+        (re.compile(r"/api/traces/(?P<trace_id>[^/]+)/labels"), "_save_labels"),
         (re.compile(_SUGGESTION + r"/accept"), "_accept_suggestion"),
         (re.compile(_SUGGESTION + r"/reject"), "_reject_suggestion"),
     ],
@@ -104,10 +110,12 @@ class ReviewServer(ThreadingHTTPServer):
         load_sessions: Callable[[], SessionsSource],
         ui_dir: Path,
         load_rules: Callable[[], RulesPanel],
+        write_score: labels.ScoreWriter,
     ) -> None:
         super().__init__(("127.0.0.1", port), ReviewHandler)
         self.ui_dir = ui_dir.resolve()
         self.load_rules = load_rules
+        self.write_score = write_score
         self._load_sessions = load_sessions
         self._loaded: SessionsSource | None = None
         self._loading = threading.Lock()
@@ -153,6 +161,8 @@ class ReviewHandler(BaseHTTPRequestHandler):
             return 404, {"error": f"unknown note: {error}"}
         except suggestions.UnknownSuggestion as error:
             return 404, {"error": f"unknown suggestion: {error}"}
+        except labels.BadDecisions as error:
+            return 400, {"error": str(error)}
 
     def _reply(self, response: Response) -> None:
         if isinstance(response, File):
@@ -212,6 +222,22 @@ class ReviewHandler(BaseHTTPRequestHandler):
 
     def _modes(self, match: re.Match[str], query: str) -> Response:
         return 200, modes.list_modes()
+
+    # -- labels -----------------------------------------------------------
+
+    def _labels(self, match: re.Match[str], query: str) -> Response:
+        return 200, labels.list_labels()
+
+    def _save_labels(self, match: re.Match[str], query: str) -> Response:
+        decisions = self._body().get("decisions")
+        if not isinstance(decisions, dict):
+            raise _BadRequest("'decisions' must be an object of mode: 0 or 1")
+        try:
+            return 200, labels.save_decisions(match["trace_id"], decisions, self.server.write_score)
+        except labels.BadDecisions:
+            raise
+        except Exception as error:
+            return 502, {"error": f"Langfuse did not take the scores, nothing was saved: {error}"}
 
     # -- notes ------------------------------------------------------------
 
@@ -293,8 +319,9 @@ def make_server(
     load_sessions: Callable[[], SessionsSource] = load_support_sessions,
     ui_dir: Path = UI_DIR,
     load_rules: Callable[[], RulesPanel] = load_spec_rules,
+    write_score: labels.ScoreWriter = langfuse_io.post_label_score,
 ) -> ReviewServer:
-    return ReviewServer(port, load_sessions, ui_dir, load_rules)
+    return ReviewServer(port, load_sessions, ui_dir, load_rules, write_score)
 
 
 def _arguments() -> argparse.Namespace:

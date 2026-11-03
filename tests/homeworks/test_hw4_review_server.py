@@ -50,8 +50,24 @@ def loader() -> _CountingLoader:
 
 
 @pytest.fixture
+def scores() -> list[tuple[str, str, int]]:
+    """Scores the stand-in Langfuse writer received; a ("fail", ...) entry makes it fail."""
+    return []
+
+
+def _score_writer(scores: list[tuple[str, str, int]]) -> Callable[..., str]:
+    def write(trace_id: str, mode: str, label: int, *, score_id: str) -> str:
+        if scores and scores[0][0] == "fail":
+            raise ConnectionError("refused")
+        scores.append((trace_id, mode, label))
+        return trace_id
+
+    return write
+
+
+@pytest.fixture
 def base_url(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, loader: _CountingLoader
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, loader: _CountingLoader, scores: list[tuple[str, str, int]]
 ) -> Iterator[str]:
     monkeypatch.setenv("CARTWHEEL_ANALYSIS_STATE", str(tmp_path))
     ui_dir = tmp_path / "ui"
@@ -59,7 +75,9 @@ def base_url(
     (ui_dir / "index.html").write_text(PAGE)
     (ui_dir / "app.js").write_text(SCRIPT)
     (tmp_path / "outside.txt").write_text("not part of the page")
-    server = make_server(port=0, load_sessions=loader, ui_dir=ui_dir, load_rules=lambda: RULES)
+    server = make_server(
+        port=0, load_sessions=loader, ui_dir=ui_dir, load_rules=lambda: RULES, write_score=_score_writer(scores)
+    )
     thread = threading.Thread(
         target=lambda: server.serve_forever(poll_interval=0.01), daemon=True
     )
@@ -244,6 +262,7 @@ def test_modes_route_serves_the_failure_modes(base_url: str, tmp_path: Path) -> 
         "definition": "The turn ends without any reply.",
         "status": "candidate",
         "example_trace_ids": ["t1"],
+        "close_negative_trace_ids": ["t2"],
         "note_ids": ["n1"],
     }
     (tmp_path / "patterns.json").write_text(json.dumps({"modes": [mode]}))
@@ -255,7 +274,45 @@ def test_modes_route_serves_the_failure_modes(base_url: str, tmp_path: Path) -> 
         "batch_counts": [{"batch": 1, "count": 1}],
         "total": 1,
         "note_ids": ["n1"],
+        "example_trace_ids": ["t1"],
+        "close_negative_trace_ids": ["t2"],
     }])
+
+
+def _two_modes(tmp_path: Path) -> None:
+    modes = [{"name": "no_reply", "note_ids": []}, {"name": "date_errors", "note_ids": []}]
+    (tmp_path / "patterns.json").write_text(json.dumps({"modes": modes}))
+
+
+def test_saved_decisions_are_listed(base_url: str, tmp_path: Path, scores: list[tuple[str, str, int]]) -> None:
+    _two_modes(tmp_path)
+
+    status, saved = _post(f"{base_url}/api/traces/t1/labels", {"decisions": {"no_reply": 1, "date_errors": 0}})
+
+    assert status == 200 and isinstance(saved, list) and len(saved) == 2
+    assert scores == [("t1", "no_reply", 1), ("t1", "date_errors", 0)]
+    _, listed = _get(f"{base_url}/api/labels")
+    assert isinstance(listed, list)
+    assert sorted((row["mode"], row["label"]) for row in listed) == [("date_errors", 0), ("no_reply", 1)]
+
+
+@pytest.mark.parametrize("body", [{}, {"decisions": {"no_reply": 1}}, {"decisions": {"no_reply": 1, "date_errors": 5}}])
+def test_incomplete_or_wrong_decisions_are_refused(base_url: str, tmp_path: Path, body: dict[str, object]) -> None:
+    _two_modes(tmp_path)
+
+    status, _ = _post(f"{base_url}/api/traces/t1/labels", body)
+
+    assert status == 400
+
+
+def test_a_langfuse_failure_answers_502(base_url: str, tmp_path: Path, scores: list[tuple[str, str, int]]) -> None:
+    _two_modes(tmp_path)
+    scores.append(("fail", "", 0))
+
+    status, answer = _post(f"{base_url}/api/traces/t1/labels", {"decisions": {"no_reply": 1, "date_errors": 0}})
+
+    assert status == 502
+    assert isinstance(answer, dict) and "Langfuse" in str(answer["error"])
 
 
 def test_conversations_share_the_loaded_traces_until_a_refresh(

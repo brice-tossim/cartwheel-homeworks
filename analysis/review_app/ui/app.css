@@ -209,6 +209,28 @@ mark.is-flashing, .is-flashing { animation: flash 1.2s ease-out; }
 .toast { position: fixed; z-index: 20; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 10px 16px; border-radius: 10px; background: var(--ink); color: #FFFFFF; font-size: 14px; }
 
 /* ---- narrow screens: panes stack and the page scrolls as one ---- */
+/* Label tab: the decisions panel */
+.decisions-intro { margin: 0; font-size: 13px; }
+.decision { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; }
+.decision.is-unchecked { border-style: dashed; border-color: var(--mark-line); background: #FFFCF3; }
+.decision-name { position: relative; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+/* The full definition opens right under the cut line while the pointer is on it. */
+.decision-name:has(.decision-definition:hover)::after { content: attr(data-full); position: absolute; top: 100%; left: -6px; right: -6px; z-index: 5; margin-top: 2px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); box-shadow: 0 6px 18px rgba(28, 30, 34, 0.12); color: var(--ink); font-size: 13px; line-height: 1.45; white-space: normal; pointer-events: none; }
+.decision-name .mono { font-size: 13.5px; font-weight: 600; }
+.decision-definition { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 13px; color: var(--muted); cursor: default; }
+.decision-choice { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.choice { min-height: 36px; padding: 0 12px; border: 1px solid var(--control-line); border-radius: 8px; background: var(--surface); color: var(--ink); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
+.choice[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: #FFFFFF; font-weight: 600; }
+.decision-hint { font-size: 12px; color: var(--muted); }
+.decision.is-unchecked .decision-hint { color: var(--write-ink); font-weight: 600; }
+.label-notes-toggle { display: inline-flex; align-self: flex-start; align-items: center; gap: 6px; min-height: 32px; margin-left: -8px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; color: var(--accent-ink); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.label-notes-toggle:hover { background: var(--accent-tint); }
+.label-notes-toggle svg { transition: transform 0.15s; }
+.label-notes-toggle[aria-expanded="true"] svg { transform: rotate(90deg); }
+.decision-notes { display: flex; flex-direction: column; gap: 8px; }
+.decisions-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; }
+.decisions-foot .button[disabled] { opacity: 0.5; cursor: not-allowed; }
+
 /* Failure modes tab */
 .modes-view { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 28px 24px; }
 .modes-page { max-width: 920px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }

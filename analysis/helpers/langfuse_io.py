@@ -454,6 +454,34 @@ def write_label_score(
     return langfuse_id
 
 
+def post_label_score(
+    trace_id: str,
+    mode: str,
+    label: int,
+    *,
+    score_id: str,
+    http: httpx.Client | None = None,
+) -> str:
+    """Write a human label as a Langfuse score and fail loudly if Langfuse refuses it.
+
+    The SDK's ``create_score`` queues the score and only logs a failed upload,
+    so a caller cannot tell the score was lost. This posts straight to
+    POST /api/public/scores and raises on any error status. The fixed
+    ``score_id`` makes a second write replace the first, so a changed label
+    leaves one score per trace and mode.
+
+    Returns:
+        The Langfuse trace id the score was written against.
+    """
+    with http or _scores_http() as client:
+        response = client.post(
+            "/api/public/scores",
+            json={"id": score_id, "traceId": trace_id, "name": mode, "value": label, "dataType": "NUMERIC"},
+        )
+        response.raise_for_status()
+    return trace_id
+
+
 def _scores_http() -> httpx.Client:
     """Return an HTTP client for the v3 scores API, which the SDK does not cover."""
     import httpx

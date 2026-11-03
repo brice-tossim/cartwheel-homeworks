@@ -1,12 +1,18 @@
-// The side panel: notes per turn, AI suggestions, rules and policy numbers.
+// The side panel: notes per turn, AI suggestions, rules and policy numbers,
+// or the decisions panel in the Label tab.
 
 import { $, esc, plural } from "./helpers.js";
+import { labelPanel } from "./label-panel.js";
 import { failureNotes, liveNotes, selected } from "./lookups.js";
 import { inline } from "./markdown.js";
 import { state } from "./state.js";
 
 export function renderSide() {
   const conversation = selected();
+  if (state.view === "label") {
+    $("side").innerHTML = (conversation ? labelPanel(conversation) : "") + rulesCard();
+    return;
+  }
   const notes = conversation
     ? conversation.turns.map((turn, i) => notesCard(conversation, turn, i)).join("")
     : "";

@@ -7,6 +7,7 @@ import { go, openNoteInRead, select, toggleList } from "./navigation.js";
 import { act, currentTurnId, decideSuggestion, focusNoteBox, markNoFailure, removeNote, rewordNote, saveTurnNote, showSavedNote, showSuggestion } from "./note-actions.js";
 import { hidePopover, openPopoverForSelection, savePopoverNote } from "./selection-popover.js";
 import { loadAll } from "./server.js";
+import { saveLabels } from "./label-actions.js";
 import { renderSide } from "./side-panel.js";
 import { remember, state } from "./state.js";
 import { renderModes, showView } from "./views.js";
@@ -125,6 +126,22 @@ export function bindClicks() {
     if (action === "save-edit") rewordNote(noteId);
     if (action === "remove") removeNote(noteId);
     if (action === "accept" || action === "reject") decideSuggestion(button.dataset.suggestion, action);
+    if (action === "label-pick") {
+      const { trace, mode, label } = button.dataset;
+      state.labelDrafts[trace] = { ...state.labelDrafts[trace], [mode]: Number(label) };
+      renderSide();
+    }
+    if (action === "label-turn") {
+      state.labelTurn[state.selectedId] = Number(button.dataset.turn);
+      renderSide();
+    }
+    if (action === "toggle-label-notes") {
+      const { mode } = button.dataset;
+      if (state.labelOpen.has(mode)) state.labelOpen.delete(mode);
+      else state.labelOpen.add(mode);
+      renderSide();
+    }
+    if (action === "save-labels") saveLabels(button.dataset.trace);
     if (action === "toggle-rules") {
       state.rulesOpen = !state.rulesOpen;
       remember("rulesOpen", state.rulesOpen);
