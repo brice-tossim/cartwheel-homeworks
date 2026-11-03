@@ -19,3 +19,6 @@ __pycache__/
 .venv/
 .pytest_cache/
 scenarios/demo_pilot_gt.json
+
+# Expanded copy of the session records, kept locally for the HW1 video.
+hw1-session.expanded.json
