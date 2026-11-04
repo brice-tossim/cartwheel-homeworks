@@ -1,6 +1,7 @@
 // The Label tab's decisions panel: one present or absent decision per failure
 // mode for the open turn, pre-filled from the review so far, with the notes
-// each mode links on this turn folded under it.
+// each mode links on this turn (for it or for a close negative) folded under it,
+// and the turn's notes no mode links in a block below the modes.
 //
 // Pre-fill: present when the mode lists the turn among its traces, absent when
 // the turn is one of its close negatives or was marked "no failure observed"
@@ -29,6 +30,7 @@ function decisionsBody(traceId) {
   const decisions = state.modes.map((mode) => [mode, decision(mode, traceId)]);
   const checked = decisions.filter(([, d]) => d.checked).length;
   return `<p class="muted decisions-intro">Pre-filled from your notes. Check each mode, then save the turn.</p>    ${decisions.map(([mode, d]) => decisionBlock(mode, d, traceId)).join("")}
+    ${unlinkedBlock(traceId)}
     <div class="decisions-foot">
       <span class="muted">${checked} of ${decisions.length} checked</span>
       <button type="button" class="button primary" data-action="save-labels" data-trace="${esc(traceId)}"${checked < decisions.length ? " disabled" : ""}>Save decisions</button>
@@ -92,8 +94,23 @@ function decisionBlock(mode, d, traceId) {
   </div><!-- /decision -->`;
 }
 
+const linkedIds = (mode) => [...mode.note_ids, ...(mode.close_negative_note_ids ?? [])];
+
+// The turn's notes that no mode lists, so a highlight without a mode is not missed.
+function unlinkedBlock(traceId) {
+  const linked = new Set(state.modes.flatMap(linkedIds));
+  const notes = failureNotes(traceId).filter((note) => !linked.has(note.id));
+  if (!notes.length) return "";
+  return `<div class="unlinked-notes" role="group" aria-labelledby="unlinked-title">
+    <h3 id="unlinked-title">Not linked to a mode · ${notes.length}</h3>
+    <p class="muted">Notes on this turn that no failure mode lists yet.</p>
+    ${notes.map(noteCard).join("")}
+  </div><!-- /unlinked-notes -->`;
+}
+
 function notesFold(mode, traceId) {
-  const notes = failureNotes(traceId).filter((note) => mode.note_ids.includes(note.id));
+  const linked = linkedIds(mode);
+  const notes = failureNotes(traceId).filter((note) => linked.includes(note.id));
   if (!notes.length) return "";
   const open = state.labelOpen.has(mode.name);
   return `<button type="button" class="label-notes-toggle" data-action="toggle-label-notes" data-mode="${esc(mode.name)}" aria-expanded="${open}"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l4 4-4 4"></path></svg>Notes</button>

@@ -228,6 +228,9 @@ mark.is-flashing, .is-flashing { animation: flash 1.2s ease-out; }
 .label-notes-toggle svg { transition: transform 0.15s; }
 .label-notes-toggle[aria-expanded="true"] svg { transform: rotate(90deg); }
 .decision-notes { display: flex; flex-direction: column; gap: 8px; }
+.unlinked-notes { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px dashed var(--control-line); border-radius: 10px; background: var(--surface-soft); }
+.unlinked-notes h3 { margin: 0; font-size: 14px; font-weight: 600; }
+.unlinked-notes p { margin: 0; font-size: 13px; }
 .decisions-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; }
 .decisions-foot .button[disabled] { opacity: 0.5; cursor: not-allowed; }
 

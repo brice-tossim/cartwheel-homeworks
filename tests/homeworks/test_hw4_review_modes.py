@@ -66,6 +66,17 @@ def test_each_mode_keeps_its_definition_status_and_notes(state: Path) -> None:
     assert first["note_ids"] == ["n1", "n2", "n3", "n4"]
 
 
+def test_each_mode_keeps_the_notes_behind_its_close_negatives(state: Path) -> None:
+    patterns = json.loads((state / "patterns.json").read_text())
+    patterns["modes"][0]["close_negative_note_ids"] = ["n9"]
+    (state / "patterns.json").write_text(json.dumps(patterns))
+
+    listed = modes.list_modes()
+
+    assert listed[0]["close_negative_note_ids"] == ["n9"]
+    assert listed[1]["close_negative_note_ids"] == []
+
+
 def test_a_trace_in_no_batch_is_refused(state: Path) -> None:
     patterns = json.loads((state / "patterns.json").read_text())
     patterns["modes"][0]["example_trace_ids"].append("unbatched")

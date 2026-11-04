@@ -4,7 +4,8 @@ Each final mode starts from a pre-filled decision: present when the mode lists
 the turn among its traces, absent when the turn is one of its close negatives
 or was marked "no failure observed", and otherwise absent but not checked yet.
 A saved label wins over the pre-fill, and a click wins over both. The turn's
-notes each mode links sit folded under it. Each test runs the page's own module in Node.
+notes each mode links sit folded under it, and the notes no mode links
+sit in their own block below the modes. Each test runs the page's own module in Node.
 """
 
 from __future__ import annotations
@@ -38,7 +39,7 @@ MODES = [
     {"name": "no_reply", "definition": "The turn ends without any reply.", "example_trace_ids": ["t1"],
      "close_negative_trace_ids": [], "note_ids": ["n1"]},
     {"name": "date_errors", "definition": "The reply uses the wrong date.", "example_trace_ids": [],
-     "close_negative_trace_ids": ["t1"], "note_ids": []},
+     "close_negative_trace_ids": ["t1"], "note_ids": [], "close_negative_note_ids": ["n3"]},
     {"name": "too_much_detail", "definition": "The reply says more than needed.", "example_trace_ids": [],
      "close_negative_trace_ids": [], "note_ids": []},
 ]
@@ -46,6 +47,10 @@ MODES = [
 NOTES = [
     {"id": "n1", "trace_id": "t1", "kind": "note", "quote": "Let me check", "step": 2, "note": "No reply after this."},
     {"id": "n2", "trace_id": "t2", "kind": "no_failure", "quote": None, "step": None, "note": "no failure observed"},
+    {"id": "n3", "trace_id": "t1", "kind": "note", "quote": "Today is", "step": None,
+     "note": "`date_errors` is a close negative here."},
+    {"id": "n4", "trace_id": "t1", "kind": "note", "quote": "list_my_orders", "step": 1,
+     "note": "Not sure which mode this is."},
 ]
 
 ONE_TURN = {"session_id": "s1", "turns": [{"trace_id": "t1"}]}
@@ -153,11 +158,17 @@ def test_an_unfolded_mode_shows_its_note_cards_from_read() -> None:
     assert "“Let me check”" in block
 
 
-def test_a_mode_without_notes_on_the_turn_has_no_notes_button() -> None:
+def test_a_close_negative_shows_the_note_behind_it() -> None:
     block = _block(_panel(open_modes=("date_errors",)), "date_errors")
 
-    assert "toggle-label-notes" not in block
+    assert 'data-note-card="n3"' in block
     assert "No reply after this." not in block
+
+
+def test_a_mode_without_notes_on_the_turn_has_no_notes_button() -> None:
+    block = _block(_panel(open_modes=("too_much_detail",)), "too_much_detail")
+
+    assert "toggle-label-notes" not in block
 
 
 def test_a_turn_without_notes_has_no_notes_button() -> None:
@@ -187,3 +198,23 @@ def test_the_definition_shows_in_full_on_hover() -> None:
 
     assert 'data-full="The turn ends without any reply."' in block
     assert "title=" not in block
+
+
+def _unlinked_block(panel: str) -> str:
+    match = re.search(r'<div class="unlinked-notes".*?<!-- /unlinked-notes -->', panel, re.S)
+    return match[0] if match else ""
+
+
+def test_notes_no_mode_links_sit_in_their_own_block_below_the_modes() -> None:
+    panel = _panel()
+    block = _unlinked_block(panel)
+
+    assert "Not linked to a mode · 1" in block
+    assert 'data-note-card="n4"' in block
+    assert 'data-note-card="n1"' not in block and 'data-note-card="n3"' not in block
+    assert panel.index("unlinked-notes") > panel.rindex("<!-- /decision -->")
+    assert panel.index("unlinked-notes") < panel.index("Save decisions")
+
+
+def test_a_turn_whose_notes_are_all_linked_has_no_unlinked_block() -> None:
+    assert "unlinked-notes" not in _panel(TWO_TURNS, turn={"s2": 1})

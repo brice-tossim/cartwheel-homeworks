@@ -2,7 +2,8 @@
 
 patterns.json is the single source of the failure modes. Each mode comes back
 with its definition, how many of its traces fall in each review batch, its
-total, and the ids of the notes that support it. Batches sharing a number
+total, the ids of the notes that support it, and the ids of the notes that
+explain its close negatives. Batches sharing a number
 (batch_1_random, batch_1_clusters) count as one batch.
 """
 
@@ -22,6 +23,7 @@ class Pattern(TypedDict):
     example_trace_ids: list[str]
     close_negative_trace_ids: NotRequired[list[str]]
     note_ids: list[str]
+    close_negative_note_ids: NotRequired[list[str]]
 
 
 class BatchCount(TypedDict):
@@ -38,6 +40,7 @@ class ModeView(TypedDict):
     note_ids: list[str]
     example_trace_ids: list[str]
     close_negative_trace_ids: list[str]
+    close_negative_note_ids: list[str]
 
 
 def list_modes() -> list[ModeView]:
@@ -76,6 +79,7 @@ def _view(pattern: Pattern, batch_of: dict[str, int]) -> ModeView:
         "note_ids": pattern["note_ids"],
         "example_trace_ids": traces,
         "close_negative_trace_ids": pattern.get("close_negative_trace_ids", []),
+        "close_negative_note_ids": pattern.get("close_negative_note_ids", []),
     }
 
 

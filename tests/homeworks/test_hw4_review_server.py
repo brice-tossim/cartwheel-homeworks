@@ -264,6 +264,7 @@ def test_modes_route_serves_the_failure_modes(base_url: str, tmp_path: Path) -> 
         "example_trace_ids": ["t1"],
         "close_negative_trace_ids": ["t2"],
         "note_ids": ["n1"],
+        "close_negative_note_ids": ["n2"],
     }
     (tmp_path / "patterns.json").write_text(json.dumps({"modes": [mode]}))
 
@@ -276,6 +277,7 @@ def test_modes_route_serves_the_failure_modes(base_url: str, tmp_path: Path) -> 
         "note_ids": ["n1"],
         "example_trace_ids": ["t1"],
         "close_negative_trace_ids": ["t2"],
+        "close_negative_note_ids": ["n2"],
     }])
 
 
