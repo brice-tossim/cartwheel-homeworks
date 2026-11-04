@@ -16,8 +16,6 @@
         "b8ec803605ae",
         "8711e0b3ae04",
         "a5d6b435b5e9",
-        "2ea1b591df69",
-        "711c00cbfea8",
         "205bc425ee64",
         "3a11ed3beec1",
         "cc0e8c6b4667",
@@ -51,8 +49,6 @@
         "2c9307a33819ac9bb904c3366004e0ae",
         "1bd924606faee465e332ea3af1420565",
         "275066f1e2548fbf11f2cc1d5e28ca96",
-        "55e41507adf80abac4e44fa5145eb204",
-        "22f0af59d66a9d1fe88a9fff38b7b92e",
         "a4aeceedb4d83f929dea27e10631a0a0",
         "2001821552a022a2ea584839d840b6b3",
         "d3155538344bf8b6f59d99d41ee78ff1",
@@ -84,7 +80,10 @@
         "6238f72c640e9c0dd6e6c2092c69b3a4",
         "57b3323291e7ffd3416aef3452c8d965",
         "60c6a13aba2821d3d67b0d6c3f59c39a",
-        "dd14ea25e0d1071e520016392f970dc1"
+        "dd14ea25e0d1071e520016392f970dc1",
+        "94b6ab798f49f16a9b82aca1d3edc7f5",
+        "55e41507adf80abac4e44fa5145eb204",
+        "22f0af59d66a9d1fe88a9fff38b7b92e"
       ],
       "merged_from": [
         {
@@ -106,6 +105,22 @@
           "trace_id": "2cfc15ccc925cccfe108dd2692e86342",
           "note_id": "effe598dfc30"
         }
+      ],
+      "close_negative_note_ids": [
+        "774dc9463252",
+        "3f5377057d76",
+        "3b50613d859e",
+        "a62dba4ecd62",
+        "e63d2278a3c7",
+        "5ef9fadbc37e",
+        "e2636d918b36",
+        "9f6343e398dd",
+        "a83d31ab4f5e",
+        "4fd7ac69266a",
+        "5f176a930367",
+        "9d8852ca4364",
+        "2ea1b591df69",
+        "711c00cbfea8"
       ]
     },
     {
@@ -146,7 +161,10 @@
         "21b7a18b156b",
         "341921dbeb36",
         "2cbc34fb0fc5",
-        "34b4fbf5fc11"
+        "34b4fbf5fc11",
+        "d378c1917a6a",
+        "3f607ec7e20c",
+        "c68e40de62a0"
       ],
       "example_trace_ids": [
         "7d614db08a876f0c70541e0a5d567b6b",
@@ -181,7 +199,10 @@
         "2efac6b6ced15c574e7f7244f7b476b2",
         "e9dba5c23d2a88d647ec02af1a3c6ffa",
         "57b3323291e7ffd3416aef3452c8d965",
-        "d25cde4c00b5bf276db48d8c1b3b0f19"
+        "d25cde4c00b5bf276db48d8c1b3b0f19",
+        "522bdafb8521932bf4c80d984d22b63c",
+        "e5237643a226a5d8bf6254462662b824",
+        "63a1a15357fe626e568ef25db3b65042"
       ],
       "any_instance_count": 33,
       "close_negative_trace_ids": [],
@@ -194,7 +215,8 @@
           "name": "reveals_data_problems",
           "definition": "The reply tells the customer about errors in the store data, such as duplicate listings or a negative price."
         }
-      ]
+      ],
+      "close_negative_note_ids": []
     },
     {
       "name": "mishandles_ambiguous_request",
@@ -257,6 +279,18 @@
           "name": "unclear_next_step",
           "definition": "The agent asks the customer for information but leaves them unsure what to give: it names it vaguely, or gives no hint where to find it."
         }
+      ],
+      "close_negative_note_ids": [
+        "01bff9460efd",
+        "43213ae71fc9",
+        "318d08247a7f",
+        "e2515e017088",
+        "3df70deda2d1",
+        "3e4fd2acc08f",
+        "19c619f257be",
+        "a245a227d4eb",
+        "a0d1d08b9325",
+        "d766a287cc10"
       ]
     },
     {
@@ -283,7 +317,8 @@
         "845aadd3db06740bb9edfbd7aab596f9"
       ],
       "any_instance_count": 7,
-      "close_negative_trace_ids": []
+      "close_negative_trace_ids": [],
+      "close_negative_note_ids": []
     },
     {
       "name": "date_errors",
@@ -330,6 +365,11 @@
           "definition": "The reply uses a current date other than the platform's current date (world_asof), or counts dates or days from the wrong current date.",
           "replaced_because": "\"recent\" needed a rule: \"most recent\" ranks the matching orders, while \"recent\" alone is a claim about age."
         }
+      ],
+      "close_negative_note_ids": [
+        "181542e9d444",
+        "9beb5afe723c",
+        "20ee9b283618"
       ]
     },
     {
@@ -368,6 +408,11 @@
           "definition": "The agent handles the request as if the caller were a shopper, when the caller's role calls for something else (for example, asking a support caller which customer they mean).",
           "replaced_because": "Asking a support caller for an order id \"from your confirmation email\" read like a shopper but still fit the role; the failure is judged by what the role mistake changes, not by wording."
         }
+      ],
+      "close_negative_note_ids": [
+        "741aefc027f1",
+        "2923e034d167",
+        "7b48b8dce6c2"
       ]
     },
     {
@@ -390,7 +435,8 @@
         "3b6ef3b84d83625c3638882d6f6dbd64"
       ],
       "any_instance_count": 5,
-      "close_negative_trace_ids": []
+      "close_negative_trace_ids": [],
+      "close_negative_note_ids": []
     },
     {
       "name": "escalates_without_need",
@@ -400,27 +446,29 @@
       "note_ids": [
         "79aac18bbc29",
         "a1e898e16009",
-        "2ea1b591df69",
         "aa0d807527a8",
         "d76407c7d922",
         "87d335cc11e4",
         "18dc298d4f3a",
         "3243102abfec",
-        "7d6e7a3a64f5"
+        "7d6e7a3a64f5",
+        "2fbbb682baf7"
       ],
       "example_trace_ids": [
         "e2e0f7095958a198f9835472f63f88c8",
         "72e33e745ff92828f0337c57e7e1695f",
-        "55e41507adf80abac4e44fa5145eb204",
         "188a1c3af05b25c563fc2f002b518e46",
         "fb1ec00a0b97582d42d02d0112e48a6b",
         "3b6ef3b84d83625c3638882d6f6dbd64",
         "2efac6b6ced15c574e7f7244f7b476b2",
         "e9dba5c23d2a88d647ec02af1a3c6ffa",
-        "60c6a13aba2821d3d67b0d6c3f59c39a"
+        "60c6a13aba2821d3d67b0d6c3f59c39a",
+        "e5237643a226a5d8bf6254462662b824"
       ],
       "any_instance_count": 9,
-      "close_negative_trace_ids": [],
+      "close_negative_trace_ids": [
+        "55e41507adf80abac4e44fa5145eb204"
+      ],
       "merged_from": [
         {
           "name": "escalates_ineligible_refund",
@@ -432,6 +480,9 @@
             }
           ]
         }
+      ],
+      "close_negative_note_ids": [
+        "2ea1b591df69"
       ]
     }
   ]

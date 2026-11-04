@@ -633,9 +633,26 @@
       "kind": "note",
       "quote": null,
       "step": null,
-      "note": "The agent ignores the store name and list all the shopper's orders. Also the agent escalate to human an order with a none eligible refund",
-      "ts": "2026-10-27T01:08:05.324976+00:00",
-      "history": [],
+      "note": "`misses_store_orders` and `escalates_without_need` are close negatives here. The agent lists the orders, matches them to Blue Heron Ceramics and finds the customer's only order from that store (#8003). It sends a dispute to a human, which `cw-disputes` requires, so the escalation is needed even though the order isn't refund eligible.",
+      "ts": "2026-11-04T18:12:09.799363+00:00",
+      "history": [
+        {
+          "note": "The agent ignores the store name and list all the shopper's orders. Also the agent escalate to human an order with a none eligible refund",
+          "ts": "2026-10-27T01:08:05.324976+00:00"
+        },
+        {
+          "note": "The agent use `list_my_orders` instead of filter out by the store name. Also the agent escalate to human an order with a none eligible refund",
+          "ts": "2026-11-04T02:26:48.508661+00:00"
+        },
+        {
+          "note": "The agent used `list_my_orders` instead of filter out by the store name. Also the agent escalate to human an order with a none eligible refund",
+          "ts": "2026-11-04T02:26:57.009387+00:00"
+        },
+        {
+          "note": "The agent used `list_my_orders` instead of filtering out by the store name. Also the agent escalate to human an order with a none eligible refund",
+          "ts": "2026-11-04T02:27:10.029010+00:00"
+        }
+      ],
       "removed_ts": null
     },
     {
@@ -842,9 +859,14 @@
       "kind": "note",
       "quote": "I’ll look up Cartwheel’s refund/return guidance and your recent orders so I can explain what information is needed and help identify the Fern & Fog Skincare order.",
       "step": 1,
-      "note": "The agent should filter the customer's orders by the store name",
-      "ts": "2026-10-27T14:56:28.479967+00:00",
-      "history": [],
+      "note": "`misses_store_orders` is a close negative here. The agent lists the orders and matches them to the Fern & Fog Skincare store id, so it shows all three of the customer's orders from that store (#1931, #3463 and #7942).",
+      "ts": "2026-11-04T18:18:21.863041+00:00",
+      "history": [
+        {
+          "note": "The agent should filter the customer's orders by the store name",
+          "ts": "2026-10-27T14:56:28.479967+00:00"
+        }
+      ],
       "removed_ts": null
     },
     {
@@ -1650,9 +1672,14 @@
       "kind": "note",
       "quote": "I’ll look up your recent Cartwheel orders so I can find the Fern & Fog Skincare order and check its current status.",
       "step": 1,
-      "note": "The store is known here. The agent could look up using the store name as a filter",
-      "ts": "2026-11-02T00:28:55.638102+00:00",
-      "history": [],
+      "note": "`misses_store_orders` is a close negative here. No tool filters orders by store, so the agent lists the orders, looks up the Fern & Fog Skincare store id and matches them. It finds order #1532, the only one not delivered yet, which is the one the customer is waiting for.",
+      "ts": "2026-11-04T03:05:54.185313+00:00",
+      "history": [
+        {
+          "note": "The store is known here. The agent could look up using the store name as a filter",
+          "ts": "2026-11-02T00:28:55.638102+00:00"
+        }
+      ],
       "removed_ts": null
     },
     {
@@ -1661,9 +1688,14 @@
       "kind": "note",
       "quote": "I’ll look up your recent Cartwheel orders so I can find the Wooden Whale Workshop purchase and check whether it’s eligible for a refund.",
       "step": 1,
-      "note": "The store is known. The agent could filter by",
-      "ts": "2026-11-02T00:30:39.856408+00:00",
-      "history": [],
+      "note": "`misses_store_orders` is a close negative here. The agent lists the orders and matches them to the Wooden Whale Workshop store id, so it has all three of the customer's orders from that store. Picking #483 without asking is `mishandles_ambiguous_request`, not this mode.",
+      "ts": "2026-11-04T03:05:54.188583+00:00",
+      "history": [
+        {
+          "note": "The store is known. The agent could filter by",
+          "ts": "2026-11-02T00:30:39.856408+00:00"
+        }
+      ],
       "removed_ts": null
     },
     {
@@ -1683,9 +1715,14 @@
       "kind": "note",
       "quote": "I’ll look up your recent orders and Cartwheel’s return/refund policy so I can identify the Wooden Whale Workshop purchase and check what options may apply.",
       "step": 1,
-      "note": "The store is known. The agent could filter by",
-      "ts": "2026-11-02T00:34:56.455105+00:00",
-      "history": [],
+      "note": "`misses_store_orders` is a close negative here. The agent lists the orders, matches them to Wooden Whale Workshop, and shows both of the customer's orders from that store (#517 and #6761).",
+      "ts": "2026-11-04T03:05:54.191344+00:00",
+      "history": [
+        {
+          "note": "The store is known. The agent could filter by",
+          "ts": "2026-11-02T00:34:56.455105+00:00"
+        }
+      ],
       "removed_ts": null
     },
     {
@@ -1716,9 +1753,14 @@
       "kind": "note",
       "quote": "I didn’t find a matching order by that search, so I’ll check your recent orders to see if there’s a Copperline Tools purchase listed.",
       "step": 2,
-      "note": "The store is known. The agent could filter by",
-      "ts": "2026-11-02T00:37:42.551960+00:00",
-      "history": [],
+      "note": "`misses_store_orders` is a close negative here. `find_order` searches product names, so it finds nothing for \"copperline tools\". The agent then lists the orders and matches them to the Copperline Tools store id, which gives it all three orders from that store. Picking #724 without asking is `mishandles_ambiguous_request`.",
+      "ts": "2026-11-04T03:05:54.193811+00:00",
+      "history": [
+        {
+          "note": "The store is known. The agent could filter by",
+          "ts": "2026-11-02T00:37:42.551960+00:00"
+        }
+      ],
       "removed_ts": null
     },
     {
@@ -1738,9 +1780,14 @@
       "kind": "note",
       "quote": "I’ll look up your recent orders to identify the Trailhead Supply order and confirm its refund eligibility before processing anything.",
       "step": 1,
-      "note": "The store is known. The agent should filter by",
-      "ts": "2026-11-02T00:39:51.790604+00:00",
-      "history": [],
+      "note": "`misses_store_orders` is a close negative here. The agent lists the orders and matches them to the Trailhead Supply store id. It finds the customer's only order from that store (#9296, already refunded) and asks if they meant another one.",
+      "ts": "2026-11-04T03:05:54.196018+00:00",
+      "history": [
+        {
+          "note": "The store is known. The agent should filter by",
+          "ts": "2026-11-02T00:39:51.790604+00:00"
+        }
+      ],
       "removed_ts": null
     },
     {
@@ -1793,9 +1840,14 @@
       "kind": "note",
       "quote": "I’ll check your recent Cartwheel orders for any Trailhead Supply purchase and look up our guidance for unrecognized charges so I can point you to the right next step.",
       "step": 1,
-      "note": "The store is known. The agent could filter by",
-      "ts": "2026-11-02T00:47:34.070884+00:00",
-      "history": [],
+      "note": "`misses_store_orders` is a close negative here. The agent lists the orders and matches them to Trailhead Supply, finds the customer's only order from that store (#2), and shows it.",
+      "ts": "2026-11-04T03:05:54.198389+00:00",
+      "history": [
+        {
+          "note": "The store is known. The agent could filter by",
+          "ts": "2026-11-02T00:47:34.070884+00:00"
+        }
+      ],
       "removed_ts": null
     },
     {
@@ -2009,6 +2061,66 @@
       "step": null,
       "note": "`mishandles_ambiguous_request` is a close negative here. The merchant names no order. The agent points to the one stuck order (#5473), lists the other open ones, and asks for the order number if it guessed wrong.",
       "ts": "2026-11-02T19:07:36.874410+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "d378c1917a6a",
+      "trace_id": "522bdafb8521932bf4c80d984d22b63c",
+      "kind": "note",
+      "quote": "(cw-cancellations)",
+      "step": null,
+      "note": "`reveals_internal_details` is present here. Leaked policy ID",
+      "ts": "2026-11-04T02:54:16.933946+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "9d8852ca4364",
+      "trace_id": "94b6ab798f49f16a9b82aca1d3edc7f5",
+      "kind": "note",
+      "quote": "I’ll check your store’s recent orders for “Harbor Knits” so I can give you the current status.",
+      "step": 1,
+      "note": "`misses_store_orders` is a close negative here. The agent searches its own store name, Harbor Knits, as a product with `find_order` and finds nothing, but it never replies, so there's no wrong answer: this is `no_reply`.",
+      "ts": "2026-11-04T03:30:37.123791+00:00",
+      "history": [
+        {
+          "note": "`misses_store_orders` is present here. The agent didn't narrow the lookup on the merchant store",
+          "ts": "2026-11-04T03:13:54.763221+00:00"
+        }
+      ],
+      "removed_ts": null
+    },
+    {
+      "id": "3f607ec7e20c",
+      "trace_id": "e5237643a226a5d8bf6254462662b824",
+      "kind": "note",
+      "quote": "delivery (cw-returns), and this order is outside that window. Because you still want a refund, I’ve opened a ticket for a human support agent to review whether any exception is possible. Refunds over $100 also require human review before any money moves (cw-refunds).",
+      "step": null,
+      "note": "`reveals_internal_details` is present here. Leak policy ID and automatic refund threshold",
+      "ts": "2026-11-04T04:21:40.849839+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "2fbbb682baf7",
+      "trace_id": "e5237643a226a5d8bf6254462662b824",
+      "kind": "note",
+      "quote": "Because you still want a refund, I’ve opened a ticket for a human support agent to review whether any exception is possible.",
+      "step": null,
+      "note": "`escalates_without_need` is present here. The agent escalated a none eligible refund",
+      "ts": "2026-11-04T04:24:29.925634+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "c68e40de62a0",
+      "trace_id": "63a1a15357fe626e568ef25db3b65042",
+      "kind": "note",
+      "quote": "items can generally be returned within 30 days of delivery, subject to store overrides and item condition requirements (cw-returns). Approved refunds go back to the original payment method; refunds of $100 or less can process automatically after eligibility checks, while refunds over $100 go to a human support agent for review before money moves (cw-refunds).",
+      "step": null,
+      "note": "`reveals_internal_details` is present here. Leaked policy ID as well as the automatic refund threshold",
+      "ts": "2026-11-04T04:34:13.048015+00:00",
       "history": [],
       "removed_ts": null
     }
