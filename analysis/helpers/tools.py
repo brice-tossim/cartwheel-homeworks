@@ -37,6 +37,9 @@ from typing import Any
 
 from . import _state, guards, scale, selection
 
+# Trace sources inside the repository are recorded relative to it.
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+
 # ---------------------------------------------------------------------------
 # small shared utilities
 # ---------------------------------------------------------------------------
@@ -219,6 +222,30 @@ def _load_trace_source(trace_source: str | Path | None) -> list[dict[str, Any]]:
     return selection.load_traces(trace_source)
 
 
+def _is_langfuse(trace_source: str | Path) -> bool:
+    return isinstance(trace_source, str) and trace_source.lower() == "langfuse"
+
+
+def _recorded_source(trace_source: str | Path) -> str:
+    """Return the source to save in the manifest.
+
+    A file inside the repository is saved relative to it, so the committed
+    manifest holds no path from the reviewer's machine; a file outside it
+    keeps its full path, since nothing else would find it again.
+    """
+    if _is_langfuse(trace_source):
+        return str(trace_source)
+    path = Path(trace_source).resolve()
+    return path.relative_to(_REPO_ROOT).as_posix() if path.is_relative_to(_REPO_ROOT) else str(path)
+
+
+def _source_path(recorded: str) -> str | Path:
+    """Turn a saved source back into one to load, from any working directory."""
+    if _is_langfuse(recorded) or Path(recorded).is_absolute():
+        return recorded
+    return _REPO_ROOT / recorded
+
+
 # ---------------------------------------------------------------------------
 # select_traces
 # ---------------------------------------------------------------------------
@@ -244,7 +271,11 @@ def select_traces(
             results raise. For offline use, pass a Module 1 export such as
             ``traces/support_traces.json``.
         k: batch size (the demo default is 24).
-        strategy: ``"diversity"`` (default), ``"random"``, or ``"outlier"``
+        strategy: ``"diversity"`` (default), ``"random"``, ``"cluster"``
+            (``k`` clusters on trace features, the trace closest to each
+            centre), ``"by_role"`` (``k`` whole conversations spread evenly
+            across caller roles, so a pick may bring several turns), or
+            ``"outlier"``
             (interquartile-range flags on a numeric feature).
         exclude_ids: trace ids already read, skipped this batch.
 
@@ -274,15 +305,12 @@ def select_traces(
             }
         )
     manifest = {
-        "source": str(trace_source),
+        "source": _recorded_source(trace_source),
         "k": k,
         "strategy": strategy,
         "selected_at": _utcnow(),
         "picks": picks,
     }
-    # Remember the file even if the next call runs from another directory.
-    if not (isinstance(trace_source, str) and trace_source.lower() == "langfuse"):
-        manifest["source"] = str(Path(trace_source).resolve())
     _state.write_json(_state.state_path("samples.json"), samples)
     _state.write_json(_state.state_path("sample_manifest.json"), manifest)
     return samples
@@ -325,9 +353,8 @@ def next_to_label(
     """
     labeled = {r["trace_id"] for r in _load_labels(mode)}
     confirmed_failures = [r["trace_id"] for r in _load_labels(mode) if r["label"] == 1]
-    source = trace_source or _state.read_json(
-        _state.state_path("sample_manifest.json"), default={}
-    ).get("source")
+    recorded = _state.read_json(_state.state_path("sample_manifest.json"), default={}).get("source")
+    source = trace_source or (_source_path(recorded) if recorded else None)
     traces = _load_trace_source(source) if source else []
     return selection.next_candidates(
         traces,
