@@ -2,6 +2,8 @@
 
 The filters live in analysis/review_app/ui/js/filters.js. Each test runs the
 page's own module in Node and reads which conversations a filter keeps.
+"Not read yet" and "AI suggestions to check" belong to the Read tab, "Not
+labeled yet" to the Label tab; the other filters apply in both.
 """
 
 from __future__ import annotations
@@ -37,14 +39,32 @@ SUGGESTIONS = [
 ]
 
 
-def _visible(suggested: bool) -> list[str]:
+MODES = [{"name": "no_reply"}, {"name": "date_errors"}]
+# t1 and t2a are read; t1 has every mode saved, t2a only one.
+NOTES = [
+    {"id": "n1", "trace_id": "t1", "kind": "no_failure"},
+    {"id": "n2", "trace_id": "t2a", "kind": "note"},
+]
+LABELS = [
+    {"trace_id": "t1", "mode": "no_reply", "label": 0},
+    {"trace_id": "t1", "mode": "date_errors", "label": 0},
+    {"trace_id": "t2a", "mode": "no_reply", "label": 1},
+]
+
+
+def _visible(
+    suggested: bool = False, unread: bool = False, unlabeled: bool = False, view: str = "read",
+) -> list[str]:
     page = {
+        "view": view,
         "conversations": CONVERSATIONS,
         "suggestions": SUGGESTIONS,
-        "notes": [],
+        "notes": NOTES,
+        "modes": MODES,
+        "labels": LABELS,
         "batches": [],
-        "filters": {"batch": "", "search": "", "role": "", "action": "", "tool": "",
-                    "twoTurns": False, "unread": False, "suggested": suggested},
+        "filters": {"batch": "", "search": "", "role": "", "action": "", "tool": "", "twoTurns": False,
+                    "unread": unread, "suggested": suggested, "unlabeled": unlabeled},
     }
     result = subprocess.run(
         ["node", "--input-type=module", "-e", _SCRIPT, FILTERS.as_uri(), json.dumps(page)],
@@ -59,3 +79,19 @@ def test_the_suggestion_filter_keeps_conversations_with_a_pending_suggestion_on_
 
 def test_without_the_suggestion_filter_every_conversation_shows() -> None:
     assert _visible(suggested=False) == ["one", "two", "three"]
+
+
+def test_not_labeled_yet_keeps_conversations_with_a_read_turn_left_to_label() -> None:
+    assert _visible(unlabeled=True, view="label") == ["two"]
+
+
+def test_not_labeled_yet_does_nothing_in_the_read_tab() -> None:
+    assert _visible(unlabeled=True, view="read") == ["one", "two", "three"]
+
+
+def test_read_tab_filters_do_nothing_in_the_label_tab() -> None:
+    assert _visible(unread=True, suggested=True, view="label") == ["one", "two", "three"]
+
+
+def test_not_read_yet_still_works_in_the_read_tab() -> None:
+    assert _visible(unread=True, view="read") == ["two", "three"]

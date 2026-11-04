@@ -35,7 +35,7 @@ export const state = {
   labelOpen: new Set(),
   labelTurn: {},
   view: remembered("view", "read"),
-  filters: { batch: "", search: "", role: "", action: "", tool: "", twoTurns: false, unread: false, suggested: false },
+  filters: { batch: "", search: "", role: "", action: "", tool: "", twoTurns: false, unread: false, suggested: false, unlabeled: false },
   selectedId: remembered("selected", null),
   listOpen: remembered("listOpen", true),
   rulesOpen: remembered("rulesOpen", true),

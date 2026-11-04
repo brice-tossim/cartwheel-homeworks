@@ -27,13 +27,11 @@ export function bindFilters() {
     state.filters.twoTurns = !state.filters.twoTurns;
     renderAll();
   });
-  $("unread").addEventListener("click", () => {
-    state.filters.unread = !state.filters.unread;
-    renderAll();
-  });
-  $("suggested").addEventListener("click", () => {
-    state.filters.suggested = !state.filters.suggested;
-    renderAll();
+  ["unread", "suggested", "unlabeled"].forEach((key) => {
+    $(key).addEventListener("click", () => {
+      state.filters[key] = !state.filters[key];
+      renderAll();
+    });
   });
 }
 

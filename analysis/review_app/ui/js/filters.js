@@ -1,6 +1,6 @@
 // What each filter keeps, and the conversations they leave visible.
 
-import { hasPendingSuggestions, isRead } from "./lookups.js";
+import { hasPendingSuggestions, hasTurnToLabel, isRead } from "./lookups.js";
 import { state } from "./state.js";
 
 export const ROLE_ORDER = ["shopper", "merchant", "support"];
@@ -58,14 +58,22 @@ const FILTER_TESTS = {
   twoTurns: (c, f) => !f.twoTurns || c.turns.length > 1,
   unread: (c, f) => !f.unread || c.turns.some((t) => !isRead(t.trace_id)),
   suggested: (c, f) => !f.suggested || hasPendingSuggestions(c),
+  unlabeled: (c, f) => !f.unlabeled || hasTurnToLabel(c),
   search: (c, f) => searchWords(f).every((word) => searchText(c).includes(word)),
 };
+
+// Filters that belong to one tab: elsewhere they are hidden and keep nothing out.
+export const FILTER_VIEW = { unread: "read", suggested: "read", unlabeled: "label" };
+
+export const appliesHere = (name) => !FILTER_VIEW[name] || FILTER_VIEW[name] === state.view;
 
 // The conversations every filter keeps, leaving out the filter named in
 // `except`: a filter's counts then show what picking each of its options gives.
 export function conversationsWithout(except) {
   const f = state.filters;
-  const tests = Object.entries(FILTER_TESTS).filter(([name]) => name !== except).map(([, test]) => test);
+  const tests = Object.entries(FILTER_TESTS)
+    .filter(([name]) => name !== except && appliesHere(name))
+    .map(([, test]) => test);
   return state.conversations.filter((c) => tests.every((test) => test(c, f)));
 }
 

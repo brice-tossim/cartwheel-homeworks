@@ -4,7 +4,7 @@ import { renderConversation } from "./conversation.js";
 import { renderList } from "./conversation-list.js";
 import { ACTIONS, NO_BATCH, ROLE_ORDER, conversationsWithout, inBatch, matchesBatch, visibleConversations } from "./filters.js";
 import { $, cap, esc } from "./helpers.js";
-import { allTurns, hasPendingSuggestions, isRead } from "./lookups.js";
+import { allTurns, hasPendingSuggestions, hasTurnToLabel, isRead, labelProgress } from "./lookups.js";
 import { renderSide } from "./side-panel.js";
 import { remember, state } from "./state.js";
 import { renderViews } from "./views.js";
@@ -43,12 +43,21 @@ function renderTopbar() {
   const fallback = $("fallback");
   fallback.hidden = state.source !== "export";
   fallback.innerHTML = `Showing the local export because Langfuse could not be reached: <code>${esc(state.fallbackReason)}</code>.`;
-  const turns = allTurns();
-  const read = turns.filter((t) => isRead(t.trace_id)).length;
-  $("progress-text").innerHTML = `<strong>${read}</strong> of ${turns.length} traces read`;
+  const [done, total, text] = progress();
+  $("progress-text").innerHTML = `<strong>${done}</strong> of ${total} ${text}`;
   const bar = $("progress-bar");
-  bar.style.width = turns.length ? `${(read / turns.length) * 100}%` : "0";
-  bar.style.minWidth = read ? "6px" : "0";
+  bar.style.width = total ? `${(done / total) * 100}%` : "0";
+  bar.style.minWidth = done ? "6px" : "0";
+}
+
+// Label counts the read turns labeled; the other tabs count the traces read.
+function progress() {
+  if (state.view === "label") {
+    const { labeled, read } = labelProgress();
+    return [labeled, read, "read turns labeled"];
+  }
+  const turns = allTurns();
+  return [turns.filter((t) => isRead(t.trace_id)).length, turns.length, "traces read"];
 }
 
 export function renderListVisibility() {
@@ -88,4 +97,5 @@ function renderFilterOptions() {
     + tools.map((tool) => option(tool, `${tool} · ${forTool.filter((c) => c.tools.includes(tool)).length}`, f.tool)).join("");
   $("two-turns").textContent = `Two turns · ${conversationsWithout("twoTurns").filter((c) => c.turns.length > 1).length}`;
   $("suggested").textContent = `AI suggestions to check · ${conversationsWithout("suggested").filter(hasPendingSuggestions).length}`;
+  $("unlabeled").textContent = `Not labeled yet · ${conversationsWithout("unlabeled").filter(hasTurnToLabel).length}`;
 }
