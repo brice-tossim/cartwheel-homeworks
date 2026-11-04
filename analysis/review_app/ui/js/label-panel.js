@@ -1,10 +1,11 @@
 // The Label tab's decisions panel: one present or absent decision per failure
-// mode for the open turn, pre-filled from the review so far, with the turn's
-// notes folded under each mode.
+// mode for the open turn, pre-filled from the review so far, with the notes
+// each mode links on this turn folded under it.
 //
 // Pre-fill: present when the mode lists the turn among its traces, absent when
-// the turn is one of its close negatives or was marked "no failure observed",
-// and otherwise absent but not checked yet. A saved label wins over the
+// the turn is one of its close negatives or was marked "no failure observed"
+// (no hint, the conversation list already says so), and otherwise absent but
+// not checked yet. A saved label wins over the
 // pre-fill, and a click wins over both. Saving waits until every mode is checked.
 
 import { esc } from "./helpers.js";
@@ -27,8 +28,7 @@ export function labelPanel(conversation) {
 function decisionsBody(traceId) {
   const decisions = state.modes.map((mode) => [mode, decision(mode, traceId)]);
   const checked = decisions.filter(([, d]) => d.checked).length;
-  return `<p class="muted decisions-intro">Pre-filled from your notes. Check each mode, then save the turn.</p>
-    ${decisions.map(([mode, d]) => decisionBlock(mode, d, traceId)).join("")}
+  return `<p class="muted decisions-intro">Pre-filled from your notes. Check each mode, then save the turn.</p>    ${decisions.map(([mode, d]) => decisionBlock(mode, d, traceId)).join("")}
     <div class="decisions-foot">
       <span class="muted">${checked} of ${decisions.length} checked</span>
       <button type="button" class="button primary" data-action="save-labels" data-trace="${esc(traceId)}"${checked < decisions.length ? " disabled" : ""}>Save decisions</button>
@@ -59,7 +59,7 @@ function decision(mode, traceId) {
 function prefill(mode, traceId) {
   if (mode.example_trace_ids.includes(traceId)) return { label: 1, hint: "From your notes", checked: true };
   if (mode.close_negative_trace_ids.includes(traceId)) return { label: 0, hint: "Close negative", checked: true };
-  if (isClean(traceId)) return { label: 0, hint: "No failure observed", checked: true };
+  if (isClean(traceId)) return { label: 0, hint: "", checked: true };
   return { label: 0, hint: "Not checked yet", checked: false };
 }
 
@@ -93,7 +93,7 @@ function decisionBlock(mode, d, traceId) {
 }
 
 function notesFold(mode, traceId) {
-  const notes = failureNotes(traceId);
+  const notes = failureNotes(traceId).filter((note) => mode.note_ids.includes(note.id));
   if (!notes.length) return "";
   const open = state.labelOpen.has(mode.name);
   return `<button type="button" class="label-notes-toggle" data-action="toggle-label-notes" data-mode="${esc(mode.name)}" aria-expanded="${open}"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l4 4-4 4"></path></svg>Notes</button>

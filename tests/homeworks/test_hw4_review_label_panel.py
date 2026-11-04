@@ -4,7 +4,7 @@ Each final mode starts from a pre-filled decision: present when the mode lists
 the turn among its traces, absent when the turn is one of its close negatives
 or was marked "no failure observed", and otherwise absent but not checked yet.
 A saved label wins over the pre-fill, and a click wins over both. The turn's
-notes sit folded under each mode. Each test runs the page's own module in Node.
+notes each mode links sit folded under it. Each test runs the page's own module in Node.
 """
 
 from __future__ import annotations
@@ -100,7 +100,7 @@ def test_a_turn_with_no_failure_starts_absent_for_every_mode() -> None:
     panel = _panel(TWO_TURNS, turn={"s2": 1})
 
     assert _pressed(_block(panel, "too_much_detail")) == "Absent"
-    assert "No failure observed" in _block(panel, "too_much_detail")
+    assert "No failure observed" not in panel
 
 
 def test_a_mode_without_evidence_starts_absent_but_not_checked() -> None:
@@ -137,20 +137,27 @@ def test_saving_waits_until_every_mode_is_checked() -> None:
     assert not re.search(r"<button[^>]*disabled[^>]*>Save decisions", ready)
 
 
-def test_the_turn_notes_sit_folded_under_each_mode_without_a_count() -> None:
-    block = _block(_panel(), "date_errors")
+def test_the_mode_notes_sit_folded_under_the_mode_without_a_count() -> None:
+    block = _block(_panel(), "no_reply")
 
-    assert 'data-action="toggle-label-notes" data-mode="date_errors" aria-expanded="false"' in block
+    assert 'data-action="toggle-label-notes" data-mode="no_reply" aria-expanded="false"' in block
     assert ">Notes<" in re.sub(r"\s+", "", block)
     assert "No reply after this." not in block
 
 
-def test_an_unfolded_mode_shows_the_note_cards_of_read() -> None:
-    block = _block(_panel(open_modes=("date_errors",)), "date_errors")
+def test_an_unfolded_mode_shows_its_note_cards_from_read() -> None:
+    block = _block(_panel(open_modes=("no_reply",)), "no_reply")
 
     assert 'data-note-card="n1"' in block
     assert "No reply after this." in block
     assert "“Let me check”" in block
+
+
+def test_a_mode_without_notes_on_the_turn_has_no_notes_button() -> None:
+    block = _block(_panel(open_modes=("date_errors",)), "date_errors")
+
+    assert "toggle-label-notes" not in block
+    assert "No reply after this." not in block
 
 
 def test_a_turn_without_notes_has_no_notes_button() -> None:
