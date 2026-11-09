@@ -2123,6 +2123,64 @@
       "ts": "2026-11-04T04:34:13.048015+00:00",
       "history": [],
       "removed_ts": null
+    },
+    {
+      "id": "765e1bb3a3ba",
+      "trace_id": "6e1108f51db7a3780b52eadee95a2fcd",
+      "kind": "note",
+      "quote": "It looks like all your recent orders have been marked as delivered. However, I couldn't find an order specifically from Blue Heron Ceramics in the recent list.",
+      "step": null,
+      "note": "`misses_store_orders` is present here. The customer named the store, but the agent could not find their order from it.",
+      "ts": "2026-11-09T15:40:38.391061+00:00",
+      "history": [
+        {
+          "note": "`missing_store_orders` is present here. The customer named the store, but the agent wasn't able to find it.",
+          "ts": "2026-11-09T15:38:47.074554+00:00"
+        },
+        {
+          "note": "`misses_store_orders ` is present here. The customer named the store, but the agent wasn't able to find it.",
+          "ts": "2026-11-09T15:40:20.065620+00:00"
+        }
+      ],
+      "removed_ts": null
+    },
+    {
+      "id": "cd2112676aef",
+      "trace_id": "a55bb0eb07f86aeffddda132252a6912",
+      "kind": "no_failure",
+      "quote": null,
+      "step": null,
+      "note": "no failure observed",
+      "ts": "2026-11-09T15:39:18.106950+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "7939ef055f68",
+      "trace_id": "95f876b55ef425963d73051945054f00",
+      "kind": "note",
+      "quote": "I found your orders, but I don’t see an order for \"Petal & Stem.\"",
+      "step": null,
+      "note": "`misses_store_orders` is present here. The customer named the store, but the agent could not find their order from it.",
+      "ts": "2026-11-09T15:47:00.338195+00:00",
+      "history": [
+        {
+          "note": "`misses_store_orders` is present here. The customer named the order, but the agent couldn't find it.",
+          "ts": "2026-11-09T15:45:44.300387+00:00"
+        }
+      ],
+      "removed_ts": null
+    },
+    {
+      "id": "899f8f17eb40",
+      "trace_id": "fd84705bf85d8fd07f9c982df9765601",
+      "kind": "no_failure",
+      "quote": null,
+      "step": null,
+      "note": "no failure observed",
+      "ts": "2026-11-09T20:22:30.555071+00:00",
+      "history": [],
+      "removed_ts": null
     }
   ]
 }

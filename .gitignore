@@ -6,6 +6,8 @@
 
 # Generated world data. Recreate with: uv run python -m seed.generate
 data/cartwheel.db
+# Copy used for the Homework 4 Part C Workshop runs (refunds and cancels land here).
+data/part_c_runs*.db
 
 # Local conversation state and scenario/replay run outputs.
 .sessions.db*
@@ -27,3 +29,5 @@ hw1-session.expanded.json
 scenarios/demo_pilot_gt.json
 
 /trace-*.json
+
+analysis/state/part_c_inputs
