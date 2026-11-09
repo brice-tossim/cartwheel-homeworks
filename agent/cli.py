@@ -40,12 +40,18 @@ except ImportError:  # Windows and slim builds ship without it
 from agents import RunConfig, Runner, SQLiteSession
 from agents.items import RunItem
 from opentelemetry import trace
+from opentelemetry.instrumentation.openai_agents.utils import should_send_prompts
 
 from agent import db
-from agent.agent import build_agent, prompt_version
+from agent.agent import build_agent, prompt_version, render_system_prompt
 from agent.auth import AuthContext
 from agent.config import REPO_ROOT
-from observability.instrument import load_env, setup_openai_tracing, setup_tracing
+from observability.instrument import (
+    load_env,
+    setup_openai_tracing,
+    setup_raindrop,
+    setup_tracing,
+)
 
 DEFAULT_USERS = {"shopper": 1, "merchant": 9001, "support": 9501}
 MAX_TURNS = 12  # cap runaway loops; keeps conversations bounded
@@ -83,6 +89,25 @@ def _print_tool_calls(new_items: list[RunItem]) -> None:
                 print(f"    -> {outputs[item.call_id]}")
 
 
+def _record_instructions(span: trace.Span, instructions: str) -> None:
+    """Record the system prompt as OTel GenAI system instructions, as the server does."""
+    if should_send_prompts():
+        span.set_attribute(
+            "gen_ai.system_instructions",
+            json.dumps([{"type": "text", "content": instructions}]),
+        )
+
+
+def _record_message(span: trace.Span, attribute: str, role: str, text: str) -> None:
+    """Record one message in the OTel GenAI format, as the server's root span does.
+
+    Only when content capture is on (TRACELOOP_TRACE_CONTENT), like the model spans.
+    """
+    if should_send_prompts():
+        message = {"role": role, "parts": [{"type": "text", "content": text}]}
+        span.set_attribute(attribute, json.dumps([message]))
+
+
 def resolve_auth(role: str, user_id: int | None) -> AuthContext:
     """Build the auth context from the users table (the injected block)."""
     with db.connection() as conn:
@@ -102,13 +127,41 @@ async def chat(
     defenses: bool = False,
     debug: bool = False,
     tracing: bool = False,
+    resume: str | None = None,
+) -> None:
+    session_id = await _session_id(ctx, resume)
+    raindrop = setup_raindrop(user_id=str(ctx.user_id), convo_id=session_id)
+    try:
+        await _chat_loop(ctx, model, session_id, defenses, debug, tracing or raindrop is not None)
+    finally:
+        if raindrop is not None:
+            raindrop.shutdown()
+
+
+async def _session_id(ctx: AuthContext, resume: str | None) -> str:
+    """A new session id, or the resumed one once it is safe to continue."""
+    if resume is None:
+        return f"cli-{ctx.role}-{ctx.user_id}-{int(time.time())}"
+    if not resume.startswith(f"cli-{ctx.role}-{ctx.user_id}-"):
+        raise SystemExit(f"session {resume} belongs to another user; resume it with its own --role and --user")
+    if not await SQLiteSession(resume, str(SESSIONS_DB)).get_items(limit=1):
+        raise SystemExit(f"nothing saved for session {resume}")
+    return resume
+
+
+async def _chat_loop(
+    ctx: AuthContext,
+    model: str | None,
+    session_id: str,
+    defenses: bool,
+    debug: bool,
+    tracing: bool,
 ) -> None:
     agent = build_agent(ctx, model=model, defenses=defenses)
-    # main() enables callbacks for Langfuse or explicit OpenAI tracing.
+    # main() enables callbacks for Langfuse or explicit OpenAI tracing;
+    # chat() also enables them when Raindrop is configured.
     run_config = RunConfig(tracing_disabled=not tracing)
-    session = SQLiteSession(
-        f"cli-{ctx.role}-{ctx.user_id}-{int(time.time())}", str(SESSIONS_DB)
-    )
+    session = SQLiteSession(session_id, str(SESSIONS_DB))
     version = prompt_version()
     print(
         f"Cartwheel support CLI | role={ctx.role} user={ctx.user_id} "
@@ -127,9 +180,13 @@ async def chat(
             return
         with _tracer.start_as_current_span("cartwheel.session_message") as span:
             if span.is_recording():
+                # session.id groups the turns of one conversation, as the server does.
+                span.set_attribute("session.id", session_id)
                 span.set_attribute("cartwheel.user_role", ctx.role)
                 span.set_attribute("cartwheel.user_id", str(ctx.user_id))
                 span.set_attribute("cartwheel.prompt_version", version)
+                _record_instructions(span, render_system_prompt(ctx))
+                _record_message(span, "gen_ai.input.messages", "user", line)
             result = await Runner.run(
                 agent,
                 line,
@@ -138,6 +195,8 @@ async def chat(
                 max_turns=MAX_TURNS,
                 run_config=run_config,
             )
+            if span.is_recording() and not getattr(result, "interruptions", None):
+                _record_message(span, "gen_ai.output.messages", "assistant", str(result.final_output))
 
         # ------------------------------------------------------------------
         # Module 4 pause and resume code (Homework 8, Part D). With defenses on,
@@ -206,6 +265,12 @@ def main() -> None:
         action="store_true",
         help="print each tool call's name, arguments, and result",
     )
+    parser.add_argument(
+        "--resume",
+        default=None,
+        metavar="SESSION_ID",
+        help="continue a saved conversation, e.g. cli-shopper-1-1794205306",
+    )
     args = parser.parse_args()
 
     load_env()
@@ -219,7 +284,8 @@ def main() -> None:
             parser.error(str(exc))
     ctx = resolve_auth(args.role, args.user)
     asyncio.run(
-        chat(ctx, args.model, defenses=args.defenses, debug=args.debug, tracing=tracing)
+        chat(ctx, args.model, defenses=args.defenses, debug=args.debug,
+             tracing=tracing, resume=args.resume)
     )
 
 
