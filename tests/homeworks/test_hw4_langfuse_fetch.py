@@ -188,6 +188,17 @@ def test_traces_without_a_scenario_id_are_left_out() -> None:
     assert [trace["trace_id"] for trace in traces] == [TRACE_A]
 
 
+def test_listed_traces_are_kept_without_a_scenario_id() -> None:
+    rows = [
+        *_trace_rows(TRACE_A, "Where is order 12?", "2026-10-07T02:00:00.000Z", scenario="support-0001"),
+        *_trace_rows(TRACE_C, "Hello?", "2026-10-07T02:30:00.000Z", scenario=None),
+    ]
+
+    traces = fetch_traces(client=_langfuse_serving(rows), also_keep={TRACE_C})
+
+    assert [trace["trace_id"] for trace in traces] == sorted([TRACE_A, TRACE_C])
+
+
 def test_tag_keeps_tagged_traces_whatever_their_scenario() -> None:
     rows = [
         *_trace_rows(TRACE_A, "Where is order 12?", "2026-10-07T02:00:00.000Z", scenario="support-0001"),

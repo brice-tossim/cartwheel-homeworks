@@ -3,6 +3,9 @@
 The local export (traces/support_traces.json) is only a fallback. When
 Langfuse cannot be reached, the reason comes back with the conversations, so
 the page can show it and it can be recorded in trace_source_notes.md.
+
+The review covers the support scenarios plus any trace listed in a batch file,
+so runs made outside the scenarios (such as CLI runs) join only when picked.
 """
 
 from __future__ import annotations
@@ -19,6 +22,7 @@ from analysis.helpers.normalization import (
     group_by_session,
     normalize_trace,
 )
+from analysis.review_app.batches import load_batches
 
 EXPORT_PATH = Path(__file__).resolve().parents[2] / "traces" / "support_traces.json"
 
@@ -36,13 +40,24 @@ class SessionsSource(TypedDict):
 
 
 def load_sessions(
-    fetch: Callable[[], list[TraceRecord]] = langfuse_io.fetch_traces,
+    fetch: Callable[[], list[TraceRecord]] | None = None,
     export_path: Path = EXPORT_PATH,
+    batched: Callable[[], set[str]] | None = None,
 ) -> SessionsSource:
-    """Return the support conversations, oldest first, and where they came from."""
-    source, reason, traces = _traces(fetch, export_path)
-    sessions = group_by_session(_support_only(traces))
+    """Return the conversations to review, oldest first, and where they came from."""
+    picked = (batched or _batched_trace_ids)()
+    source, reason, traces = _traces(fetch or _fetch_keeping(picked), export_path)
+    sessions = group_by_session(_reviewed(traces, picked))
     return {"source": source, "fallback_reason": reason, "sessions": sessions}
+
+
+def _fetch_keeping(picked: set[str]) -> Callable[[], list[TraceRecord]]:
+    """Langfuse drops traces without a scenario id unless they are listed."""
+    return lambda: langfuse_io.fetch_traces(also_keep=picked)
+
+
+def _batched_trace_ids() -> set[str]:
+    return {trace_id for batch in load_batches() for trace_id in batch["trace_ids"]}
 
 
 def _traces(
@@ -66,5 +81,5 @@ def _is_support(trace: TraceRecord) -> bool:
     return str(scenario or "").startswith(_SUPPORT_PREFIX)
 
 
-def _support_only(traces: list[TraceRecord]) -> list[TraceRecord]:
-    return [trace for trace in traces if _is_support(trace)]
+def _reviewed(traces: list[TraceRecord], batched: set[str]) -> list[TraceRecord]:
+    return [trace for trace in traces if _is_support(trace) or trace.get("id") in batched]

@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import os
 import re
-from collections.abc import Iterable, Iterator
+from collections.abc import Collection, Iterable, Iterator
 from typing import TYPE_CHECKING, Any, Protocol
 
 from .normalization import TraceRecord, normalize_trace
@@ -132,6 +132,7 @@ def fetch_traces(
     tag: str | None = None,
     limit: int = 1000,
     client: Any | None = None,
+    also_keep: Collection[str] = (),
 ) -> list[dict[str, Any]]:
     """Pull full traces from Langfuse and normalize them for Module 2.
 
@@ -147,6 +148,8 @@ def fetch_traces(
             Module 1 traces carrying `cartwheel.scenario_id` metadata.
         limit: maximum number of traces to return, keeping the most recent.
         client: an existing Langfuse client (tests/seeds reuse one).
+        also_keep: trace identifiers to keep even without a scenario id, such
+            as CLI runs picked into a review batch.
 
     Returns:
         Normalized trace dictionaries sorted by Langfuse identifier. Each
@@ -156,7 +159,7 @@ def fetch_traces(
     lf = client or _client()
     by_trace = _observations_by_trace(_iter_observations(lf.api.observations_v_2))
     traces = _normalized(_carrying(by_trace, tag))
-    return _most_recent(_with_scenario(traces, tag), limit)
+    return _most_recent(_with_scenario(traces, tag, also_keep), limit)
 
 
 def _is_too_busy(error: Exception) -> bool:
@@ -236,11 +239,13 @@ def _has_scenario(trace: TraceRecord) -> bool:
     return isinstance(meta, dict) and bool(meta.get("scenario_id"))
 
 
-def _with_scenario(traces: list[TraceRecord], tag: str | None) -> list[TraceRecord]:
-    """Without a tag, keep only the Module 1 traces, which carry a scenario id."""
+def _with_scenario(
+    traces: list[TraceRecord], tag: str | None, also_keep: Collection[str]
+) -> list[TraceRecord]:
+    """Without a tag, keep the Module 1 traces, which carry a scenario id, and the listed ones."""
     if tag is not None:
         return traces
-    return [trace for trace in traces if _has_scenario(trace)]
+    return [trace for trace in traces if _has_scenario(trace) or trace["trace_id"] in also_keep]
 
 
 def _most_recent(traces: list[TraceRecord], limit: int) -> list[TraceRecord]:

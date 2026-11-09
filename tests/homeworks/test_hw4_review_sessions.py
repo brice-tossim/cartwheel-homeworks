@@ -11,6 +11,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
+from analysis.helpers import langfuse_io
 from analysis.helpers.normalization import TraceRecord, normalize_trace
 from analysis.review_app.sessions import load_sessions
 from tests.homeworks.hw4_observations import observation
@@ -84,9 +87,41 @@ def test_only_support_scenarios_are_reviewed(tmp_path: Path) -> None:
         _trace("t3", "probe-024-followup", "s3", "And now?", "2026-10-01T02:00:00Z"),
     ]
 
-    loaded = load_sessions(fetch=lambda: traces, export_path=tmp_path / "unused.json")
+    loaded = load_sessions(
+        fetch=lambda: traces, export_path=tmp_path / "unused.json", batched=lambda: set()
+    )
 
     assert _session_trace_ids(loaded) == [["t1"]]
+
+
+def test_a_trace_put_in_a_batch_is_reviewed_whatever_its_scenario(tmp_path: Path) -> None:
+    traces = [
+        _trace("t1", "support-0001", "s1", "Where is order 12?", "2026-10-07T02:00:00Z"),
+        _trace("t2", "", "cli-shopper-1", "Where is my order?", "2026-11-06T02:00:00Z"),
+        _trace("t3", "", "cli-shopper-2", "Cancel it.", "2026-11-06T03:00:00Z"),
+    ]
+
+    loaded = load_sessions(
+        fetch=lambda: traces, export_path=tmp_path / "unused.json", batched=lambda: {"t2"}
+    )
+
+    assert _session_trace_ids(loaded) == [["t1"], ["t2"]]
+
+
+def test_langfuse_is_asked_to_keep_the_batched_traces(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    asked: list[set[str]] = []
+
+    def fetch_traces(also_keep: set[str]) -> list[TraceRecord]:
+        asked.append(set(also_keep))
+        return []
+
+    monkeypatch.setattr(langfuse_io, "fetch_traces", fetch_traces)
+
+    load_sessions(export_path=tmp_path / "unused.json", batched=lambda: {"t2"})
+
+    assert asked == [{"t2"}]
 
 
 def test_the_export_is_used_when_langfuse_cannot_be_reached(tmp_path: Path) -> None:
