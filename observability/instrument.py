@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING, Any
 from agents.tracing import set_trace_processors
 from agents.tracing.processors import default_processor
 from opentelemetry import trace
+from raindrop_openai_agents import RaindropOpenAIAgents
 
 if TYPE_CHECKING:
     from agent.auth import AuthContext
@@ -29,16 +30,52 @@ log = logging.getLogger("cartwheel.instrument")
 
 _genai_instrumented = False
 _openai_tracing_enabled = False
+_raindrop_enabled = False
+RAINDROP_ENV_VARS = ("RAINDROP_LOCAL_DEBUGGER", "RAINDROP_WRITE_KEY")
 
 
 def configure_model_tracing(*, openai_model: bool) -> None:
     """Remove implicit hosted export for non-OpenAI models.
 
-    SDK processors are process-wide. Preserve either explicitly selected course
+    SDK processors are process-wide. Preserve every explicitly selected
     destination; do not globally disable spans, which would also break Langfuse.
     """
-    if not openai_model and not _genai_instrumented and not _openai_tracing_enabled:
+    if not openai_model and not _explicit_destination():
         set_trace_processors([])
+
+
+def setup_raindrop(*, user_id: str, convo_id: str) -> RaindropOpenAIAgents | None:
+    """Send agent runs to Raindrop when one of RAINDROP_ENV_VARS is set.
+
+    Call it after setup_tracing(). Raindrop then adds its exporter to the
+    Langfuse tracer provider instead of creating its own, and its Agents SDK
+    processor runs next to the Langfuse one, so both destinations keep working.
+    """
+    if not _raindrop_configured():
+        return None
+    _drop_implicit_hosted_export()
+    return _start_raindrop(user_id=user_id, convo_id=convo_id)
+
+
+def _explicit_destination() -> bool:
+    return _genai_instrumented or _openai_tracing_enabled or _raindrop_enabled
+
+
+def _raindrop_configured() -> bool:
+    return any(os.environ.get(name, "").strip() for name in RAINDROP_ENV_VARS)
+
+
+def _drop_implicit_hosted_export() -> None:
+    """Keep Raindrop-only runs from also shipping to OpenAI's hosted tracing."""
+    if not _explicit_destination():
+        set_trace_processors([])
+
+
+def _start_raindrop(*, user_id: str, convo_id: str) -> RaindropOpenAIAgents:
+    global _raindrop_enabled
+    raindrop = RaindropOpenAIAgents(user_id=user_id, convo_id=convo_id)
+    _raindrop_enabled = True
+    return raindrop
 
 
 def setup_openai_tracing() -> bool:
