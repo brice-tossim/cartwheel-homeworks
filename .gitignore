@@ -8,6 +8,7 @@
 data/cartwheel.db
 # Copy used for the Homework 4 Part C Workshop runs (refunds and cancels land here).
 data/part_c_runs*.db
+data/part_c_policies/
 
 # Local conversation state and scenario/replay run outputs.
 .sessions.db*
