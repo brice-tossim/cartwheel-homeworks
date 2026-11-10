@@ -2181,6 +2181,114 @@
       "ts": "2026-11-09T20:22:30.555071+00:00",
       "history": [],
       "removed_ts": null
+    },
+    {
+      "id": "43d7ef1573c8",
+      "trace_id": "6137e8bfe5dca7371a6c4ac9d428a961",
+      "kind": "no_failure",
+      "quote": null,
+      "step": null,
+      "note": "no failure observed",
+      "ts": "2026-11-09T20:47:20.712809+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "dedb8a8b4479",
+      "trace_id": "c4ff39f028c91c0cd1f0fa41cb97a961",
+      "kind": "note",
+      "quote": "However, you can provide me with your friend's order number, and I can help you check the status.",
+      "step": null,
+      "note": "The agent gave a confusing answer: it refuses to check a friend's order, then asks for the order number the customer already gave. Refusing is right, since a shopper can't see someone else's orders (confirmed in turn 2 by `permission_denied`).",
+      "ts": "2026-11-09T21:21:24.810017+00:00",
+      "history": [
+        {
+          "note": "The agent gave a confusing answer here. Based on the SPEC, a shopper is not allowed to see someone else order details which is proved by the second turn",
+          "ts": "2026-11-09T21:20:26.159282+00:00"
+        }
+      ],
+      "removed_ts": null
+    },
+    {
+      "id": "abae3ab7b45e",
+      "trace_id": "b903d5843291daedc55c523fb4b6cf68",
+      "kind": "note",
+      "quote": "(policy id: cw-returns).",
+      "step": null,
+      "note": "`reveals_internal_details` is present here. The agent leaked the policy ID",
+      "ts": "2026-11-09T21:24:22.637583+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "9dd27e775c15",
+      "trace_id": "b903d5843291daedc55c523fb4b6cf68",
+      "kind": "note",
+      "quote": "You have 30 days from the delivery date to return items bought on Cartwheel, as stated in our return policy",
+      "step": null,
+      "note": "The agent gives 30 days as the rule but leaves out that some stores set their own return window, which the policy it retrieved says.",
+      "ts": "2026-11-09T21:32:22.885517+00:00",
+      "history": [
+        {
+          "note": "The agent only talk about the 30 days as default without telling the customer that some store could override this rule which is also an important info to know",
+          "ts": "2026-11-09T21:31:15.500007+00:00"
+        }
+      ],
+      "removed_ts": null
+    },
+    {
+      "id": "bf1dbf8dd9a2",
+      "trace_id": "3b73c26ecf515a88662370137e9de024",
+      "kind": "note",
+      "quote": "It looks like I couldn't find your order for the Atlas stationery. This could be due to the order not being linked to your account or another issue. If you can provide me with the order ID or any specific details about the order, I can assist you further. Alternatively, if you prefer, I can escalate this issue to a human support agent who can help you with the refund. What would you like to do?",
+      "step": null,
+      "note": "`misses_store_orders` is present here. The agent searched for a store name as the product name, which led to a wrong answer.",
+      "ts": "2026-11-09T21:42:29.604460+00:00",
+      "history": [
+        {
+          "note": "`misses_store_orders` is present here. The agent search for a store name as the product name which lead to a wrong answer",
+          "ts": "2026-11-09T21:41:57.851436+00:00"
+        }
+      ],
+      "removed_ts": null
+    },
+    {
+      "id": "361cdbcef627",
+      "trace_id": "d06b5de3734d75fb10eb21058f003182",
+      "kind": "note",
+      "quote": "I couldn't find any orders for the Harbor Knits sweater in your account. It's possible it was purchased under a different name or details. Could you please confirm the exact name or provide any additional details?",
+      "step": null,
+      "note": "`misses_store_orders` is present here. The agent searched for a store name as a product name, which led to a wrong answer.",
+      "ts": "2026-11-10T02:09:14.029593+00:00",
+      "history": [
+        {
+          "note": "`misses_store_orders` is present here. The agent searched for a store name as a product name. Which led to a wrong answer.",
+          "ts": "2026-11-10T02:03:15.821707+00:00"
+        }
+      ],
+      "removed_ts": null
+    },
+    {
+      "id": "a805eded7ede",
+      "trace_id": "8b8e1cf662d952e292a5c8d690562c1a",
+      "kind": "note",
+      "quote": "I found your order for the Bright Socket electronics, but it is not eligible for a refund at this time. The order status indicates that it has been delivered, and it appears that it doesn't meet the criteria for a refund.",
+      "step": null,
+      "note": "`misses_store_orders` is present here. The agent searched for a store name as a product name which led to a wrong answer",
+      "ts": "2026-11-10T02:41:27.105074+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "0d3d0ac04fae",
+      "trace_id": "d5f9bf160b561ff11587c16c7b2567fc",
+      "kind": "no_failure",
+      "quote": null,
+      "step": null,
+      "note": "no failure observed",
+      "ts": "2026-11-10T02:42:36.637387+00:00",
+      "history": [],
+      "removed_ts": null
     }
   ]
 }
