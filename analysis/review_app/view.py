@@ -185,6 +185,7 @@ def _step(
     ok, error, error_reason = _outcome(answer)
     chars = _chars(answer)
     changes_data = tool in _DATA_CHANGING_TOOLS
+    summary = _summary(answer)
     return {
         "reason": reason,
         "tool": tool,
@@ -192,10 +193,11 @@ def _step(
         "ok": ok,
         "error": error,
         "error_reason": error_reason,
-        "summary": _summary(answer),
+        "summary": summary,
         "result": answer,
         "result_chars": chars,
-        "folded": chars > _FOLD_AFTER_CHARS and not changes_data,
+        # A one-line summary hides the answer, so it always comes with a way to open it.
+        "folded": (chars > _FOLD_AFTER_CHARS or bool(summary)) and not changes_data,
         "changes_data": changes_data,
     }
 
@@ -217,7 +219,7 @@ def _chars(answer: object) -> int:
 
 
 def _summary(answer: object) -> str:
-    """One line for a successful answer; empty when the answer is short enough to show."""
+    """One line for a successful list or status answer; empty for any other answer."""
     if not isinstance(answer, dict) or answer.get("ok") is False:
         return ""
     listed = next(((key, value) for key, value in answer.items() if isinstance(value, list)), None)
@@ -225,13 +227,19 @@ def _summary(answer: object) -> str:
 
 
 def _list_summary(name: str, items: list[object]) -> str:
+    count = _counted(len(items), name)
     stores = [item.get("store_id") for item in items if isinstance(item, dict)]
     if not items or None in stores or len(stores) != len(items):
-        return f"{len(items)} {name}"
+        return count
     distinct = sorted({str(store) for store in stores})
     if len(distinct) == 1:
-        return f"{len(items)} {name}, all from store {distinct[0]}"
-    return f"{len(items)} {name} across {len(distinct)} stores"
+        return f"{count}, all from store {distinct[0]}"
+    return f"{count} across {len(distinct)} stores"
+
+
+def _counted(count: int, name: str) -> str:
+    """'1 order' for one item, '3 orders' otherwise; tool lists are named in the plural."""
+    return f"{count} {name.removesuffix('s') if count == 1 else name}"
 
 
 def _status_summary(answer: dict[str, object]) -> str:

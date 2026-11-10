@@ -119,6 +119,20 @@ def test_a_long_answer_is_folded_and_a_short_one_is_not() -> None:
     assert _only_step(long_answer)["result_chars"] == len(json.dumps(long_answer))
 
 
+def test_a_short_answer_summed_up_in_one_line_is_folded_too() -> None:
+    one_order = {"ok": True, "orders": [{"order_id": 6182, "store_id": 4, "refund_eligible": False}]}
+
+    step = _only_step(one_order)
+
+    assert (step["summary"], step["folded"]) == ("1 order, all from store 4", True)
+
+
+def test_a_list_of_one_is_counted_in_the_singular() -> None:
+    no_store = _only_step({"ok": True, "results": [{"policy_id": "cw-returns"}]})
+
+    assert no_store["summary"] == "1 result"
+
+
 def test_a_step_that_changes_data_is_never_folded() -> None:
     long_refund = {"ok": True, "status": "queued_for_approval", "note": "x" * 600}
 
