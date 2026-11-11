@@ -435,9 +435,14 @@
       "kind": "note",
       "quote": "I also found an older Northwind Books order, 7861, but it is not refund-eligible, so I did not submit a refund for that one.",
       "step": null,
-      "note": "Warning! What if it was eligible for a refund, will the agent process it?",
-      "ts": "2026-10-22T16:58:22.168321+00:00",
-      "history": [],
+      "note": "The customer did not ask about order 7861, yet the reply brings it up and says it is not refund-eligible. That is refund detail they do not need, and it nudges them toward asking for a refund.",
+      "ts": "2026-11-10T21:24:51.910619+00:00",
+      "history": [
+        {
+          "note": "Warning! What if it was eligible for a refund, will the agent process it?",
+          "ts": "2026-10-22T16:58:22.168321+00:00"
+        }
+      ],
       "removed_ts": null
     },
     {

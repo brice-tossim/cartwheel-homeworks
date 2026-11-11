@@ -3,6 +3,8 @@
     {
       "name": "misses_store_orders",
       "definition": "The customer names a store, and the agent doesn't find their orders from it: its lookup doesn't narrow to that store, it searches the store name as a product, or it has the store's orders but doesn't connect them. It answers or asks the customer anyway.",
+      "nearest_mode": "mishandles_ambiguous_request",
+      "boundary": "Ask whether the agent used the store the customer named. If it didn't (no lookup by that store, the store name searched as a product, or the store's orders found but not connected), it's misses_store_orders. If it did narrow to that store and several orders still match, then guessing one or asking vaguely is mishandles_ambiguous_request. A trace can have both when it misses the store and then guesses among the wrong results. The two need different fixes: one is about using the store when looking up orders, the other about asking the customer clearly.",
       "status": "candidate",
       "added_in": "batch_1",
       "note_ids": [
@@ -216,7 +218,9 @@
           "definition": "The reply tells the customer about errors in the store data, such as duplicate listings or a negative price."
         }
       ],
-      "close_negative_note_ids": []
+      "close_negative_note_ids": [],
+      "nearest_mode": "too_much_detail",
+      "boundary": "Ask whether the extra content is something the customer shouldn't see. Policy IDs, internal thresholds, back-end steps and store-data errors are **reveals_internal_details**, even in a short reply. **too_much_detail** covers only extra content the customer is allowed to know, such as listing every order line when they asked about one item. A reply can have both. The two need different fixes: one is about keeping internal information out of replies, the other about keeping replies focused on what was asked."
     },
     {
       "name": "mishandles_ambiguous_request",
@@ -291,7 +295,9 @@
         "a245a227d4eb",
         "a0d1d08b9325",
         "d766a287cc10"
-      ]
+      ],
+      "nearest_mode": "misses_store_orders",
+      "boundary": "Ask whether the agent used the store the customer named. If it did, or no store was named, and several orders still match or it needs more from the customer, then guessing one or asking vaguely is **mishandles_ambiguous_request**. If it didn't use the named store, it's **misses_store_orders**, even when it then asks the customer. A trace can have both when it misses the store and then guesses among the wrong results. The two need different fixes: one is about asking the customer clearly, the other about using the store when looking up orders."
     },
     {
       "name": "no_reply",
@@ -318,7 +324,9 @@
       ],
       "any_instance_count": 7,
       "close_negative_trace_ids": [],
-      "close_negative_note_ids": []
+      "close_negative_note_ids": [],
+      "nearest_mode": null,
+      "boundary": "Ask whether the customer received any text at all in that turn. If not, it's no_reply, whatever the agent did with its tools. If they received anything, even an error message or a vague question, it's not **no_reply**: judge that reply under the other modes. The fix is a fallback answer when the run fails."
     },
     {
       "name": "date_errors",
@@ -370,7 +378,9 @@
         "181542e9d444",
         "9beb5afe723c",
         "20ee9b283618"
-      ]
+      ],
+      "nearest_mode": null,
+      "boundary": "Ask whether the wrong fact is a date or an age compared with the platform date (world_asof). The wrong \"today\", days counted from the wrong date, or an order called older or newer than it is: **date_errors**. Any other fact that contradicts the tool data, such as an amount, a policy window length or an order status, is not date_errors. A deadline calculated correctly is not a date error, even when the answer disappoints the customer."
     },
     {
       "name": "ignores_caller_role",
@@ -413,7 +423,9 @@
         "741aefc027f1",
         "2923e034d167",
         "7b48b8dce6c2"
-      ]
+      ],
+      "nearest_mode": "mishandles_ambiguous_request",
+      "boundary": "Ask whether the mistake comes from who the caller is. If the agent treats a support or merchant caller as the owner of the orders (\"your order\", other customers' orders shown as theirs, no question about which customer they mean), it's **ignores_caller_role**. If it understood the role and still guesses among several matching orders, or asks vaguely, it's **mishandles_ambiguous_request**. A trace can have both. The two need different fixes: one is about using the caller's role, the other about asking the caller clearly."
     },
     {
       "name": "too_much_detail",
@@ -436,7 +448,9 @@
       ],
       "any_instance_count": 5,
       "close_negative_trace_ids": [],
-      "close_negative_note_ids": []
+      "close_negative_note_ids": [],
+      "nearest_mode": "reveals_internal_details",
+      "boundary": "Ask whether the extra content is something the customer is allowed to know. Order lines, dates, totals or other orders the customer didn't ask about are **too_much_detail**. If the extra content is something the customer shouldn't see (policy IDs, internal thresholds, back-end steps or store-data errors), it's **reveals_internal_details**, even in a short reply. A reply can have both. The two need different fixes: one is about answering only the customer's question, the other about keeping internal information out of replies."
     },
     {
       "name": "escalates_without_need",
@@ -483,7 +497,9 @@
       ],
       "close_negative_note_ids": [
         "2ea1b591df69"
-      ]
+      ],
+      "nearest_mode": "mishandles_ambiguous_request",
+      "boundary": "Ask whether the agent opened, or offered, a human review. If it did, and the review isn't needed (a refund the tool marks not refund eligible, something the agent can answer, a request already queued, or before it knows what the customer means), it's **escalates_without_need**. If it opened no review and instead guessed among several orders or asked vaguely, it's **mishandles_ambiguous_request**. A needed escalation, such as an eligible refund over the auto-approval limit, is not a failure. A trace can have both. The two need different fixes: one is about when to open a human review, the other about asking the customer clearly."
     }
   ]
 }
