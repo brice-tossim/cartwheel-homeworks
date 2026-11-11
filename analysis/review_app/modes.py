@@ -12,13 +12,15 @@ from __future__ import annotations
 import re
 from typing import NotRequired, TypedDict
 
-from analysis.helpers._state import read_json, state_path
+from analysis.helpers._state import read_json, state_path, write_json
 from analysis.review_app.batches import Batch, load_batches
 
 
 class Pattern(TypedDict):
     name: str
     definition: str
+    nearest_mode: NotRequired[str | None]
+    boundary: NotRequired[str]
     status: str
     example_trace_ids: list[str]
     close_negative_trace_ids: NotRequired[list[str]]
@@ -34,6 +36,8 @@ class BatchCount(TypedDict):
 class ModeView(TypedDict):
     name: str
     definition: str
+    nearest_mode: str | None
+    boundary: str | None
     status: str
     batch_counts: list[BatchCount]
     total: int
@@ -43,6 +47,14 @@ class ModeView(TypedDict):
     close_negative_note_ids: list[str]
 
 
+class UnknownMode(LookupError):
+    """No mode in patterns.json has this name."""
+
+
+class BadBoundary(ValueError):
+    """The boundary's nearest mode or text can't be saved."""
+
+
 def list_modes() -> list[ModeView]:
     """Return every failure mode, in the order patterns.json lists them."""
     patterns = _patterns()
@@ -50,9 +62,43 @@ def list_modes() -> list[ModeView]:
     return [_view(pattern, batch_of) for pattern in patterns]
 
 
+def save_boundary(name: str, nearest_mode: str | None, boundary: str) -> ModeView:
+    """Write a mode's nearest mode (None when it has no close neighbour) and boundary, and return the mode."""
+    patterns = _patterns()
+    pattern = _find(patterns, name)
+    text = _checked_boundary(patterns, name, nearest_mode, boundary)
+    _write(patterns, pattern, nearest_mode, text)
+    return _view(pattern, _batch_numbers(load_batches()))
+
+
 def _patterns() -> list[Pattern]:
     saved: dict[str, list[Pattern]] = read_json(state_path("patterns.json"), default={"modes": []})
     return saved["modes"]
+
+
+def _find(patterns: list[Pattern], name: str) -> Pattern:
+    for pattern in patterns:
+        if pattern["name"] == name:
+            return pattern
+    raise UnknownMode(name)
+
+
+def _checked_boundary(patterns: list[Pattern], name: str, nearest_mode: str | None, boundary: str) -> str:
+    if nearest_mode == name:
+        raise BadBoundary(f"{name} can't be its own nearest mode (itself)")
+    if nearest_mode is not None and nearest_mode not in {pattern["name"] for pattern in patterns}:
+        raise BadBoundary(f"nearest mode {nearest_mode} is not a failure mode")
+    if not boundary.strip():
+        raise BadBoundary("the boundary text is empty")
+    return boundary.strip()
+
+
+def _write(patterns: list[Pattern], pattern: Pattern, nearest_mode: str | None, boundary: str) -> None:
+    pattern["nearest_mode"] = nearest_mode
+    pattern["boundary"] = boundary
+    path = state_path("patterns.json")
+    saved: dict[str, object] = read_json(path)
+    write_json(path, {**saved, "modes": patterns})
 
 
 def _batch_numbers(batches: list[Batch]) -> dict[str, int]:
@@ -73,6 +119,8 @@ def _view(pattern: Pattern, batch_of: dict[str, int]) -> ModeView:
     return {
         "name": pattern["name"],
         "definition": pattern["definition"],
+        "nearest_mode": pattern.get("nearest_mode"),
+        "boundary": pattern.get("boundary"),
         "status": pattern["status"],
         "batch_counts": [{"batch": n, "count": batches.count(n)} for n in sorted(set(batch_of.values()))],
         "total": len(traces),

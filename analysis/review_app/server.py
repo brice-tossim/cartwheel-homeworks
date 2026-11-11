@@ -26,6 +26,7 @@ Routes:
     GET  /api/suggestions                     AI suggestions with their status
     POST /api/suggestions/<id>/accept         turn a suggestion into a note
     POST /api/suggestions/<id>/reject         record a rejected suggestion
+    POST /api/modes/<name>/boundary           save a mode's boundary {nearest_mode or null, boundary}
 """
 
 from __future__ import annotations
@@ -93,6 +94,7 @@ _ROUTES: dict[str, list[Route]] = {
         (re.compile(r"/api/traces/(?P<trace_id>[^/]+)/labels"), "_save_labels"),
         (re.compile(_SUGGESTION + r"/accept"), "_accept_suggestion"),
         (re.compile(_SUGGESTION + r"/reject"), "_reject_suggestion"),
+        (re.compile(r"/api/modes/(?P<name>[^/]+)/boundary"), "_save_boundary"),
     ],
 }
 
@@ -163,6 +165,10 @@ class ReviewHandler(BaseHTTPRequestHandler):
             return 404, {"error": f"unknown suggestion: {error}"}
         except labels.BadDecisions as error:
             return 400, {"error": str(error)}
+        except modes.UnknownMode as error:
+            return 404, {"error": f"unknown mode: {error}"}
+        except modes.BadBoundary as error:
+            return 400, {"error": str(error)}
 
     def _reply(self, response: Response) -> None:
         if isinstance(response, File):
@@ -222,6 +228,12 @@ class ReviewHandler(BaseHTTPRequestHandler):
 
     def _modes(self, match: re.Match[str], query: str) -> Response:
         return 200, modes.list_modes()
+
+    def _save_boundary(self, match: re.Match[str], query: str) -> Response:
+        body = self._body()
+        return 200, modes.save_boundary(
+            match["name"], _text_or_null(body, "nearest_mode"), _required_text(body, "boundary")
+        )
 
     # -- labels -----------------------------------------------------------
 
@@ -302,6 +314,11 @@ def _required_text(body: dict[str, object], key: str) -> str:
     if not isinstance(value, str) or not value.strip():
         raise _BadRequest(f"'{key}' must be non-empty text")
     return value
+
+
+def _text_or_null(body: dict[str, object], key: str) -> str | None:
+    """Non-empty text, or None when the body sends null on purpose."""
+    return None if key in body and body[key] is None else _required_text(body, key)
 
 
 def _optional_text(body: dict[str, object], key: str) -> str | None:

@@ -248,6 +248,22 @@ mark.is-flashing, .is-flashing { animation: flash 1.2s ease-out; }
 .mode-total { font-size: 14px; font-weight: 600; }
 .mode-definition { margin: 0; line-height: 1.55; }
 .mode-definition > strong:first-child { font-weight: 600; }
+.mode-boundary { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; background: var(--reply); border: 1px solid var(--reply-line); border-radius: 10px; }
+.mode-boundary-title { margin: 0; font-size: 13px; color: var(--ink-soft); }
+.mode-boundary-title strong, .mode-nearest { font-weight: 600; color: var(--ink); }
+.mode-boundary-text { margin: 0; font-size: 14px; line-height: 1.55; }
+.mode-ref { font-size: 13px; font-weight: 600; }
+.mode-no-boundary { margin: 0; font-size: 13px; color: var(--muted); }
+.mode-boundary-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.mode-boundary-edit { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; margin: -6px -6px -6px 0; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--ink-soft); cursor: pointer; }
+.mode-boundary-edit:hover { background: var(--accent-tint); color: var(--accent-ink); }
+.mode-boundary-empty { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.mode-boundary-add { min-height: 32px; color: var(--accent-ink); font-weight: 600; }
+.mode-boundary-form { display: flex; flex-direction: column; gap: 10px; padding: 12px; background: var(--surface); border: 1px solid var(--accent); border-radius: 10px; }
+.mode-boundary-field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--ink-soft); }
+.mode-boundary-field select { max-width: 360px; min-height: 40px; padding: 0 10px; border: 1px solid var(--control-line); border-radius: 8px; background: var(--surface); color: var(--ink); font-size: 14px; }
+.mode-boundary-field textarea { padding: 10px 12px; border: 1px solid var(--control-line); border-radius: 8px; background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; line-height: 1.55; resize: vertical; }
+.mode-boundary-buttons { display: flex; gap: 8px; }
 .mode-batches { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 13px; color: var(--ink-soft); }
 .mode-batches strong { color: var(--ink); font-weight: 600; }
 .mode-notes { display: flex; flex-direction: column; gap: 8px; padding-top: 10px; border-top: 1px solid var(--line-soft); }

@@ -25,6 +25,7 @@ state.modes = JSON.parse(process.argv[2]);
 state.notes = JSON.parse(process.argv[3]);
 state.modesSearch = process.argv[4];
 state.openModes = new Set(JSON.parse(process.argv[5]));
+state.editingBoundary = process.argv[6] || null;
 console.log(modesView());
 """
 
@@ -56,11 +57,16 @@ NOTES = [
 ]
 
 
-def _view(search: str = "", open_modes: tuple[str, ...] = ("no_reply", "date_errors")) -> str:
+def _view(
+    search: str = "",
+    open_modes: tuple[str, ...] = ("no_reply", "date_errors"),
+    modes: list[dict[str, object]] = MODES,
+    editing: str = "",
+) -> str:
     result = subprocess.run(
         [
             "node", "--input-type=module", "-e", _SCRIPT, MODES_VIEW.as_uri(),
-            json.dumps(MODES), json.dumps(NOTES), search, json.dumps(list(open_modes)),
+            json.dumps(modes), json.dumps(NOTES), search, json.dumps(list(open_modes)), editing,
         ],
         capture_output=True, text=True, check=True,
     )
@@ -126,3 +132,56 @@ def test_notes_and_definitions_still_escape_html() -> None:
 
     assert "<b>" not in view
     assert "&lt;b&gt;Wrong date&lt;/b&gt;" in view
+
+
+def test_mode_names_in_a_boundary_are_bold() -> None:
+    boundary = "Silence is no_reply; a wrong day is date_errors, not no_reply_extra."
+    modes = [{**MODES[0], "nearest_mode": "date_errors", "boundary": boundary}, MODES[1]]
+
+    view = _view(modes=modes)
+
+    assert (
+        'Silence is <strong class="mode-ref mono">no_reply</strong>; '
+        'a wrong day is <strong class="mode-ref mono">date_errors</strong>, not no_reply_extra.'
+    ) in view
+
+
+def test_a_boundary_with_no_nearest_mode_says_so() -> None:
+    modes = [{**MODES[0], "nearest_mode": None, "boundary": "Any text means it is not silence."}, MODES[1]]
+
+    view = _view(modes=modes)
+
+    assert "<strong>Boundary</strong> · no close neighbour</p>" in view
+    assert "nearest mode" not in view
+
+
+def test_the_boundary_form_offers_none_as_nearest_mode() -> None:
+    modes = [{**MODES[0], "nearest_mode": None, "boundary": "Any text means it is not silence."}, MODES[1]]
+
+    view = _view(modes=modes, editing="no_reply")
+
+    assert '<option value="none" selected>None (no close neighbour)</option>' in view
+    assert "How to tell it apart" in view
+    assert "Which question decides whether a trace has this mode, and what looks like it but isn't" in view
+
+
+def test_the_boundary_form_keeps_the_saved_nearest_mode_selected() -> None:
+    modes = [{**MODES[0], "nearest_mode": "date_errors", "boundary": "Silence."}, MODES[1]]
+
+    view = _view(modes=modes, editing="no_reply")
+
+    assert '<option value="none">None (no close neighbour)</option>' in view
+    assert '<option value="date_errors" selected>date_errors</option>' in view
+    assert "How to tell them apart" in view
+
+
+def test_a_mode_name_already_marked_in_a_boundary_is_bold_once() -> None:
+    boundary = "Silence is **no_reply**, a wrong day is `date_errors`. Both can hold."
+    modes = [{**MODES[0], "nearest_mode": "date_errors", "boundary": boundary}, MODES[1]]
+
+    view = _view(modes=modes)
+
+    assert (
+        'Silence is <strong class="mode-ref mono">no_reply</strong>, '
+        'a wrong day is <strong class="mode-ref mono">date_errors</strong>. Both can hold.'
+    ) in view

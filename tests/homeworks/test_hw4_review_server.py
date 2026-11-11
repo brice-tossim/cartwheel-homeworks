@@ -271,6 +271,8 @@ def test_modes_route_serves_the_failure_modes(base_url: str, tmp_path: Path) -> 
     assert _get(f"{base_url}/api/modes") == (200, [{
         "name": "no_reply",
         "definition": "The turn ends without any reply.",
+        "nearest_mode": None,
+        "boundary": None,
         "status": "candidate",
         "batch_counts": [{"batch": 1, "count": 1}],
         "total": 1,
@@ -279,6 +281,58 @@ def test_modes_route_serves_the_failure_modes(base_url: str, tmp_path: Path) -> 
         "close_negative_trace_ids": ["t2"],
         "close_negative_note_ids": ["n2"],
     }])
+
+
+def _boundary_modes(tmp_path: Path) -> None:
+    (tmp_path / "batches").mkdir(exist_ok=True)
+    (tmp_path / "batches" / "batch_1_random.jsonl").write_text('{"trace_id": "t1"}\n')
+    base = {"definition": "d", "status": "candidate", "example_trace_ids": ["t1"], "note_ids": []}
+    modes = [{"name": "no_reply", **base}, {"name": "date_errors", **base}]
+    (tmp_path / "patterns.json").write_text(json.dumps({"modes": modes}))
+
+
+def test_saving_a_boundary_answers_the_updated_mode(base_url: str, tmp_path: Path) -> None:
+    _boundary_modes(tmp_path)
+
+    status, saved = _post(
+        f"{base_url}/api/modes/no_reply/boundary", {"nearest_mode": "date_errors", "boundary": "Silence."}
+    )
+
+    assert status == 200 and isinstance(saved, dict)
+    assert (saved["name"], saved["nearest_mode"], saved["boundary"]) == ("no_reply", "date_errors", "Silence.")
+
+
+def test_a_boundary_with_no_nearest_mode_is_saved(base_url: str, tmp_path: Path) -> None:
+    _boundary_modes(tmp_path)
+
+    status, saved = _post(f"{base_url}/api/modes/no_reply/boundary", {"nearest_mode": None, "boundary": "Silence."})
+
+    assert status == 200 and isinstance(saved, dict)
+    assert (saved["nearest_mode"], saved["boundary"]) == (None, "Silence.")
+
+
+def test_saving_a_boundary_for_an_unknown_mode_answers_404(base_url: str, tmp_path: Path) -> None:
+    _boundary_modes(tmp_path)
+
+    status, _ = _post(f"{base_url}/api/modes/ghost/boundary", {"nearest_mode": "date_errors", "boundary": "x"})
+
+    assert status == 404
+
+
+def test_a_bad_boundary_answers_400(base_url: str, tmp_path: Path) -> None:
+    _boundary_modes(tmp_path)
+
+    status, _ = _post(f"{base_url}/api/modes/no_reply/boundary", {"nearest_mode": "no_reply", "boundary": "x"})
+
+    assert status == 400
+
+
+def test_a_boundary_without_a_chosen_nearest_mode_answers_400(base_url: str, tmp_path: Path) -> None:
+    _boundary_modes(tmp_path)
+
+    status, _ = _post(f"{base_url}/api/modes/no_reply/boundary", {"nearest_mode": "", "boundary": "x"})
+
+    assert status == 400
 
 
 def _two_modes(tmp_path: Path) -> None:

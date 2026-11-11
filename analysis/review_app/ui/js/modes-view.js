@@ -4,6 +4,7 @@
 // so typing never redraws it.
 
 import { esc, plural, shortId } from "./helpers.js";
+import { ICON_PENCIL } from "./icons.js";
 import { inline } from "./markdown.js";
 import { state } from "./state.js";
 
@@ -22,6 +23,7 @@ function modeCard(mode) {
       <span class="mode-total">${plural(mode.total, "trace")}</span>
     </div>
     <p class="mode-definition"><strong>Fails when</strong> ${inline(mode.definition)}</p>
+    ${boundarySection(mode)}
     <div class="mode-batches">${mode.batch_counts.map(batchCount).join("")}</div>
     ${notesSection(mode, notes)}
   </li>`;
@@ -38,6 +40,74 @@ function notesSection(mode, notes) {
     </h3>
     ${open ? notes.map(noteCard).join("") : ""}
   </section>`;
+}
+
+function boundarySection(mode) {
+  if (state.editingBoundary === mode.name) return boundaryForm(mode);
+  if (!mode.boundary) return emptyBoundary(mode);
+  const nearest = mode.nearest_mode
+    ? ` · nearest mode <span class="mono mode-nearest">${esc(mode.nearest_mode)}</span>`
+    : " · no close neighbour";
+  return `<div class="mode-boundary">
+    <div class="mode-boundary-top">
+      <p class="mode-boundary-title"><strong>Boundary</strong>${nearest}</p>
+      <button type="button" class="mode-boundary-edit" data-action="edit-boundary" data-mode="${esc(mode.name)}" aria-label="Edit boundary of ${esc(mode.name)}" title="Edit boundary">${ICON_PENCIL}</button>
+    </div>
+    <p class="mode-boundary-text">${withModeNames(mode.boundary)}</p>
+  </div>`;
+}
+
+// The text with every failure mode name it mentions in bold. A name the
+// writer already marked with ** or ` takes its markers along, so they never
+// pair up with another name's markers.
+function withModeNames(text) {
+  const names = new Set(state.modes.map((mode) => mode.name));
+  const pattern = new RegExp(`(?:\\*\\*|\`)?\\b(${[...names].join("|")})\\b(?:\\*\\*|\`)?`);
+  return text
+    .split(pattern)
+    .map((part) => (names.has(part) ? `<strong class="mode-ref mono">${esc(part)}</strong>` : inline(part)))
+    .join("");
+}
+
+function emptyBoundary(mode) {
+  return `<div class="mode-boundary-empty">
+    <p class="mode-no-boundary">No boundary written yet.</p>
+    <button type="button" class="button small mode-boundary-add" data-action="edit-boundary" data-mode="${esc(mode.name)}">Add boundary</button>
+  </div>`;
+}
+
+function boundaryForm(mode) {
+  const options = state.modes
+    .filter((other) => other.name !== mode.name)
+    .map((other) => `<option value="${esc(other.name)}"${other.name === mode.nearest_mode ? " selected" : ""}>${esc(other.name)}</option>`)
+    .join("");
+  const none = Boolean(mode.boundary) && !mode.nearest_mode;
+  const text = boundaryTextWording(none);
+  return `<form class="mode-boundary-form" data-mode="${esc(mode.name)}">
+    <p class="mode-boundary-title"><strong>Boundary</strong></p>
+    <label class="mode-boundary-field">Nearest mode
+      <select name="nearest_mode" class="mono" data-action="pick-nearest">
+        <option value="">Choose a mode</option>
+        <option value="none"${none ? " selected" : ""}>None (no close neighbour)</option>
+        ${options}
+      </select>
+    </label>
+    <label class="mode-boundary-field"><span class="mode-boundary-text-label">${text.label}</span>
+      <textarea name="boundary" rows="5" placeholder="${text.hint}">${esc(mode.boundary ?? "")}</textarea>
+    </label>
+    <div class="mode-boundary-buttons">
+      <button type="button" class="button small primary" data-action="save-boundary" data-mode="${esc(mode.name)}">Save</button>
+      <button type="button" class="button small" data-action="cancel-boundary">Cancel</button>
+    </div>
+  </form>`;
+}
+
+// The text box's label and hint: about one mode alone when it has no close
+// neighbour, about the pair otherwise.
+export function boundaryTextWording(none) {
+  return none
+    ? { label: "How to tell it apart", hint: "Which question decides whether a trace has this mode, and what looks like it but isn't" }
+    : { label: "How to tell them apart", hint: "Which question decides between this mode and the nearest one, and which fix each needs" };
 }
 
 function batchCount({ batch, count }) {

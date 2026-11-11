@@ -8,6 +8,7 @@ import { act, currentTurnId, decideSuggestion, focusNoteBox, markNoFailure, remo
 import { hidePopover, openPopoverForSelection, savePopoverNote } from "./selection-popover.js";
 import { loadAll } from "./server.js";
 import { saveLabels } from "./label-actions.js";
+import { cancelBoundary, editBoundary, pickNearest, saveBoundary } from "./mode-actions.js";
 import { renderSide } from "./side-panel.js";
 import { remember, state } from "./state.js";
 import { renderModes, showView } from "./views.js";
@@ -55,6 +56,13 @@ export function bindClicks() {
     }
     const button = event.target.closest('[data-action="open-note"]');
     if (button) openNoteInRead(button.dataset.trace, button.dataset.note);
+    const boundary = event.target.closest('[data-action$="-boundary"]');
+    if (boundary?.dataset.action === "edit-boundary") editBoundary(boundary.dataset.mode);
+    if (boundary?.dataset.action === "cancel-boundary") cancelBoundary();
+    if (boundary?.dataset.action === "save-boundary") saveBoundary(boundary.dataset.mode);
+  });
+  $("modes").addEventListener("change", (event) => {
+    if (event.target.dataset.action === "pick-nearest") pickNearest(event.target);
   });
   $("list").addEventListener("click", (event) => {
     const row = event.target.closest("[data-id]");

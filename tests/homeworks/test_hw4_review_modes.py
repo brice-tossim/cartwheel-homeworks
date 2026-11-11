@@ -77,6 +77,62 @@ def test_each_mode_keeps_the_notes_behind_its_close_negatives(state: Path) -> No
     assert listed[1]["close_negative_note_ids"] == []
 
 
+def test_each_mode_keeps_its_nearest_mode_and_boundary_or_none(state: Path) -> None:
+    patterns = json.loads((state / "patterns.json").read_text())
+    patterns["modes"][0]["nearest_mode"] = "date_errors"
+    patterns["modes"][0]["boundary"] = "Silence is no_reply; a wrong date is date_errors."
+    (state / "patterns.json").write_text(json.dumps(patterns))
+
+    listed = modes.list_modes()
+
+    assert (listed[0]["nearest_mode"], listed[0]["boundary"]) == (
+        "date_errors",
+        "Silence is no_reply; a wrong date is date_errors.",
+    )
+    assert (listed[1]["nearest_mode"], listed[1]["boundary"]) == (None, None)
+
+
+def test_saving_a_boundary_writes_it_and_keeps_the_rest_of_the_mode(state: Path) -> None:
+    saved = modes.save_boundary("no_reply", "date_errors", "  Silence is no_reply.  ")
+
+    stored = json.loads((state / "patterns.json").read_text())["modes"][0]
+    assert (saved["nearest_mode"], saved["boundary"]) == ("date_errors", "Silence is no_reply.")
+    assert (stored["nearest_mode"], stored["boundary"]) == ("date_errors", "Silence is no_reply.")
+    assert stored["note_ids"] == ["n1", "n2", "n3", "n4"]
+
+
+def test_a_boundary_can_have_no_nearest_mode(state: Path) -> None:
+    modes.save_boundary("no_reply", "date_errors", "Old text.")
+
+    saved = modes.save_boundary("no_reply", None, "Any text at all means it is not no_reply.")
+
+    stored = json.loads((state / "patterns.json").read_text())["modes"][0]
+    assert (saved["nearest_mode"], saved["boundary"]) == (None, "Any text at all means it is not no_reply.")
+    assert (stored["nearest_mode"], stored["boundary"]) == (None, "Any text at all means it is not no_reply.")
+
+
+def test_saving_a_boundary_for_an_unknown_mode_is_refused(state: Path) -> None:
+    with pytest.raises(modes.UnknownMode, match="ghost"):
+        modes.save_boundary("ghost", "date_errors", "text")
+
+
+@pytest.mark.parametrize(
+    ("nearest", "text", "reason"),
+    [
+        ("ghost", "text", "ghost"),
+        ("no_reply", "text", "itself"),
+        ("date_errors", "   ", "empty"),
+    ],
+)
+def test_a_bad_boundary_is_refused_and_nothing_is_written(state: Path, nearest: str, text: str, reason: str) -> None:
+    before = (state / "patterns.json").read_text()
+
+    with pytest.raises(modes.BadBoundary, match=reason):
+        modes.save_boundary("no_reply", nearest, text)
+
+    assert (state / "patterns.json").read_text() == before
+
+
 def test_a_trace_in_no_batch_is_refused(state: Path) -> None:
     patterns = json.loads((state / "patterns.json").read_text())
     patterns["modes"][0]["example_trace_ids"].append("unbatched")
