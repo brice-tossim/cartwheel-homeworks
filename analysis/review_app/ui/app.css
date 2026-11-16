@@ -248,6 +248,22 @@ mark.is-flashing, .is-flashing { animation: flash 1.2s ease-out; }
 .mode-total { font-size: 14px; font-weight: 600; }
 .mode-definition { margin: 0; line-height: 1.55; }
 .mode-definition > strong:first-child { font-weight: 600; }
+.mode-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; font-size: 13px; color: var(--ink-soft); }
+.mode-meta-item { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.mode-meta-item > strong { font-weight: 600; color: var(--ink); }
+.mode-meta-kind { color: var(--muted); }
+.mode-chip { padding: 2px 8px; border: 1px solid var(--control-line); border-radius: 999px; background: var(--surface); color: var(--ink); font-weight: 500; }
+.mode-chip-id { border-color: var(--reply-line); background: var(--reply); font-weight: 600; }
+.mode-requirement-toggle { min-height: 32px; padding: 0 10px; color: var(--accent-ink); font-weight: 600; }
+.mode-requirement-body { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.mode-requirement-text { margin: 0; font-size: 14px; line-height: 1.55; }
+.mode-requirement-text > strong { font-size: 13px; font-weight: 600; }
+.mode-product-changes { display: flex; flex-direction: column; gap: 4px; padding-top: 8px; border-top: 1px solid var(--line); }
+.mode-product-changes-title { margin: 0; font-size: 13px; font-weight: 600; color: var(--ink); }
+.mode-product-changes ul { margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.55; }
+.spec-revisions { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; padding: 18px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.spec-revisions-title { margin: 0; font-size: 16px; font-weight: 600; }
+.spec-revisions .mode-requirement-body { padding: 0; border: 0; }
 .mode-boundary { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; background: var(--reply); border: 1px solid var(--reply-line); border-radius: 10px; }
 .mode-boundary-title { margin: 0; font-size: 13px; color: var(--ink-soft); }
 .mode-boundary-title strong, .mode-nearest { font-weight: 600; color: var(--ink); }

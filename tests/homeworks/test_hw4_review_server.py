@@ -280,7 +280,17 @@ def test_modes_route_serves_the_failure_modes(base_url: str, tmp_path: Path) -> 
         "example_trace_ids": ["t1"],
         "close_negative_trace_ids": ["t2"],
         "close_negative_note_ids": ["n2"],
+        "evaluator_type": None,
+        "requirements": [],
+        "product_changes": [],
     }])
+
+
+def test_spec_revisions_route_serves_the_revisions_not_tied_to_a_mode(base_url: str, tmp_path: Path) -> None:
+    revision = {"id": "REF-1", "text": "A refund covers whole units.", "product_changes": ["Take units."]}
+    (tmp_path / "patterns.json").write_text(json.dumps({"modes": [], "spec_revisions": [revision]}))
+
+    assert _get(f"{base_url}/api/spec-revisions") == (200, [revision])
 
 
 def _boundary_modes(tmp_path: Path) -> None:

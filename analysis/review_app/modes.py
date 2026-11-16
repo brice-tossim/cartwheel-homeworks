@@ -3,7 +3,9 @@
 patterns.json is the single source of the failure modes. Each mode comes back
 with its definition, how many of its traces fall in each review batch, its
 total, the ids of the notes that support it, and the ids of the notes that
-explain its close negatives. Batches sharing a number
+explain its close negatives, its likely evaluator, the requirements it
+enforces and the product changes it calls for. The spec revisions not tied to
+any one mode are listed apart. Batches sharing a number
 (batch_1_random, batch_1_clusters) count as one batch.
 """
 
@@ -16,6 +18,18 @@ from analysis.helpers._state import read_json, state_path, write_json
 from analysis.review_app.batches import Batch, load_batches
 
 
+class Requirement(TypedDict):
+    kind: str
+    id: str
+    text: str
+
+
+class SpecRevision(TypedDict):
+    id: str
+    text: str
+    product_changes: list[str]
+
+
 class Pattern(TypedDict):
     name: str
     definition: str
@@ -26,6 +40,14 @@ class Pattern(TypedDict):
     close_negative_trace_ids: NotRequired[list[str]]
     note_ids: list[str]
     close_negative_note_ids: NotRequired[list[str]]
+    evaluator_type: NotRequired[str]
+    requirement_source: NotRequired[list[Requirement]]
+    product_changes: NotRequired[list[str]]
+
+
+class Patterns(TypedDict):
+    modes: list[Pattern]
+    spec_revisions: NotRequired[list[SpecRevision]]
 
 
 class BatchCount(TypedDict):
@@ -45,6 +67,9 @@ class ModeView(TypedDict):
     example_trace_ids: list[str]
     close_negative_trace_ids: list[str]
     close_negative_note_ids: list[str]
+    evaluator_type: str | None
+    requirements: list[Requirement]
+    product_changes: list[str]
 
 
 class UnknownMode(LookupError):
@@ -62,6 +87,11 @@ def list_modes() -> list[ModeView]:
     return [_view(pattern, batch_of) for pattern in patterns]
 
 
+def list_spec_revisions() -> list[SpecRevision]:
+    """Return the spec revisions not tied to any one mode, in file order."""
+    return _saved().get("spec_revisions", [])
+
+
 def save_boundary(name: str, nearest_mode: str | None, boundary: str) -> ModeView:
     """Write a mode's nearest mode (None when it has no close neighbour) and boundary, and return the mode."""
     patterns = _patterns()
@@ -72,8 +102,12 @@ def save_boundary(name: str, nearest_mode: str | None, boundary: str) -> ModeVie
 
 
 def _patterns() -> list[Pattern]:
-    saved: dict[str, list[Pattern]] = read_json(state_path("patterns.json"), default={"modes": []})
-    return saved["modes"]
+    return _saved()["modes"]
+
+
+def _saved() -> Patterns:
+    saved: Patterns = read_json(state_path("patterns.json"), default={"modes": []})
+    return saved
 
 
 def _find(patterns: list[Pattern], name: str) -> Pattern:
@@ -128,6 +162,9 @@ def _view(pattern: Pattern, batch_of: dict[str, int]) -> ModeView:
         "example_trace_ids": traces,
         "close_negative_trace_ids": pattern.get("close_negative_trace_ids", []),
         "close_negative_note_ids": pattern.get("close_negative_note_ids", []),
+        "evaluator_type": pattern.get("evaluator_type"),
+        "requirements": pattern.get("requirement_source", []),
+        "product_changes": pattern.get("product_changes", []),
     }
 
 

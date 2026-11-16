@@ -30,6 +30,8 @@ export const state = {
   modes: [],
   modesSearch: "",
   openModes: new Set(),
+  openRequirements: new Set(),
+  specRevisions: [],
   editingBoundary: null,
   labels: [],
   labelDrafts: {},

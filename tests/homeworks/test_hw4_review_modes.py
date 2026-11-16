@@ -92,6 +92,39 @@ def test_each_mode_keeps_its_nearest_mode_and_boundary_or_none(state: Path) -> N
     assert (listed[1]["nearest_mode"], listed[1]["boundary"]) == (None, None)
 
 
+def test_each_mode_keeps_its_evaluator_requirements_and_product_changes_or_none(state: Path) -> None:
+    patterns = json.loads((state / "patterns.json").read_text())
+    requirement = {"kind": "spec_revision", "id": "RESP-7", "text": "Every turn ends with a reply."}
+    patterns["modes"][0]["evaluator_type"] = "code_check"
+    patterns["modes"][0]["requirement_source"] = [requirement]
+    patterns["modes"][0]["product_changes"] = ["Return a fallback reply."]
+    (state / "patterns.json").write_text(json.dumps(patterns))
+
+    listed = modes.list_modes()
+
+    assert (listed[0]["evaluator_type"], listed[0]["requirements"], listed[0]["product_changes"]) == (
+        "code_check",
+        [requirement],
+        ["Return a fallback reply."],
+    )
+    assert (listed[1]["evaluator_type"], listed[1]["requirements"], listed[1]["product_changes"]) == (None, [], [])
+
+
+def test_spec_revisions_not_tied_to_a_mode_are_listed(state: Path) -> None:
+    patterns = json.loads((state / "patterns.json").read_text())
+    revision = {"id": "REF-1", "text": "A refund covers whole units.", "product_changes": ["Take units."]}
+    patterns["spec_revisions"] = [revision]
+    (state / "patterns.json").write_text(json.dumps(patterns))
+
+    assert modes.list_spec_revisions() == [revision]
+
+
+def test_no_spec_revisions_means_an_empty_list(state: Path) -> None:
+    assert modes.list_spec_revisions() == []
+    (state / "patterns.json").unlink()
+    assert modes.list_spec_revisions() == []
+
+
 def test_saving_a_boundary_writes_it_and_keeps_the_rest_of_the_mode(state: Path) -> None:
     saved = modes.save_boundary("no_reply", "date_errors", "  Silence is no_reply.  ")
 

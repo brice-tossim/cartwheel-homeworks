@@ -1,5 +1,6 @@
-// The Failure modes tab: every mode with its definition, its trace counts per
-// batch, and the notes that support it, folded until asked. The search box
+// The Failure modes tab: every mode with its definition, its evaluator and
+// requirements, its trace counts per batch, and the notes that support it,
+// folded until asked, then the spec revisions not tied to a mode. The search box
 // keeps the modes whose name contains the typed text; it sits in index.html
 // so typing never redraws it.
 
@@ -11,8 +12,22 @@ import { state } from "./state.js";
 export function modesView() {
   const search = state.modesSearch.trim().toLowerCase();
   const shown = state.modes.filter((mode) => mode.name.toLowerCase().includes(search));
-  if (!shown.length) return `<p class="modes-empty">No mode name contains “${esc(state.modesSearch.trim())}”.</p>`;
-  return `<ul class="modes-list">${shown.map(modeCard).join("")}</ul>`;
+  const list = shown.length
+    ? `<ul class="modes-list">${shown.map(modeCard).join("")}</ul>`
+    : `<p class="modes-empty">No mode name contains “${esc(state.modesSearch.trim())}”.</p>`;
+  return list + otherRevisions();
+}
+
+// The spec revisions not tied to any one mode, below the modes.
+function otherRevisions() {
+  if (!state.specRevisions.length) return "";
+  return `<section class="spec-revisions" aria-labelledby="spec-revisions-title">
+    <h2 id="spec-revisions-title" class="spec-revisions-title">Spec revisions not tied to a mode</h2>
+    ${state.specRevisions.map((revision) => `<div class="mode-requirement-body">
+      ${requirementLine(revision)}
+      ${productChanges(revision.product_changes)}
+    </div>`).join("")}
+  </section>`;
 }
 
 function modeCard(mode) {
@@ -23,6 +38,7 @@ function modeCard(mode) {
       <span class="mode-total">${plural(mode.total, "trace")}</span>
     </div>
     <p class="mode-definition"><strong>Fails when</strong> ${inline(mode.definition)}</p>
+    ${requirementSection(mode)}
     ${boundarySection(mode)}
     <div class="mode-batches">${mode.batch_counts.map(batchCount).join("")}</div>
     ${notesSection(mode, notes)}
@@ -40,6 +56,45 @@ function notesSection(mode, notes) {
     </h3>
     ${open ? notes.map(noteCard).join("") : ""}
   </section>`;
+}
+
+const EVALUATORS = { llm_judge: "LLM judge", code_check: "Code check" };
+
+// The mode's likely evaluator and the ids of the requirements it enforces,
+// with their text and the product changes folded behind a button.
+function requirementSection(mode) {
+  const requirements = mode.requirements ?? [];
+  if (!mode.evaluator_type && !requirements.length) return "";
+  const open = state.openRequirements.has(mode.name);
+  const evaluator = mode.evaluator_type
+    ? `<span class="mode-meta-item"><strong>Evaluator</strong><span class="mode-chip">${esc(EVALUATORS[mode.evaluator_type] ?? mode.evaluator_type)}</span></span>`
+    : "";
+  const ids = requirements.length
+    ? `<span class="mode-meta-item"><strong>Requirement</strong>${requirements.map((r) => `<span class="mode-chip mode-chip-id mono">${esc(r.id)}</span>`).join("")}<span class="mode-meta-kind">· ${requirementKind(requirements)}</span></span>
+      <button type="button" class="button small mode-requirement-toggle" data-action="toggle-requirement" data-mode="${esc(mode.name)}" aria-expanded="${open}">${open ? "Hide" : "Show"} requirement</button>`
+    : "";
+  const body = open && requirements.length
+    ? `<div class="mode-requirement-body">${requirements.map(requirementLine).join("")}${productChanges(mode.product_changes ?? [])}</div>`
+    : "";
+  return `<div class="mode-meta">${evaluator}${ids}</div>${body}`;
+}
+
+function requirementKind(requirements) {
+  const revision = requirements.every((r) => r.kind === "spec_revision");
+  const noun = revision ? "proposed spec revision" : "spec rule";
+  return requirements.length > 1 ? `${noun}s` : noun;
+}
+
+function requirementLine(requirement) {
+  return `<p class="mode-requirement-text"><strong class="mono">${esc(requirement.id)}</strong> ${inline(requirement.text)}</p>`;
+}
+
+function productChanges(changes) {
+  if (!changes.length) return "";
+  return `<div class="mode-product-changes">
+    <p class="mode-product-changes-title">Product changes</p>
+    <ul>${changes.map((change) => `<li>${inline(change)}</li>`).join("")}</ul>
+  </div>`;
 }
 
 function boundarySection(mode) {

@@ -46,11 +46,12 @@ export function bindClicks() {
     renderModes();
   });
   $("modes").addEventListener("click", (event) => {
-    const toggle = event.target.closest('[data-action="toggle-notes"]');
+    const toggle = event.target.closest('[data-action="toggle-notes"], [data-action="toggle-requirement"]');
     if (toggle) {
-      const { mode } = toggle.dataset;
-      if (state.openModes.has(mode)) state.openModes.delete(mode);
-      else state.openModes.add(mode);
+      const { mode, action } = toggle.dataset;
+      const open = action === "toggle-notes" ? state.openModes : state.openRequirements;
+      if (open.has(mode)) open.delete(mode);
+      else open.add(mode);
       renderModes();
       return;
     }

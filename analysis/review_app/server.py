@@ -15,6 +15,7 @@ Routes:
     GET  /api/sessions[?refresh=1]            the raw conversations and their source
     GET  /api/rules                           SPEC.md rules and facts.yaml numbers
     GET  /api/modes                           the failure modes from patterns.json, with counts per batch
+    GET  /api/spec-revisions                  the spec revisions in patterns.json not tied to a mode
     GET  /api/labels                          the saved present (1) / absent (0) label per trace and mode
     GET  /api/notes                           every saved note, removed ones included
     POST /api/notes                           add a note {trace_id, note, quote?, step?}
@@ -82,6 +83,7 @@ _ROUTES: dict[str, list[Route]] = {
         (re.compile(r"/api/sessions"), "_sessions"),
         (re.compile(r"/api/rules"), "_rules"),
         (re.compile(r"/api/modes"), "_modes"),
+        (re.compile(r"/api/spec-revisions"), "_spec_revisions"),
         (re.compile(r"/api/labels"), "_labels"),
         (re.compile(r"/api/notes"), "_notes"),
         (re.compile(r"/api/suggestions"), "_suggestions"),
@@ -228,6 +230,9 @@ class ReviewHandler(BaseHTTPRequestHandler):
 
     def _modes(self, match: re.Match[str], query: str) -> Response:
         return 200, modes.list_modes()
+
+    def _spec_revisions(self, match: re.Match[str], query: str) -> Response:
+        return 200, modes.list_spec_revisions()
 
     def _save_boundary(self, match: re.Match[str], query: str) -> Response:
         body = self._body()

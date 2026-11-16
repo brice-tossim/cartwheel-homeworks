@@ -26,6 +26,8 @@ state.notes = JSON.parse(process.argv[3]);
 state.modesSearch = process.argv[4];
 state.openModes = new Set(JSON.parse(process.argv[5]));
 state.editingBoundary = process.argv[6] || null;
+state.openRequirements = new Set(JSON.parse(process.argv[7]));
+state.specRevisions = JSON.parse(process.argv[8]);
 console.log(modesView());
 """
 
@@ -62,11 +64,14 @@ def _view(
     open_modes: tuple[str, ...] = ("no_reply", "date_errors"),
     modes: list[dict[str, object]] = MODES,
     editing: str = "",
+    open_requirements: tuple[str, ...] = (),
+    spec_revisions: list[dict[str, object]] | None = None,
 ) -> str:
     result = subprocess.run(
         [
             "node", "--input-type=module", "-e", _SCRIPT, MODES_VIEW.as_uri(),
             json.dumps(modes), json.dumps(NOTES), search, json.dumps(list(open_modes)), editing,
+            json.dumps(list(open_requirements)), json.dumps(spec_revisions or []),
         ],
         capture_output=True, text=True, check=True,
     )
@@ -173,6 +178,67 @@ def test_the_boundary_form_keeps_the_saved_nearest_mode_selected() -> None:
     assert '<option value="none">None (no close neighbour)</option>' in view
     assert '<option value="date_errors" selected>date_errors</option>' in view
     assert "How to tell them apart" in view
+
+
+REQUIRED = {
+    **MODES[0],
+    "evaluator_type": "code_check",
+    "requirements": [
+        {"kind": "spec_revision", "id": "RESP-7", "text": "Every turn ends with a reply."},
+        {"kind": "spec_revision", "id": "RESP-6", "text": "Do not reveal <internal> details."},
+    ],
+    "product_changes": ["Return a fallback reply."],
+}
+
+
+def test_a_mode_shows_its_evaluator_and_requirement_ids_with_the_text_folded() -> None:
+    view = _view(modes=[REQUIRED, MODES[1]])
+
+    assert "<strong>Evaluator</strong>" in view and ">Code check<" in view
+    assert ">RESP-7<" in view and ">RESP-6<" in view
+    assert "proposed spec revisions" in view
+    assert 'data-action="toggle-requirement" data-mode="no_reply" aria-expanded="false"' in view
+    assert "Show requirement" in view
+    assert "Every turn ends with a reply." not in view
+    assert "Return a fallback reply." not in view
+
+
+def test_an_unfolded_requirement_shows_its_text_and_product_changes() -> None:
+    view = _view(modes=[REQUIRED, MODES[1]], open_requirements=("no_reply",))
+
+    assert 'data-mode="no_reply" aria-expanded="true"' in view and "Hide requirement" in view
+    assert "Every turn ends with a reply." in view
+    assert "Do not reveal &lt;internal&gt; details." in view
+    assert "Product changes" in view and "Return a fallback reply." in view
+
+
+def test_a_single_requirement_without_product_changes_says_revision_and_lists_no_changes() -> None:
+    mode = {**REQUIRED, "evaluator_type": "llm_judge", "requirements": REQUIRED["requirements"][:1], "product_changes": []}
+
+    view = _view(modes=[mode, MODES[1]], open_requirements=("no_reply",))
+
+    assert ">LLM judge<" in view
+    assert "proposed spec revision<" in view
+    assert "Product changes" not in view
+
+
+def test_a_mode_without_evaluator_or_requirement_shows_neither() -> None:
+    view = _view()
+
+    assert "Evaluator" not in view and "toggle-requirement" not in view
+
+
+def test_spec_revisions_not_tied_to_a_mode_show_below_the_modes() -> None:
+    revision = {"id": "REF-1", "text": "A refund covers whole units.", "product_changes": ["Take units."]}
+
+    view = _view(spec_revisions=[revision])
+
+    assert view.index("</ul>") < view.index("Spec revisions not tied to a mode")
+    assert ">REF-1<" in view and "A refund covers whole units." in view and "Take units." in view
+
+
+def test_no_spec_revisions_means_no_section() -> None:
+    assert "Spec revisions not tied to a mode" not in _view()
 
 
 def test_a_mode_name_already_marked_in_a_boundary_is_bold_once() -> None:
