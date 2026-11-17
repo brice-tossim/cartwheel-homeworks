@@ -2294,6 +2294,61 @@
       "ts": "2026-11-10T02:42:36.637387+00:00",
       "history": [],
       "removed_ts": null
+    },
+    {
+      "id": "9e0f755f9d68",
+      "trace_id": "66bc63068ecace5e3332136d8096c7c9",
+      "kind": "note",
+      "quote": "Your latest Clover Field Naturals order is **refunded**.",
+      "step": null,
+      "note": "`too_much_detail` is a close negative here. The agent sees 17 orders, two of them from Clover Field Naturals, and replies in one line that the latest one (#6190) is refunded. It leaves out the other order, the dates and the totals, so the customer could lose nothing from the reply.",
+      "ts": "2026-11-17T06:05:07.277647+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "35e9859cc79f",
+      "trace_id": "e1bb06a88e85cc5736641a2cf59187c7",
+      "kind": "note",
+      "quote": "Yes.",
+      "step": null,
+      "note": "`too_much_detail` is a close negative here. The customer asks for a plain yes or no on a Northwind Books refund. The agent sees 20 orders, confirms the only Northwind Books one (#464) is refund eligible, and replies only \"Yes.\"",
+      "ts": "2026-11-17T06:05:07.280905+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "755e0427fc52",
+      "trace_id": "e1ad182bc41ee81500c28a8644fa5f23",
+      "kind": "note",
+      "quote": "I can’t refund the wrong one, so please reply with the **order number** you want refunded",
+      "step": null,
+      "note": "`too_much_detail` is a close negative here. The customer has three Cascade Audio orders, and the agent lists each with its amount, delivery date and refund eligibility, then asks which one to refund. Those details are what the customer needs to choose between matching orders (ORD-2), and the rest of the reply is the next step.",
+      "ts": "2026-11-17T06:05:07.283208+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "07fdc6a4b322",
+      "trace_id": "57b3323291e7ffd3416aef3452c8d965",
+      "kind": "note",
+      "quote": "Because you’re saying the card charge was not made by you, I opened a human support ticket for review",
+      "step": null,
+      "note": "`escalates_without_need` is a close negative here. The customer disputes a Trailhead Supply charge they never made. The order the agent finds (#2) isn't refund eligible, but no refund was asked for: disputes always go to a human (cw-disputes, ESC-3), so the one ticket it opens is needed.",
+      "ts": "2026-11-17T06:05:07.285245+00:00",
+      "history": [],
+      "removed_ts": null
+    },
+    {
+      "id": "b04d0e5f9657",
+      "trace_id": "59c03333b95060f4886023252ea48afb",
+      "kind": "note",
+      "quote": "I’ve opened a human support ticket to review this as an unrecognized-charge dispute",
+      "step": null,
+      "note": "`escalates_without_need` is a close negative here. The customer disputes a Blue Heron Ceramics charge. The agent matches the store, confirms order #1145 with get_order, and opens one ticket. Disputes always go to a human (cw-disputes, ESC-3), so the escalation is needed.",
+      "ts": "2026-11-17T06:05:07.288190+00:00",
+      "history": [],
+      "removed_ts": null
     }
   ]
 }

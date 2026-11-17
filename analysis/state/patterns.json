@@ -511,8 +511,16 @@
         "3b6ef3b84d83625c3638882d6f6dbd64"
       ],
       "any_instance_count": 5,
-      "close_negative_trace_ids": [],
-      "close_negative_note_ids": [],
+      "close_negative_trace_ids": [
+        "66bc63068ecace5e3332136d8096c7c9",
+        "e1bb06a88e85cc5736641a2cf59187c7",
+        "e1ad182bc41ee81500c28a8644fa5f23"
+      ],
+      "close_negative_note_ids": [
+        "9e0f755f9d68",
+        "35e9859cc79f",
+        "755e0427fc52"
+      ],
       "nearest_mode": "reveals_internal_details",
       "boundary": "Ask whether the extra content is something the customer is allowed to know. Order lines, dates, totals or other orders the customer didn't ask about are **too_much_detail**. If the extra content is something the customer shouldn't see (policy IDs, internal thresholds, back-end steps or store-data errors), it's **reveals_internal_details**, even in a short reply. A reply can have both. The two need different fixes: one is about answering only the customer's question, the other about keeping internal information out of replies.",
       "definition_history": [
@@ -559,7 +567,9 @@
       ],
       "any_instance_count": 9,
       "close_negative_trace_ids": [
-        "55e41507adf80abac4e44fa5145eb204"
+        "55e41507adf80abac4e44fa5145eb204",
+        "57b3323291e7ffd3416aef3452c8d965",
+        "59c03333b95060f4886023252ea48afb"
       ],
       "merged_from": [
         {
@@ -574,7 +584,9 @@
         }
       ],
       "close_negative_note_ids": [
-        "2ea1b591df69"
+        "2ea1b591df69",
+        "07fdc6a4b322",
+        "b04d0e5f9657"
       ],
       "nearest_mode": "mishandles_ambiguous_request",
       "boundary": "Ask whether the agent opened, or offered, a human review. If it did, and the review isn't needed (a refund the tool marks not refund eligible, something the agent can answer, a request already queued, or before it knows what the customer means), it's **escalates_without_need**. If it opened no review and instead guessed among several orders or asked vaguely, it's **mishandles_ambiguous_request**. A needed escalation, such as an eligible refund over the auto-approval limit, is not a failure. A trace can have both. The two need different fixes: one is about when to open a human review, the other about asking the customer clearly.",
