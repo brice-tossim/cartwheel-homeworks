@@ -28,6 +28,7 @@ import math
 import random
 import re
 from collections import Counter
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -134,6 +135,8 @@ def select(
     seed: int = 7,
 ) -> list[dict[str, str]]:
     """Return ``k`` picks as ``{"trace_id", "reason"}`` dicts."""
+    if strategy == "by_role":
+        return _role_picks(traces, k, seed, exclude_ids)
     pool = [t for t in traces if t.get("id") not in exclude_ids]
     if not pool:
         return []
@@ -141,6 +144,8 @@ def select(
         return _random_picks(pool, k, seed)
     if strategy == "outlier":
         return _outlier_picks(pool, k)
+    if strategy == "cluster":
+        return _cluster_picks(pool, k, seed)
     return _diversity_picks(pool, k, seed)
 
 
@@ -200,6 +205,97 @@ def _diversity_picks(
         chosen_ids.add(t["id"])
 
     return picks[:k]
+
+
+type Conversation = list[dict[str, object]]
+
+
+def _role_picks(
+    traces: Sequence[dict[str, object]], k: int, seed: int, exclude_ids: set[str]
+) -> list[dict[str, str]]:
+    """Spread ``k`` conversations evenly across the caller roles, picked at
+    random within each role. A picked conversation brings all its turns, and
+    a conversation with an excluded turn is never picked."""
+    by_role = _conversations_by_role(_open_conversations(traces, exclude_ids))
+    roles = sorted(by_role)
+    rng = random.Random(seed)
+    return [pick
+            for role, quota in zip(roles, _even_split(k, len(roles)))
+            for pick in _role_draw(role, by_role[role], quota, rng)]
+
+
+def _open_conversations(
+    traces: Sequence[dict[str, object]], exclude_ids: set[str]
+) -> list[Conversation]:
+    conversations: dict[str, Conversation] = {}
+    for trace in traces:
+        conversations.setdefault(_meta(trace, "session_id") or str(trace["id"]), []).append(trace)
+    return [turns for turns in conversations.values()
+            if not any(turn["id"] in exclude_ids for turn in turns)]
+
+
+def _conversations_by_role(conversations: list[Conversation]) -> dict[str, list[Conversation]]:
+    by_role: dict[str, list[Conversation]] = {}
+    for turns in conversations:
+        by_role.setdefault(_meta(turns[0], "role") or "unknown", []).append(turns)
+    return by_role
+
+
+def _meta(trace: dict[str, object], key: str) -> str | None:
+    meta = trace.get("meta")
+    value = meta.get(key) if isinstance(meta, dict) else None
+    return str(value) if value else None
+
+
+def _even_split(k: int, parts: int) -> list[int]:
+    """``k`` split into ``parts`` near-equal counts, the extra ones first."""
+    return [k // parts + (1 if i < k % parts else 0) for i in range(parts)] if parts else []
+
+
+def _role_draw(
+    role: str, conversations: list[Conversation], quota: int, rng: random.Random
+) -> list[dict[str, str]]:
+    chosen = rng.sample(conversations, min(quota, len(conversations)))
+    return [{"trace_id": str(turn["id"]), "reason": f"role {role}, conversation {number} of {len(chosen)}"}
+            for number, turns in enumerate(chosen, start=1)
+            for turn in turns]
+
+
+def _cluster_picks(
+    pool: Sequence[dict[str, object]], k: int, seed: int
+) -> list[dict[str, str]]:
+    """Group the pool into ``k`` clusters and return the trace closest to each centre."""
+    vectors = _standardize([_feature_vector(t) for t in pool])
+    clusters = _clusters(_kmeans(vectors, k=k, seed=seed))
+    return [
+        _representative(pool, vectors, members, number, len(clusters))
+        for number, members in enumerate(clusters, start=1)
+    ]
+
+
+def _clusters(assign: list[int]) -> list[list[int]]:
+    """Member positions of each non-empty cluster, in cluster order."""
+    by_cluster: dict[int, list[int]] = {}
+    for position, cluster in enumerate(assign):
+        by_cluster.setdefault(cluster, []).append(position)
+    return [by_cluster[cluster] for cluster in sorted(by_cluster)]
+
+
+def _representative(
+    pool: Sequence[dict[str, object]],
+    vectors: list[list[float]],
+    members: list[int],
+    number: int,
+    total: int,
+) -> dict[str, str]:
+    centre = [sum(vectors[m][d] for m in members) / len(members) for d in range(len(vectors[0]))]
+    closest = min(members, key=lambda m: (_distance(vectors[m], centre), str(pool[m]["id"])))
+    reason = f"representative of cluster {number} of {total} ({len(members)} traces)"
+    return {"trace_id": str(pool[closest]["id"]), "reason": reason}
+
+
+def _distance(a: list[float], b: list[float]) -> float:
+    return sum((x - y) ** 2 for x, y in zip(a, b))
 
 
 def _outlier_picks(pool: list[dict[str, Any]], k: int) -> list[dict[str, str]]:

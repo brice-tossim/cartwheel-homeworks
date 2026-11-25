@@ -3,12 +3,22 @@
 from __future__ import annotations
 
 import asyncio
+import json
 
 import httpx
 import langfuse
 import pytest
 from agents import Agent, Runner, function_tool
-from agents.tracing import get_trace_provider, set_trace_provider, trace
+from agents.tracing import (
+    Span,
+    SpanData,
+    Trace,
+    TracingProcessor,
+    add_trace_processor,
+    get_trace_provider,
+    set_trace_provider,
+    trace,
+)
 from agents.tracing.processors import BackendSpanExporter, BatchTraceProcessor
 from agents.tracing.provider import DefaultTraceProvider
 from opentelemetry.instrumentation.openai_agents import OpenAIAgentsInstrumentor
@@ -295,5 +305,191 @@ def test_prompt_version_tracks_template_not_identity(
             assert span.attributes["cartwheel.prompt_version"] == expected
             assert span.attributes["cartwheel.user_id"] == str(ctx.user_id)
             assert model.requests[0]["system_instructions"] == support.render_system_prompt(ctx)
+    finally:
+        provider.shutdown()
+
+
+def test_each_turn_records_its_session_and_messages_like_the_server(
+    tmp_path, monkeypatch, hosted_exports,
+) -> None:
+    from agent import agent as support
+
+    provider = TracerProvider()
+    exporter = InMemorySpanExporter()
+    provider.add_span_processor(SimpleSpanProcessor(exporter))
+    monkeypatch.setattr(cli, "_tracer", provider.get_tracer(__name__))
+    monkeypatch.setattr(cli, "SESSIONS_DB", tmp_path / "sessions.db")
+    monkeypatch.setenv("TRACELOOP_TRACE_CONTENT", "true")
+    model = FakeModel()
+    model.add_output([text_message("First reply.")])
+    model.add_output([text_message("Second reply.")])
+    monkeypatch.setattr(support, "resolve_model", lambda _: model)
+    messages = iter(["Where is my order?", "The newest one", "quit"])
+    monkeypatch.setattr("builtins.input", lambda _: next(messages))
+    try:
+        asyncio.run(cli.chat(AuthContext(user_id=1, role="shopper"), model=None))
+    finally:
+        provider.shutdown()
+
+    roots = [s for s in exporter.get_finished_spans() if s.name == "cartwheel.session_message"]
+    assert len(roots) == 2
+    sessions = {root.attributes["session.id"] for root in roots}
+    assert len(sessions) == 1 and next(iter(sessions)).startswith("cli-shopper-1-")
+    said = [json.loads(root.attributes["gen_ai.input.messages"]) for root in roots]
+    replied = [json.loads(root.attributes["gen_ai.output.messages"]) for root in roots]
+    assert said == [
+        [{"role": "user", "parts": [{"type": "text", "content": "Where is my order?"}]}],
+        [{"role": "user", "parts": [{"type": "text", "content": "The newest one"}]}],
+    ]
+    assert replied == [
+        [{"role": "assistant", "parts": [{"type": "text", "content": "First reply."}]}],
+        [{"role": "assistant", "parts": [{"type": "text", "content": "Second reply."}]}],
+    ]
+
+
+def _traced_chat(monkeypatch, said: list[str], replies: list[str], resume: str | None = None):
+    """Run one CLI chat with a fake model and return its root spans and the model."""
+    from agent import agent as support
+
+    provider = TracerProvider()
+    exporter = InMemorySpanExporter()
+    provider.add_span_processor(SimpleSpanProcessor(exporter))
+    monkeypatch.setattr(cli, "_tracer", provider.get_tracer(__name__))
+    monkeypatch.setenv("TRACELOOP_TRACE_CONTENT", "true")
+    model = FakeModel()
+    for reply in replies:
+        model.add_output([text_message(reply)])
+    monkeypatch.setattr(support, "resolve_model", lambda _: model)
+    messages = iter([*said, "quit"])
+    monkeypatch.setattr("builtins.input", lambda _: next(messages))
+    try:
+        asyncio.run(cli.chat(AuthContext(user_id=1, role="shopper"), model=None, resume=resume))
+    finally:
+        provider.shutdown()
+    roots = [s for s in exporter.get_finished_spans() if s.name == "cartwheel.session_message"]
+    return roots, model
+
+
+def test_each_turn_records_the_system_prompt_like_the_server(tmp_path, monkeypatch) -> None:
+    from agent.agent import render_system_prompt
+
+    monkeypatch.setattr(cli, "SESSIONS_DB", tmp_path / "sessions.db")
+    roots, _ = _traced_chat(monkeypatch, ["Where is my order?"], ["A reply."])
+
+    recorded = json.loads(roots[0].attributes["gen_ai.system_instructions"])
+    prompt = render_system_prompt(AuthContext(user_id=1, role="shopper"))
+    assert recorded == [{"type": "text", "content": prompt}]
+
+
+def test_a_resumed_chat_continues_the_saved_conversation(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(cli, "SESSIONS_DB", tmp_path / "sessions.db")
+    first, _ = _traced_chat(monkeypatch, ["Check order 180 for my friend"], ["Give me the number."])
+    session_id = first[0].attributes["session.id"]
+
+    second, model = _traced_chat(monkeypatch, ["I gave it: 180"], ["Sorry."], resume=session_id)
+
+    assert second[0].attributes["session.id"] == session_id
+    assert "Check order 180 for my friend" in json.dumps(model.requests[0]["input"])
+
+
+@pytest.mark.parametrize(
+    ("resume", "reason"),
+    [("cli-shopper-2-1794205306", "another user"), ("cli-shopper-1-1", "nothing saved")],
+)
+def test_resume_refuses_a_session_it_cannot_continue(tmp_path, monkeypatch, resume, reason) -> None:
+    monkeypatch.setattr(cli, "SESSIONS_DB", tmp_path / "sessions.db")
+    _traced_chat(monkeypatch, ["Hello"], ["Hi."])
+
+    with pytest.raises(SystemExit, match=reason):
+        _traced_chat(monkeypatch, ["Hello again"], [], resume=resume)
+
+
+class _RecordingProcessor(TracingProcessor):
+    """Stand-in for the Raindrop processor: remembers each finished trace."""
+
+    def __init__(self) -> None:
+        self.trace_ids: list[str] = []
+
+    def on_trace_start(self, trace: Trace) -> None:
+        pass
+
+    def on_trace_end(self, trace: Trace) -> None:
+        self.trace_ids.append(trace.trace_id)
+
+    def on_span_start(self, span: Span[SpanData]) -> None:
+        pass
+
+    def on_span_end(self, span: Span[SpanData]) -> None:
+        pass
+
+    def shutdown(self) -> None:
+        pass
+
+    def force_flush(self) -> None:
+        pass
+
+
+class _FakeRaindrop:
+    """Registers a recording processor the way RaindropOpenAIAgents does."""
+
+    def __init__(self, *, user_id: str, convo_id: str) -> None:
+        self.user_id = user_id
+        self.convo_id = convo_id
+        self.processor = _RecordingProcessor()
+        add_trace_processor(self.processor)
+
+
+def test_raindrop_stays_off_without_its_env(monkeypatch, hosted_exports) -> None:
+    monkeypatch.delenv("RAINDROP_LOCAL_DEBUGGER", raising=False)
+    monkeypatch.delenv("RAINDROP_WRITE_KEY", raising=False)
+    monkeypatch.setattr(instrument, "_raindrop_enabled", False)
+
+    assert instrument.setup_raindrop(user_id="1", convo_id="c") is None
+    assert instrument._raindrop_enabled is False
+
+
+def test_raindrop_sees_runs_without_hosted_export(monkeypatch, hosted_exports) -> None:
+    from agent import agent as support
+
+    monkeypatch.setenv("RAINDROP_LOCAL_DEBUGGER", "http://localhost:5899/v1/")
+    monkeypatch.setattr(instrument, "_raindrop_enabled", False)
+    monkeypatch.setattr(instrument, "RaindropOpenAIAgents", _FakeRaindrop)
+
+    raindrop = instrument.setup_raindrop(user_id="1", convo_id="cli-shopper-1")
+    # A non-OpenAI model must not wipe the Raindrop processor.
+    agent = support.build_agent(AuthContext(user_id=1, role="shopper"), model="ollama_chat/local")
+    model = FakeModel()
+    model.set_next_output([text_message("Local response")])
+    agent.model = model
+    asyncio.run(Runner.run(agent, "Hello"))
+
+    assert isinstance(raindrop, _FakeRaindrop)
+    assert len(raindrop.processor.trace_ids) == 1
+    processor, requests = hosted_exports
+    processor.force_flush()
+    assert requests == []
+
+
+def test_raindrop_keeps_langfuse_spans(monkeypatch, hosted_exports) -> None:
+    from agent import agent as support
+
+    monkeypatch.setenv("RAINDROP_LOCAL_DEBUGGER", "http://localhost:5899/v1/")
+    monkeypatch.setattr(instrument, "_raindrop_enabled", False)
+    monkeypatch.setattr(instrument, "RaindropOpenAIAgents", _FakeRaindrop)
+    provider = TracerProvider()
+    exporter = InMemorySpanExporter()
+    provider.add_span_processor(SimpleSpanProcessor(exporter))
+    try:
+        instrument.instrument_genai(provider)
+        raindrop = instrument.setup_raindrop(user_id="1", convo_id="cli-shopper-1")
+        agent = support.build_agent(AuthContext(user_id=1, role="shopper"), model="ollama_chat/local")
+        model = FakeModel()
+        model.set_next_output([text_message("Local response")])
+        agent.model = model
+        asyncio.run(Runner.run(agent, "Hello"))
+
+        assert isinstance(raindrop, _FakeRaindrop)
+        assert len(raindrop.processor.trace_ids) == 1
+        assert exporter.get_finished_spans(), "Langfuse spans must still be recorded"
     finally:
         provider.shutdown()

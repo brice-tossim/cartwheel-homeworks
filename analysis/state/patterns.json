@@ -1,1 +1,636 @@
-{"modes": []}
+{
+  "modes": [
+    {
+      "name": "misses_store_orders",
+      "definition": "The customer names a store, and the agent doesn't find their orders from it: its lookup doesn't narrow to that store, it searches the store name as a product, or it has the store's orders but doesn't connect them. It answers or asks the customer anyway.",
+      "nearest_mode": "mishandles_ambiguous_request",
+      "boundary": "Ask whether the agent used the store the customer named. If it didn't (no lookup by that store, the store name searched as a product, or the store's orders found but not connected), it's misses_store_orders. If it did narrow to that store and several orders still match, then guessing one or asking vaguely is mishandles_ambiguous_request. A trace can have both when it misses the store and then guesses among the wrong results. The two need different fixes: one is about using the store when looking up orders, the other about asking the customer clearly.",
+      "status": "candidate",
+      "added_in": "batch_1",
+      "note_ids": [
+        "18ee98945349",
+        "803ddd423850",
+        "a816eee858fc",
+        "5500a36f92f9",
+        "d598f0977dc6",
+        "024dde2d0cc1",
+        "5200d871a781",
+        "b8ec803605ae",
+        "8711e0b3ae04",
+        "a5d6b435b5e9",
+        "205bc425ee64",
+        "3a11ed3beec1",
+        "cc0e8c6b4667",
+        "fb90ba3a6593",
+        "f532c14fccd1",
+        "32ab54b6cf57",
+        "12988ffa781e",
+        "3089d52daa24",
+        "a824ef6ec385",
+        "63d381770924",
+        "956bfca685b9",
+        "54b859354350",
+        "6f7bfadf7637",
+        "ac2d44c00990",
+        "effe598dfc30",
+        "8300768e3778",
+        "2af91fb9ca31",
+        "6b000f5523b4",
+        "40b9b9c85748",
+        "1c2c936dbbdf",
+        "776f104aea71",
+        "bf1dbf8dd9a2",
+        "a805eded7ede",
+        "361cdbcef627",
+        "7939ef055f68",
+        "765e1bb3a3ba"
+      ],
+      "example_trace_ids": [
+        "7d614db08a876f0c70541e0a5d567b6b",
+        "c0749c66ca2a0db2b0123f85a34dc9ad",
+        "a7e9dd4474c34bc14ed71fcdd4fbfd21",
+        "c77bc73de2930040ef5ae5ad718ed92d",
+        "fb77a52d811e50e4f54c71c131a02f6a",
+        "e2e0f7095958a198f9835472f63f88c8",
+        "72e33e745ff92828f0337c57e7e1695f",
+        "2c9307a33819ac9bb904c3366004e0ae",
+        "1bd924606faee465e332ea3af1420565",
+        "275066f1e2548fbf11f2cc1d5e28ca96",
+        "a4aeceedb4d83f929dea27e10631a0a0",
+        "2001821552a022a2ea584839d840b6b3",
+        "d3155538344bf8b6f59d99d41ee78ff1",
+        "f5039a0e38808e9d4764016064fd0eb5",
+        "45b8b8cd790ee12658fe9479c79b0370",
+        "34b98d221349f9289b47e92f76ac9692",
+        "85a51352c94119f4aced6f73f30f7b19",
+        "31c0c9af11c2fe3bd486a857862309bf",
+        "a679c2438327f35dae8dfc6dedcfca53",
+        "63a1a15357fe626e568ef25db3b65042",
+        "4ee30d6ea6ec55840754c1a0bb769cf8",
+        "2cfc15ccc925cccfe108dd2692e86342",
+        "fa6ec99735cdf1f1c22bfe2b3b4e6a75",
+        "0af642ab91984e8dd0904d69f341cbbb",
+        "d0f8a392a62de98e11fb937e02369572",
+        "fb1ec00a0b97582d42d02d0112e48a6b",
+        "e9dba5c23d2a88d647ec02af1a3c6ffa",
+        "3b73c26ecf515a88662370137e9de024",
+        "8b8e1cf662d952e292a5c8d690562c1a",
+        "d06b5de3734d75fb10eb21058f003182",
+        "95f876b55ef425963d73051945054f00",
+        "6e1108f51db7a3780b52eadee95a2fcd"
+      ],
+      "any_instance_count": 29,
+      "close_negative_trace_ids": [
+        "8bb9fcb99ee9accb3e01661b4dc0d431",
+        "e5237643a226a5d8bf6254462662b824",
+        "755619040e57dad62ab8a98c0d6b27a2",
+        "a39f90ded7e8eb8194ea15dd4ef83e19",
+        "5649ffb00905ae070eeb5a465676fee6",
+        "39224ed805057c88899a69dfc364e267",
+        "36ccfba90db94bcb435c377c2d5efd3d",
+        "2efac6b6ced15c574e7f7244f7b476b2",
+        "6238f72c640e9c0dd6e6c2092c69b3a4",
+        "57b3323291e7ffd3416aef3452c8d965",
+        "60c6a13aba2821d3d67b0d6c3f59c39a",
+        "dd14ea25e0d1071e520016392f970dc1",
+        "94b6ab798f49f16a9b82aca1d3edc7f5",
+        "55e41507adf80abac4e44fa5145eb204",
+        "22f0af59d66a9d1fe88a9fff38b7b92e"
+      ],
+      "merged_from": [
+        {
+          "name": "ignores_known_store",
+          "definition": "The customer named a store, or an earlier turn found it, and the agent's first order lookup does not narrow to that store."
+        },
+        {
+          "name": "searches_store_as_product",
+          "definition": "The agent passes a store name to find_order, which matches product names, and answers from those results: either presenting the matches as that store's orders, or saying the customer has no order there."
+        },
+        {
+          "name": "asks_for_lookup_info",
+          "definition": "The agent asks the customer for information it could have found with its tools from what it already knows."
+        }
+      ],
+      "folded_in": [
+        {
+          "from": "contradicts_tool_data",
+          "trace_id": "2cfc15ccc925cccfe108dd2692e86342",
+          "note_id": "effe598dfc30"
+        }
+      ],
+      "close_negative_note_ids": [
+        "774dc9463252",
+        "3f5377057d76",
+        "3b50613d859e",
+        "a62dba4ecd62",
+        "e63d2278a3c7",
+        "5ef9fadbc37e",
+        "e2636d918b36",
+        "9f6343e398dd",
+        "a83d31ab4f5e",
+        "4fd7ac69266a",
+        "5f176a930367",
+        "9d8852ca4364",
+        "2ea1b591df69",
+        "711c00cbfea8"
+      ],
+      "evaluator_type": "llm_judge",
+      "requirement_source": [
+        {
+          "kind": "spec_revision",
+          "id": "ORD-1",
+          "text": "When the customer refers to a store by name, the agent restricts its order lookup to orders from that store before answering or asking a follow-up. It does not treat the store name as a product name. If it is unclear whether the name is a store, the agent checks the name against known stores, or asks the customer, before searching. If no orders from that store match, the agent says so rather than answering about orders from other stores."
+        }
+      ]
+    },
+    {
+      "name": "reveals_internal_details",
+      "definition": "The reply tells the customer a policy id, an internal threshold, how a request is processed behind the scenes, or errors in the store data.",
+      "status": "candidate",
+      "added_in": "batch_1",
+      "note_ids": [
+        "194b3a395d12",
+        "a5a6e224a28b",
+        "dac0c21830f0",
+        "79aac18bbc29",
+        "4792035489c2",
+        "6ee5bd1b606b",
+        "a1e898e16009",
+        "5ba685ce9b35",
+        "66f1c6faed34",
+        "f2ba919e27b3",
+        "ddcfe4e1a960",
+        "ecc7a818b862",
+        "2eb09337c1dd",
+        "d369c604a3c0",
+        "c79b6bab8b1a",
+        "88e09538511b",
+        "645803e575ee",
+        "98a4deb07d80",
+        "7f4f679169f0",
+        "732d6c0c5063",
+        "02a1a515cda7",
+        "d3ffef084459",
+        "38e2de57a2d7",
+        "8ad0ebc552d1",
+        "1c34c5b725f4",
+        "c13bd480c7ee",
+        "c783ee441430",
+        "b17fd345a890",
+        "f33555813440",
+        "21b7a18b156b",
+        "341921dbeb36",
+        "2cbc34fb0fc5",
+        "34b4fbf5fc11",
+        "d378c1917a6a",
+        "3f607ec7e20c",
+        "c68e40de62a0",
+        "abae3ab7b45e"
+      ],
+      "example_trace_ids": [
+        "7d614db08a876f0c70541e0a5d567b6b",
+        "cf89270130faf85e682bf47abbcc7287",
+        "5649ffb00905ae070eeb5a465676fee6",
+        "e2e0f7095958a198f9835472f63f88c8",
+        "259155c9124b0f5c6ca9501c17a68e8d",
+        "77fef59b98d57cf63fbe1822cc05030f",
+        "72e33e745ff92828f0337c57e7e1695f",
+        "188a1c3af05b25c563fc2f002b518e46",
+        "5ccf99b3b733a127efff3f0cb2da36af",
+        "20359fb5559f9a275eff3d94159569ff",
+        "a39aefca38b5fecfb1eb60f620bd4940",
+        "22f0af59d66a9d1fe88a9fff38b7b92e",
+        "4e3fcb5185c6a9815e450fb2f79d2678",
+        "c82cca95759e4ad8ccb3513fb232d5ce",
+        "34b98d221349f9289b47e92f76ac9692",
+        "755619040e57dad62ab8a98c0d6b27a2",
+        "9435f98d3524e80927c554c08b634e91",
+        "3f60fd9737640e4246f43068369c90f3",
+        "b2ca24996e4a0684ebd1b60982058bbf",
+        "6776b7df1dbd706e4fbc07ccae3e28ca",
+        "f3c5672b6283128027a95b38a3f62c2c",
+        "104c7ebc34f95a0338308797245f9287",
+        "552df0278430258b28ec8f247242479c",
+        "d7e3af35ee13f7a55009dd269717d1e2",
+        "a998e4aa6bc769ce04bdd6fbc8537858",
+        "55e41507adf80abac4e44fa5145eb204",
+        "d0f8a392a62de98e11fb937e02369572",
+        "3b6ef3b84d83625c3638882d6f6dbd64",
+        "36ccfba90db94bcb435c377c2d5efd3d",
+        "2efac6b6ced15c574e7f7244f7b476b2",
+        "e9dba5c23d2a88d647ec02af1a3c6ffa",
+        "57b3323291e7ffd3416aef3452c8d965",
+        "d25cde4c00b5bf276db48d8c1b3b0f19",
+        "522bdafb8521932bf4c80d984d22b63c",
+        "e5237643a226a5d8bf6254462662b824",
+        "63a1a15357fe626e568ef25db3b65042",
+        "b903d5843291daedc55c523fb4b6cf68"
+      ],
+      "any_instance_count": 33,
+      "close_negative_trace_ids": [],
+      "merged_from": [
+        {
+          "name": "reveals_internal_policy",
+          "definition": "The reply tells the customer a policy id (such as cw-refunds), an internal threshold (such as the $100 auto-approval limit), or how a request is processed behind the scenes."
+        },
+        {
+          "name": "reveals_data_problems",
+          "definition": "The reply tells the customer about errors in the store data, such as duplicate listings or a negative price."
+        }
+      ],
+      "close_negative_note_ids": [],
+      "nearest_mode": "too_much_detail",
+      "boundary": "Ask whether the extra content is something the customer shouldn't see. Policy IDs, internal thresholds, back-end steps and store-data errors are **reveals_internal_details**, even in a short reply. **too_much_detail** covers only extra content the customer is allowed to know, such as listing every order line when they asked about one item. A reply can have both. The two need different fixes: one is about keeping internal information out of replies, the other about keeping replies focused on what was asked.",
+      "evaluator_type": "llm_judge",
+      "requirement_source": [
+        {
+          "kind": "spec_revision",
+          "id": "RESP-1",
+          "text": "For every claim derived from a policy document, cite the policy's link. Do not show the policy identifier."
+        },
+        {
+          "kind": "spec_revision",
+          "id": "RESP-6",
+          "text": "Do not reveal internal details to the customer: internal identifiers, internal limits such as the refund approval threshold, how the request is processed behind the scenes, or errors in the store data. When a refund needs review, say only that it needs review."
+        }
+      ],
+      "product_changes": [
+        "Add a link field to each policy file and return it from get_policy.",
+        "Remove the $100 figure from the customer-facing cw-refunds policy; say only that some refunds need review."
+      ]
+    },
+    {
+      "name": "mishandles_ambiguous_request",
+      "definition": "Several orders could match, or the agent needs more from the customer, and it either picks one without asking or asks in a way that leaves the customer unsure what to give.",
+      "status": "candidate",
+      "added_in": "batch_1",
+      "note_ids": [
+        "2681c140282b",
+        "09ba7527951f",
+        "01837a31ad13",
+        "30d5aadd7f87",
+        "9b6e35de5b27",
+        "a17e7ef421a3",
+        "38da911594cb",
+        "d77a8e5d1f36",
+        "e3f157869e26",
+        "30d80705df2d",
+        "f9e3c64dbe93",
+        "669cd463449d",
+        "4b8f5f7e984b",
+        "0e23ca6c6120",
+        "a955e4ecf928"
+      ],
+      "example_trace_ids": [
+        "c77bc73de2930040ef5ae5ad718ed92d",
+        "2c9307a33819ac9bb904c3366004e0ae",
+        "188a1c3af05b25c563fc2f002b518e46",
+        "dd6f07289997669f3f7f885ab739a140",
+        "f87559c034e450d921553bac804a8e77",
+        "2001821552a022a2ea584839d840b6b3",
+        "fc6c8df96d518e630e658232910df993",
+        "8ebded8f6a6ec7b0a256fc48350a5ad6",
+        "7d614db08a876f0c70541e0a5d567b6b",
+        "fb77a52d811e50e4f54c71c131a02f6a",
+        "b08a1505c303777ea971df3082948bc3",
+        "a1c72c4aebbc231771b262ba6b23b396",
+        "22f90c6ffd3bcc00679a84d8eb1d95fc",
+        "36ccfba90db94bcb435c377c2d5efd3d",
+        "60c6a13aba2821d3d67b0d6c3f59c39a"
+      ],
+      "any_instance_count": 15,
+      "close_negative_trace_ids": [
+        "dd14ea25e0d1071e520016392f970dc1",
+        "1ea9dd6c1aa53fd77c2cfe993ab061fb",
+        "deb44f97dad1859d707b71ce28c8a447",
+        "3994621e9b91a1ade7b6946f81854f44",
+        "a4aeceedb4d83f929dea27e10631a0a0",
+        "a7e9dd4474c34bc14ed71fcdd4fbfd21",
+        "22f0af59d66a9d1fe88a9fff38b7b92e",
+        "1dfc8b530b48f908837ca7b840151ac3",
+        "4b8e93a26822dc8f70ff4e4324c4669c",
+        "b9043ac1a664285404cd89cd9425ea7c"
+      ],
+      "merged_from": [
+        {
+          "name": "guesses_order",
+          "definition": "Several orders could match, and the agent picks one to report on or act on without asking which one the customer means."
+        },
+        {
+          "name": "unclear_next_step",
+          "definition": "The agent asks the customer for information but leaves them unsure what to give: it names it vaguely, or gives no hint where to find it."
+        }
+      ],
+      "close_negative_note_ids": [
+        "01bff9460efd",
+        "43213ae71fc9",
+        "318d08247a7f",
+        "e2515e017088",
+        "3df70deda2d1",
+        "3e4fd2acc08f",
+        "19c619f257be",
+        "a245a227d4eb",
+        "a0d1d08b9325",
+        "d766a287cc10"
+      ],
+      "nearest_mode": "misses_store_orders",
+      "boundary": "Ask whether the agent used the store the customer named. If it did, or no store was named, and several orders still match or it needs more from the customer, then guessing one or asking vaguely is **mishandles_ambiguous_request**. If it didn't use the named store, it's **misses_store_orders**, even when it then asks the customer. A trace can have both when it misses the store and then guesses among the wrong results. The two need different fixes: one is about asking the customer clearly, the other about using the store when looking up orders.",
+      "evaluator_type": "llm_judge",
+      "requirement_source": [
+        {
+          "kind": "spec_revision",
+          "id": "ORD-2",
+          "text": "When more than one order matches the customer's request, the agent does not pick one. It asks the customer which order they mean, listing each match with details the customer can recognize, such as product, quantity, order date, and status. When the agent needs any other information from the customer, it asks for that specific item, such as the number of units to refund, rather than asking an open question."
+        }
+      ]
+    },
+    {
+      "name": "no_reply",
+      "definition": "The turn ends without any reply to the customer.",
+      "status": "candidate",
+      "added_in": "batch_1",
+      "note_ids": [
+        "706b7457673f",
+        "d6d92cd826de",
+        "c078e7600b29",
+        "594b3cd8224d",
+        "04d4c88139fb",
+        "772a9ddbabac",
+        "d616223ca8d4"
+      ],
+      "example_trace_ids": [
+        "3b14d86eb8280273e7946e5cffc0023c",
+        "c23630503c3dd267ed10b20e804092d3",
+        "fb77a52d811e50e4f54c71c131a02f6a",
+        "47fec190c6ddc93595852ddd125eab76",
+        "275066f1e2548fbf11f2cc1d5e28ca96",
+        "94b6ab798f49f16a9b82aca1d3edc7f5",
+        "845aadd3db06740bb9edfbd7aab596f9"
+      ],
+      "any_instance_count": 7,
+      "close_negative_trace_ids": [],
+      "close_negative_note_ids": [],
+      "nearest_mode": null,
+      "boundary": "Ask whether the customer received any text at all in that turn. If not, it's no_reply, whatever the agent did with its tools. If they received anything, even an error message or a vague question, it's not **no_reply**: judge that reply under the other modes. The fix is a fallback answer when the run fails.",
+      "evaluator_type": "code_check",
+      "requirement_source": [
+        {
+          "kind": "spec_revision",
+          "id": "RESP-7",
+          "text": "Every turn ends with a reply to the customer. If a tool fails unexpectedly or the run cannot finish, the agent tells the customer it couldn't complete the request and what happens next, such as trying again or escalating to a human. Following RESP-6, it does not describe the internal error."
+        }
+      ],
+      "product_changes": [
+        "Return a fallback reply to the customer when the run fails (tool exception, step limit, or empty model response)."
+      ]
+    },
+    {
+      "name": "date_errors",
+      "definition": "The reply uses a current date other than the platform date (world_asof), counts days from the wrong date, or misstates how old an order is compared with the platform date. \"Most recent\" or \"latest\" means the newest of the matching orders and is not a date error; \"recent\" on its own means placed within the last 30 days.",
+      "status": "candidate",
+      "added_in": "batch_2",
+      "note_ids": [
+        "a6504947a80f",
+        "f7763f214d85",
+        "2ae035229b44",
+        "c2170b771c70",
+        "ff51ade6c836",
+        "fc34cae6aca7",
+        "ffb2369b2d85",
+        "339fcac1fef0",
+        "06244eb309e8"
+      ],
+      "example_trace_ids": [
+        "d7e3af35ee13f7a55009dd269717d1e2",
+        "4e3fcb5185c6a9815e450fb2f79d2678",
+        "3f60fd9737640e4246f43068369c90f3",
+        "b2ca24996e4a0684ebd1b60982058bbf",
+        "59c03333b95060f4886023252ea48afb",
+        "dd14ea25e0d1071e520016392f970dc1",
+        "a998e4aa6bc769ce04bdd6fbc8537858",
+        "55e41507adf80abac4e44fa5145eb204",
+        "3b6ef3b84d83625c3638882d6f6dbd64"
+      ],
+      "any_instance_count": 9,
+      "close_negative_trace_ids": [
+        "c82cca95759e4ad8ccb3513fb232d5ce",
+        "9435f98d3524e80927c554c08b634e91",
+        "57b3323291e7ffd3416aef3452c8d965"
+      ],
+      "folded_in": [
+        {
+          "from": "contradicts_tool_data",
+          "trace_id": "dd14ea25e0d1071e520016392f970dc1",
+          "note_id": "fc34cae6aca7"
+        }
+      ],
+      "definition_history": [
+        {
+          "definition": "The reply uses a current date other than the platform's current date (world_asof), or counts dates or days from the wrong current date.",
+          "replaced_because": "\"recent\" needed a rule: \"most recent\" ranks the matching orders, while \"recent\" alone is a claim about age."
+        }
+      ],
+      "close_negative_note_ids": [
+        "181542e9d444",
+        "9beb5afe723c",
+        "20ee9b283618"
+      ],
+      "nearest_mode": null,
+      "boundary": "Ask whether the wrong fact is a date or an age compared with the platform date (world_asof). The wrong \"today\", days counted from the wrong date, or an order called older or newer than it is: **date_errors**. Any other fact that contradicts the tool data, such as an amount, a policy window length or an order status, is not date_errors. A deadline calculated correctly is not a date error, even when the answer disappoints the customer.",
+      "evaluator_type": "llm_judge",
+      "requirement_source": [
+        {
+          "kind": "spec_revision",
+          "id": "DATE-1",
+          "text": "The agent treats the platform's current date as today. Every date it states, and every age, day count, or deadline it computes, uses that date, counting from the date the relevant policy names, such as the delivery date for returns. \"Recent\" on its own means placed within the last recent_order_days days (30). \"Most recent\" or \"latest\" means the newest of the matching orders."
+        }
+      ],
+      "product_changes": [
+        "Give the agent the platform date (world_asof), in the system prompt or as a tool.",
+        "Add recent_order_days: 30 to facts.yaml."
+      ]
+    },
+    {
+      "name": "ignores_caller_role",
+      "definition": "The agent treats a support or merchant caller as a shopper in a way that changes what it does or shows: for example, it presents other customers' orders as the caller's, or never asks a support caller which customer or order they mean. Shopper-style wording alone (\"your confirmation email\"), around a request that still fits the caller's role, is not a failure.",
+      "status": "candidate",
+      "added_in": "batch_1",
+      "note_ids": [
+        "606b53d96b48",
+        "ef132c64a06c",
+        "b9079b1e2ef6"
+      ],
+      "example_trace_ids": [
+        "a4aeceedb4d83f929dea27e10631a0a0",
+        "28b7a9e232e6d77fa776292271eae6c5",
+        "1c1c2a8a3bbde8297873aac276ebc3f5"
+      ],
+      "any_instance_count": 3,
+      "close_negative_trace_ids": [
+        "33434e3827c00900e7b972a0a379fe6f",
+        "13c82aa3b1ecd2709048d39b5c64d277",
+        "015083042084a4d07a67fb46688362f5"
+      ],
+      "merged_from": [
+        {
+          "name": "ignores_caller_role",
+          "definition": "The agent handles the request as if the caller were a shopper, when the caller's role calls for something else (for example, asking a support caller which customer they mean)."
+        },
+        {
+          "name": "shows_others_orders",
+          "definition": "For a shopper or merchant caller, the reply presents orders that are not the caller's as theirs."
+        }
+      ],
+      "definition_history": [
+        {
+          "definition": "The agent handles the request as if the caller were a shopper, when the caller's role calls for something else (for example, asking a support caller which customer they mean).",
+          "replaced_because": "Asking a support caller for an order id \"from your confirmation email\" read like a shopper but still fit the role; the failure is judged by what the role mistake changes, not by wording."
+        }
+      ],
+      "close_negative_note_ids": [
+        "741aefc027f1",
+        "2923e034d167",
+        "7b48b8dce6c2"
+      ],
+      "nearest_mode": "mishandles_ambiguous_request",
+      "boundary": "Ask whether the mistake comes from who the caller is. If the agent treats a support or merchant caller as the owner of the orders (\"your order\", other customers' orders shown as theirs, no question about which customer they mean), it's **ignores_caller_role**. If it understood the role and still guesses among several matching orders, or asks vaguely, it's **mishandles_ambiguous_request**. A trace can have both. The two need different fixes: one is about using the caller's role, the other about asking the caller clearly.",
+      "evaluator_type": "llm_judge",
+      "requirement_source": [
+        {
+          "kind": "spec_revision",
+          "id": "AUTH-2",
+          "text": "The agent acts according to the caller's role. For a merchant or support caller, it treats orders as the store's or a customer's, never as the caller's own purchases, and does not present another customer's orders as the caller's. When a support caller's request doesn't identify the customer or order, the agent asks for an order ID, customer, or other identifying details before acting. Shopper-style wording alone, around a request that fits the caller's role, is not a violation."
+        }
+      ]
+    },
+    {
+      "name": "too_much_detail",
+      "definition": "The reply includes at least one detail the customer could lose without affecting their request.",
+      "status": "candidate",
+      "added_in": "batch_1",
+      "note_ids": [
+        "5484561661ca",
+        "01837a31ad13",
+        "ddcfe4e1a960",
+        "ae0dc537b680",
+        "c9194f661c72"
+      ],
+      "example_trace_ids": [
+        "22f90c6ffd3bcc00679a84d8eb1d95fc",
+        "188a1c3af05b25c563fc2f002b518e46",
+        "a39aefca38b5fecfb1eb60f620bd4940",
+        "22f0af59d66a9d1fe88a9fff38b7b92e",
+        "3b6ef3b84d83625c3638882d6f6dbd64"
+      ],
+      "any_instance_count": 5,
+      "close_negative_trace_ids": [
+        "66bc63068ecace5e3332136d8096c7c9",
+        "e1bb06a88e85cc5736641a2cf59187c7",
+        "e1ad182bc41ee81500c28a8644fa5f23"
+      ],
+      "close_negative_note_ids": [
+        "9e0f755f9d68",
+        "35e9859cc79f",
+        "755e0427fc52"
+      ],
+      "nearest_mode": "reveals_internal_details",
+      "boundary": "Ask whether the extra content is something the customer is allowed to know. Order lines, dates, totals or other orders the customer didn't ask about are **too_much_detail**. If the extra content is something the customer shouldn't see (policy IDs, internal thresholds, back-end steps or store-data errors), it's **reveals_internal_details**, even in a short reply. A reply can have both. The two need different fixes: one is about answering only the customer's question, the other about keeping internal information out of replies.",
+      "definition_history": [
+        {
+          "definition": "The reply includes details the customer did not ask for and does not need.",
+          "replaced_because": "\"Did not ask for and does not need\" left the call to taste; the removal test (could the customer lose this detail without affecting their request?) is one a reviewer can apply to each detail."
+        }
+      ],
+      "evaluator_type": "llm_judge",
+      "requirement_source": [
+        {
+          "kind": "spec_revision",
+          "id": "RESP-8",
+          "text": "The reply contains only what the customer needs for their current request: the answer, the details that support it, any details required to choose between matching orders (ORD-2), and the next step. It leaves out anything the customer could lose without affecting their request, such as orders, order lines, dates, or totals they didn't ask about."
+        }
+      ]
+    },
+    {
+      "name": "escalates_without_need",
+      "definition": "The agent opens, or offers to open, a human review that isn't needed: for a refund the tool marks as not refund eligible, for something the agent can answer itself, before it knows what the customer means, or a second time for a request already queued for human review.",
+      "status": "candidate",
+      "added_in": "batch_1",
+      "note_ids": [
+        "79aac18bbc29",
+        "a1e898e16009",
+        "aa0d807527a8",
+        "d76407c7d922",
+        "87d335cc11e4",
+        "18dc298d4f3a",
+        "3243102abfec",
+        "7d6e7a3a64f5",
+        "2fbbb682baf7"
+      ],
+      "example_trace_ids": [
+        "e2e0f7095958a198f9835472f63f88c8",
+        "72e33e745ff92828f0337c57e7e1695f",
+        "188a1c3af05b25c563fc2f002b518e46",
+        "fb1ec00a0b97582d42d02d0112e48a6b",
+        "3b6ef3b84d83625c3638882d6f6dbd64",
+        "2efac6b6ced15c574e7f7244f7b476b2",
+        "e9dba5c23d2a88d647ec02af1a3c6ffa",
+        "60c6a13aba2821d3d67b0d6c3f59c39a",
+        "e5237643a226a5d8bf6254462662b824"
+      ],
+      "any_instance_count": 9,
+      "close_negative_trace_ids": [
+        "55e41507adf80abac4e44fa5145eb204",
+        "57b3323291e7ffd3416aef3452c8d965",
+        "59c03333b95060f4886023252ea48afb"
+      ],
+      "merged_from": [
+        {
+          "name": "escalates_ineligible_refund",
+          "definition": "The agent opens, or offers to open, a human review for a refund on an order that the tool result marks as not refund eligible.",
+          "definition_history": [
+            {
+              "definition": "The agent opens a human review for a refund on an order that the tool result marks as not refund eligible.",
+              "replaced_because": "On 2efac6b6 the agent offered a human review for an ineligible refund without opening one; offering leads to the same problem."
+            }
+          ]
+        }
+      ],
+      "close_negative_note_ids": [
+        "2ea1b591df69",
+        "07fdc6a4b322",
+        "b04d0e5f9657"
+      ],
+      "nearest_mode": "mishandles_ambiguous_request",
+      "boundary": "Ask whether the agent opened, or offered, a human review. If it did, and the review isn't needed (a refund the tool marks not refund eligible, something the agent can answer, a request already queued, or before it knows what the customer means), it's **escalates_without_need**. If it opened no review and instead guessed among several orders or asked vaguely, it's **mishandles_ambiguous_request**. A needed escalation, such as an eligible refund over the auto-approval limit, is not a failure. A trace can have both. The two need different fixes: one is about when to open a human review, the other about asking the customer clearly.",
+      "evaluator_type": "llm_judge",
+      "requirement_source": [
+        {
+          "kind": "spec_revision",
+          "id": "ESC-1",
+          "text": "Refunds above the threshold: the refund tool queues the refund for human review, which is the escalation. The agent explains the result and does not open a separate human review for that refund."
+        },
+        {
+          "kind": "spec_revision",
+          "id": "ESC-4",
+          "text": "Any case where, after checking the relevant policy and the order record, the agent still cannot tell whether policy allows the action."
+        },
+        {
+          "kind": "spec_revision",
+          "id": "ESC-5",
+          "text": "The agent does not open or offer a human review when: the refund tool reports the order not refund eligible (it explains the decision instead); it can answer from the help center or the order record; it doesn't yet know what the customer means (it asks first, per ORD-2); or the request is already queued for human review. A refund the tool queued counts as already escalated, so the agent never escalates it again."
+        }
+      ]
+    }
+  ],
+  "spec_revisions": [
+    {
+      "id": "REF-1",
+      "text": "A refund covers whole units: the amount equals the unit price times a number of units between 1 and the units not yet refunded. When the order quantity is above 1 and the customer hasn't said how many units, the agent asks before refunding. The approval threshold applies to the total refunded on the order, including refunds still in review, not to each request alone.",
+      "product_changes": [
+        "issue_refund takes a number of units instead of a dollar amount; amount = order total / quantity * units.",
+        "issue_refund rejects more units than remain unrefunded on the order.",
+        "issue_refund checks the approval threshold against the order's running refund total, including queued refunds."
+      ]
+    }
+  ]
+}
